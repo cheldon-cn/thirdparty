@@ -1,2 +1,5 @@
 # thirdparty
-3rd
+third party lib repo
+
+1. libiconv
+2. 
