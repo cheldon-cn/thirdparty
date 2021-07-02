@@ -195,6 +195,7 @@ sources.append(["connections-xyz","Bing VirtualEarth", "", "", "", "http://ecn.t
 
 ```
 
+<<<<<<< HEAD
 ## 4.  北纬N：30°29′13.38″  东经E：114°28′49.83″
 
  中心点经纬度：30.487051085698166, 114.48050921768188  北纬N：30°29′13.38″  东经E：114°28′49.83″
@@ -202,3 +203,6 @@ sources.append(["connections-xyz","Bing VirtualEarth", "", "", "", "http://ecn.t
 
 
 Copyright 2020 - 2021 @ [cheldon](https://github.com/cheldon-cn/).
+=======
+Copyright 2020 - 2021 @ [cheldon](https://github.com/cheldon-cn/).
+>>>>>>> de096463cdd53f20073dce46b5aa7945d1c9ff10
