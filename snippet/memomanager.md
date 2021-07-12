@@ -195,14 +195,167 @@ sources.append(["connections-xyz","Bing VirtualEarth", "", "", "", "http://ecn.t
 
 ```
 
-<<<<<<< HEAD
 ## 4.  北纬N：30°29′13.38″  东经E：114°28′49.83″
 
- 中心点经纬度：30.487051085698166, 114.48050921768188  北纬N：30°29′13.38″  东经E：114°28′49.83″
+  中心点经纬度：30.487051085698166, 114.48050921768188  北纬N：30°29′13.38″  东经E：114°28′49.83″
+
+## 5. GraphicsContext
+```
+public class LayoutControl extends Control {
+    private static final int DEFAULT_WIDTH = 512;
+    private static final int DEFAULT_HEIGHT = 512;
+    private LayoutTool layoutTool = null;
+    private Layout mLayout = null;
+    private ILayoutSizeChangeListener mSizeChageListener = this::onSizeChanged;
+    private ILayoutSelectSetChangeListener mSelectSetChangeListener = this::onSelectSetChanged;
+    //endregion
+
+    //region 构造
+    public LayoutControl() {
+
+        zoomCanvas = new javafx.scene.canvas.Canvas(DEFAULT_WIDTH, DEFAULT_HEIGHT);
+        this.getChildren().add(zoomCanvas);
+        GraphicsContext gczoom = zoomCanvas.getGraphicsContext2D();
+        gczoom.setFill(javafx.scene.paint.Color.rgb(200, 200, 200, 0.4));
+        gczoom.setStroke(javafx.scene.paint.Color.rgb(100, 110, 110, 1));
+        gczoom.setLineWidth(0.02);
+        zoomCanvas.setVisible(false);
+        zoomCanvas.heightProperty().bind(this.heightProperty());
+        zoomCanvas.widthProperty().bind(this.widthProperty());
+
+        this.setPrefWidth(DEFAULT_WIDTH);
+        this.setPrefHeight(DEFAULT_HEIGHT);
+        LayoutControlNative.jni_OnSize(layoutControlNative, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+        this.widthProperty().addListener((observable, oldValue, newValue) -> {
+            double height = this.getHeight();
+            if (height > 0.001 && newValue.intValue() > 0) {
+                if (isFirstShow) {
+                    isFirstShow = false;
+                    Rect devRc = new Rect();
+                    devRc.setXMin(0.0);
+                    devRc.setYMin(0.0);
+                    devRc.setXMax(newValue.doubleValue());
+                    devRc.setYMax(height);
+                    setDeviceRect(devRc);
+                    setClientRect(devRc);
+                    restoreWnd();
+                } else {
+                    LayoutControlNative.jni_OnSize(layoutControlNative, 0, newValue.intValue(), (int) height);
+                }
+            }
+        });
+        this.heightProperty().addListener((observable, oldValue, newValue) -> {
+            double width = this.getWidth();
+            if (width > 0.001 && newValue.intValue() > 0) {
+                if (isFirstShow) {
+                    isFirstShow = false;
+                    Rect devRc = new Rect();
+                    devRc.setXMin(0.0);
+                    devRc.setYMin(0.0);
+                    devRc.setXMax(width);
+                    devRc.setYMax(newValue.doubleValue());
+                    getTransformation().setDeviceRect(devRc);
+                    getTransformation().setClientRect(devRc);
+                    restoreWnd();
+                } else {
+                    LayoutControlNative.jni_OnSize(layoutControlNative, 0, (int) width, newValue.intValue());
+                }
+            }
+        });
+
+        this.setFocusTraversable(true);
+    }
+
+	
+    public LayoutTool getLayoutTool() {
+        return this.layoutTool;
+    }
+
+    private InteractionListener getInteractionListener() {
+        return this.interactionListener;
+    }
+
+    private void setInteractionListener(InteractionListener interactionListener) {
+        //Check.throwIfNull(interactionListener, "interactionListener");
+        if (this.interactionListener != null) {
+            this.interactionListener.onRemoved();
+        }
+
+        this.interactionListener = interactionListener;
+        if (this.interactionListener == null)
+            return;
+
+        this.setOnMousePressed(this.interactionListener::onMousePressed);
+        this.setOnMouseClicked(this.interactionListener::onMouseClicked);
+        this.setOnMouseDragged(this.interactionListener::onMouseDragged);
+        this.setOnMouseReleased(this.interactionListener::onMouseReleased);
+        this.addEventFilter(MouseEvent.MOUSE_MOVED, this.interactionListener::onMouseMoved);
+        this.setOnKeyPressed(this.interactionListener::onKeyPressed);
+        this.setOnKeyReleased(this.interactionListener::onKeyReleased);
+        this.setOnScroll(this.interactionListener::onScroll);
+        this.setOnScrollStarted(this.interactionListener::onScrollStarted);
+        this.setOnScrollFinished(this.interactionListener::onScrollFinished);
+        this.interactionListener.onAdded();
+    }
+
+	
+    public void setLayout(Layout layout) {
+        if (this.mLayout != null) {
+            this.mLayout.removeSizeChagedListener(mSizeChageListener);
+            this.mLayout.removeSelectSetChangedListener(mSelectSetChangeListener);
+        }
+
+        this.mLayout = layout;
+        if (layout == null)
+            return;
+        LayoutControlNative.jni_SetLayout(layoutControlNative, this.mLayout.getHandle());
+
+        this.mLayout.addSizeChagedListener(mSizeChageListener);
+        this.mLayout.addSelectSetChangedListener(mSelectSetChangeListener);
+
+        this.layoutTool = new LayoutTool(this);
+        this.setInteractionListener(layoutTool);
+    }
 
 
+    protected boolean isPointHit(MouseEvent event) {
 
+        int  offsetx = (int) Math.abs(event.getX() - this.mLastPressX);
+        int  offsety = (int) Math.abs(event.getY() - this.mLastPressY);
+
+        boolean isPntClick = (offsetx <= 5 || offsety <= 5);
+        return isPntClick;
+    }
+
+    public void onRefreshSelectRegion(MouseEvent event) {
+
+        boolean isPntClick = isPointHit(event);
+        if(isPntClick){
+            bvalidDrag = false;
+            return;
+        }
+
+        Bounds b = this.layoutControl.getBoundsInLocal();
+        com.zondy.mapgis.geometry.Rect devRect = new com.zondy.mapgis.geometry.Rect();
+        devRect.setXMin(Math.min(event.getX(), this.mLastPressX));
+        devRect.setXMax(Math.max(event.getX(), this.mLastPressX));
+        devRect.setYMin(b.getHeight() - Math.max(event.getY(), this.mLastPressY));
+        devRect.setYMax(b.getHeight() - Math.min(event.getY(), this.mLastPressY));
+
+        try {
+            GraphicsContext gcc = this.layoutControl.getZoomCanvas().getGraphicsContext2D();
+            gcc.clearRect(0, 0, this.layoutControl.getZoomCanvas().getWidth(), this.layoutControl.getZoomCanvas().getHeight());
+            gcc.setLineDashes(0, 0);
+            gcc.strokeRect(Math.min(event.getX(), this.mLastPressX), Math.min(event.getY(), this.mLastPressY), Math.abs(event.getX() - this.mLastPressX), Math.abs(event.getY() - this.mLastPressY));
+            this.layoutControl.getZoomCanvas().setVisible(true);
+            bvalidDrag = true;
+
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+}
+
+```
 Copyright 2020 - 2021 @ [cheldon](https://github.com/cheldon-cn/).
-=======
-Copyright 2020 - 2021 @ [cheldon](https://github.com/cheldon-cn/).
->>>>>>> de096463cdd53f20073dce46b5aa7945d1c9ff10
