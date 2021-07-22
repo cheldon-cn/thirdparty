@@ -336,7 +336,7 @@ public class LayoutControl extends Control {
         }
 
         Bounds b = this.layoutControl.getBoundsInLocal();
-        com.zondy.mapgis.geometry.Rect devRect = new com.zondy.mapgis.geometry.Rect();
+        com.butter.geometry.Rect devRect = new com.butter.geometry.Rect();
         devRect.setXMin(Math.min(event.getX(), this.mLastPressX));
         devRect.setXMax(Math.max(event.getX(), this.mLastPressX));
         devRect.setYMin(b.getHeight() - Math.max(event.getY(), this.mLastPressY));
@@ -356,6 +356,85 @@ public class LayoutControl extends Control {
     }
 
 }
-
 ```
+
+## 6. Interaction Listener
+```
+
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.input.RotateEvent;
+import javafx.scene.input.ScrollEvent;
+import javafx.scene.input.SwipeEvent;
+import javafx.scene.input.TouchEvent;
+import javafx.scene.input.ZoomEvent;
+
+public interface InteractionListener {
+    default void onAdded() {
+    }
+
+    default void onRemoved() {
+    }
+
+    default void onMouseClicked(MouseEvent event) {
+    }
+
+    default void onMouseDragged(MouseEvent event) {
+    }
+
+    default void onMousePressed(MouseEvent event) {
+    }
+
+    default void onMouseReleased(MouseEvent event) {
+    }
+
+    default void onMouseMoved(MouseEvent event) {
+    }
+
+    default void onKeyPressed(KeyEvent event) {
+    }
+
+    default void onKeyReleased(KeyEvent event) {
+    }
+
+    default void onKeyTyped(KeyEvent event) {
+    }
+
+    default void onScroll(ScrollEvent event) {
+    }
+
+    default void onZoom(ZoomEvent event) {
+    }
+
+    default void onRotate(RotateEvent event) {
+    }
+
+    default void onMouseEntered(MouseEvent event) {
+    }
+
+    default void onMouseExited(MouseEvent event) {
+    }
+
+    default void onScrollStarted(ScrollEvent event) {
+    }
+
+    default void onScrollFinished(ScrollEvent event) {
+    }
+
+    default void onZoomStarted(ZoomEvent event) {
+    }
+
+    default void onZoomFinished(ZoomEvent event) {
+    }
+
+    default void onRotationStarted(RotateEvent event) {
+    }
+
+    default void onRotationFinished(RotateEvent event) {
+    }
+}
+```
+
+
+
 Copyright 2020 - 2021 @ [cheldon](https://github.com/cheldon-cn/).
