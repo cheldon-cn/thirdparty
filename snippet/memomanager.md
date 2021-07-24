@@ -90,7 +90,7 @@ void *CMemManager::Alloc(int size)
 	}
 
 	// for linux or android,the memory buffer start position must be aligned, the default aligned byte is 4;
-#if defined(BUTTER_LINUX) || defined(BUTTER_ANDROID) || defined(BUTTER_IOS)
+#if defined(BUTTER_LINUX) || defined(LINUX_ANDROID) || defined(BUTTER_IOS)
 	if ((size % 4) == 0)
 	{
 		m_pos = (m_pos + 3) / 4 * 4;
@@ -435,6 +435,178 @@ public interface InteractionListener {
 }
 ```
 
+## 7. Callback
 
 
+```
+class ControlListener : public GListener
+{
+private:
+	JavaVM* m_jvm;
+	jobject m_jobj;
+public:
+	ControlListener(JavaVM* env, jobject obj)
+	{
+		m_jvm = env;
+		m_jobj = obj;
+	}
+	virtual void OnFire(::EventType type, GEventArgs *args)
+	{
+
+		switch (type)
+		{
+		case MapViewAfterReFresh:
+		{
+			CGViewAfterReFreshArgs* refreshArgs = (CGViewAfterReFreshArgs*)args;
+			JNIEnv* jniEnv = NULL;
+			int state = m_jvm->GetEnv((void**)&jniEnv, 0x00010008);// JNI_VERSION_1_8);
+			bool isNeedDetach = false;
+			if (state != JNI_OK) {
+				isNeedDetach = true;
+#ifndef LINUX_ANDROID
+				m_jvm->AttachCurrentThread((void**)&jniEnv, NULL);
+#else
+				m_jvm->AttachCurrentThread((JNIEnv**)&jniEnv, NULL);
+#endif
+			}
+			CSmartFile* sFile = refreshArgs->GetImageBuffer();
+			unsigned long dataLen = sFile->GetLength();
+			jbyteArray data = jniEnv->NewByteArray(dataLen);
+
+			char* ptBuf = new char[dataLen];
+
+			sFile->SeekToBegin();
+			sFile->Read(ptBuf, dataLen);
+			jniEnv->SetByteArrayRegion(data, 0, dataLen, (jbyte*)ptBuf);
+			safe_delete_array(ptBuf);
+
+			jclass cls = jniEnv->GetObjectClass(m_jobj);
+			jmethodID mid = jniEnv->GetMethodID(cls, "onCallbackAfterReFresh", "([B)V");
+			jniEnv->CallVoidMethod(m_jobj, mid, data);
+			jniEnv->DeleteLocalRef(data);
+			jniEnv->DeleteLocalRef(cls);
+
+			if (isNeedDetach)
+				m_jvm->DetachCurrentThread();
+		}
+		break;
+		case OverlayAfterRefresh:
+		{
+			CGViewAfterReFreshArgs* refreshArgs = (CGViewAfterReFreshArgs*)args;
+			JNIEnv* jniEnv = NULL;
+			int state = m_jvm->GetEnv((void**)&jniEnv, 0x00010008);// JNI_VERSION_1_8);
+			bool isNeedDetach = false;
+			if (state != JNI_OK) {
+				isNeedDetach = true;
+#ifndef LINUX_ANDROID
+				m_jvm->AttachCurrentThread((void**)&jniEnv, NULL);
+#else
+				m_jvm->AttachCurrentThread((JNIEnv**)&jniEnv, NULL);
+#endif
+			}
+			CSmartFile* sFile = refreshArgs->GetImageBuffer();
+			unsigned long dataLen = sFile->GetLength();
+			jbyteArray data = jniEnv->NewByteArray(dataLen);
+
+			char* ptBuf = new char[dataLen];
+
+			sFile->SeekToBegin();
+			sFile->Read(ptBuf, dataLen);
+			jniEnv->SetByteArrayRegion(data, 0, dataLen, (jbyte*)ptBuf);
+			safe_delete_array(ptBuf);
+
+			jclass cls = jniEnv->GetObjectClass(m_jobj);
+			jmethodID mid = jniEnv->GetMethodID(cls, "onCallbackAfterOverlayReFresh", "([B)V");
+			jniEnv->CallVoidMethod(m_jobj, mid, data);
+			jniEnv->DeleteLocalRef(data);
+			jniEnv->DeleteLocalRef(cls);
+
+			if (isNeedDetach)
+				m_jvm->DetachCurrentThread();
+		}
+		break;
+		case dataViewBeginDrawing:
+		{
+			JNIEnv* jniEnv = NULL;
+			int state = m_jvm->GetEnv((void**)&jniEnv, 0x00010008);// JNI_VERSION_1_8);
+			bool isNeedDetach = false;
+			if (state != JNI_OK) {
+				isNeedDetach = true;
+#ifndef LINUX_ANDROID
+				m_jvm->AttachCurrentThread((void**)&jniEnv, NULL);
+#else
+				m_jvm->AttachCurrentThread((JNIEnv**)&jniEnv, NULL);
+#endif
+			}
+
+			jclass cls = jniEnv->GetObjectClass(m_jobj);
+			jmethodID mid = jniEnv->GetMethodID(cls, "onCallbackBeforeRefesh", "()V");
+			jniEnv->CallVoidMethod(m_jobj, mid);
+			jniEnv->DeleteLocalRef(cls);
+
+			if (isNeedDetach)
+				m_jvm->DetachCurrentThread();
+		}
+		break;
+		default:
+			break;
+		}
+	}
+};
+class CGMapViewX : public CGMapView
+{
+private:
+	ControlListener* m_listenner;
+	jobject m_job;
+	JavaVM* m_jvm;
+public:
+	CGMapViewX(JNIEnv* env, jobject obj) :m_listenner(NULL)
+	{
+		env->GetJavaVM(&m_jvm);
+		m_job = env->NewGlobalRef(obj);
+
+		m_listenner = new ControlListener(m_jvm, m_job);
+		this->Add(m_listenner, allEvent);
+		this->SetImageBufferType(1);//bgra
+	}
+	virtual ~CGMapViewX()
+	{
+		delete m_listenner;
+
+		JNIEnv* jniEnv = NULL;
+		int state = m_jvm->GetEnv((void**)&jniEnv, 0x00010008);// JNI_VERSION_1_8);
+		bool isNeedDetach = false;
+		if (state != JNI_OK) {
+			isNeedDetach = true;
+#ifndef LINUX_ANDROID
+			m_jvm->AttachCurrentThread((void**)&jniEnv, NULL);
+#else
+			m_jvm->AttachCurrentThread((JNIEnv**)&jniEnv, NULL);
+#endif
+		}
+		jniEnv->DeleteGlobalRef(m_job);
+
+		if (isNeedDetach)
+			m_jvm->DetachCurrentThread();
+	}
+};
+
+JNIEXPORT jlong JNICALL Java_com_butter_controls_ControlNative_jni_1CreateObj(JNIEnv *env, jclass jclassobj, jobject dataobj)
+{
+	CGMapViewX* pMapView = new CGMapViewX(env, dataobj);
+	return (jlong)pMapView;
+}
+JNIEXPORT void JNICALL Java_com_butter_controls_ControlNative_jni_1DeleteObj(JNIEnv *env, jclass jclassobj, jlong handle)
+{
+	CGMapViewX* pMapView = (CGMapViewX*)handle;
+	safe_delete(pMapView);
+}
+
+
+```
+
+
+
+
+-----
 Copyright 2020 - 2021 @ [cheldon](https://github.com/cheldon-cn/).
