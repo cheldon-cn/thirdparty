@@ -15,3 +15,5 @@ this is the snippet code
 - [interaction listener](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#6-interaction-listener): interaction listener
 
 - [Callback](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#7-Callback): Callback
+
+- [A dynamic link library (DLL) initialization routine failed](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#8-):  A dynamic link library (DLL) initialization routine failed
