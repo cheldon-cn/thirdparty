@@ -10,10 +10,16 @@ this is the snippet code
 
 - [30°29′](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#4--%E5%8C%97%E7%BA%ACn30291338--%E4%B8%9C%E7%BB%8Fe114284983): 北纬N：30°29′13.38″
 
-- [graphicscontext](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#5-graphicscontext): graphics context 
+- [5. graphicscontext](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#5-graphicscontext): graphics context 
 
-- [interaction listener](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#6-interaction-listener): interaction listener
+- [6. interaction listener](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#6-interaction-listener): interaction listener
 
-- [Callback](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#7-Callback): Callback
+- [7. Callback](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#7-Callback): Callback
 
-- [A dynamic link library (DLL) initialization routine failed](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#8-a-dynamic-link-library-dll-initialization-routine-failed):  A dynamic link library (DLL) initialization routine failed
+- [8. A dynamic link library (DLL) initialization routine failed](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#8-a-dynamic-link-library-dll-initialization-routine-failed):  A dynamic link library (DLL) initialization routine failed
+
+- [9. Debug cpp module in Android studio](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#9-debug-cpp-module-in-android-studio)
+  
+- [10. signal SIGBUS: illegal alignment](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#10-signal-sigbus-illegal-alignment)
+
+- [10.4 signal SIGBUS: illegal alignment Link Error](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#104-link-error)
