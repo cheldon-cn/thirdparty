@@ -607,6 +607,7 @@ JNIEXPORT void JNICALL Java_com_butter_controls_ControlNative_jni_1DeleteObj(JNI
 ## 8. A dynamic link library (DLL) initialization routine failed
 
 ![initialization routine failed](./img/8_initialization_routine_failed.png)
+
 ```
 use IntelliJ IDEA to debug some program, when load some dynamic link library (*.dll),
 throw out some error infomation: "A dynamic link library (DLL) initialization routine failed" ;
@@ -618,13 +619,63 @@ the method to solve this situation:
 
 1. cmd --->regedit 
 2. locate the target program node;
-   eg: HKEY_CURRENT_USER\Software\Butter\AppProduct
+   eg: HKEY_CURRENT_USER\Software\MapCycle\AppProduct\Developer
 3. delete the java node which set the java infomation,
    and node name make consist of the HEX code;
 
 
 ```
+ regedit path
+![HKEY_CURRENT_USER_Software_MapCycle](./img/8_initialization_routine_failed_regedit.png)
 
+
+
+## 9. Debug cpp module in Android studio
+
+![Debug cpp module in Android studio](./img/9_debug_cpp_in_androidstudio.png)
+```
+STEPS:
+
+1. open project in android studio;
+2. select Android Node,not Project Node,
+3. select app tree root node,and click the mouse right button,
+   get the menu lists;
+4. click 'Link c++ project with Gradle' from the menu
+   the show the configure window
+5. if the *.mk file is Ok,choose ndk-build for Build system;
+   then choose the file 'Android.mk' in the project path;
+6.press ok,add the mk config into the build.gradle;
+
+	android {
+		compileSdkVersion 26
+		defaultConfig {
+			applicationId "com.map.cycle"
+			minSdkVersion 21
+			targetSdkVersion 26
+			versionCode 1
+			versionName "1.0"
+			testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+			multiDexEnabled true
+			ndk {
+				abiFilters "armeabi-v7a"
+			}
+		}
+		externalNativeBuild {
+			ndkBuild {
+				path file('../../code/build/map/jni/Android.mk')
+			}
+		}
+	}
+```
+
+
+
+## 10. signal SIGBUS: illegal alignment
+
+![initialization routine failed](./img/10_signal_SIGBUS_illegal_alignment.png)
+```
+
+```
 
 
 -----

@@ -16,4 +16,4 @@ this is the snippet code
 
 - [Callback](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#7-Callback): Callback
 
-- [A dynamic link library (DLL) initialization routine failed](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#8-):  A dynamic link library (DLL) initialization routine failed
+- [A dynamic link library (DLL) initialization routine failed](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#8-a-dynamic-link-library-dll-initialization-routine-failed):  A dynamic link library (DLL) initialization routine failed
