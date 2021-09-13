@@ -23,3 +23,9 @@ this is the snippet code
 - [10. signal SIGBUS: illegal alignment](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#10-signal-sigbus-illegal-alignment)
 
 - [10.4 signal SIGBUS: illegal alignment Link Error](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#104-link-error)
+
+- [11. token](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#11-token)
+
+- [12. ogcwmts](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#12-ogcwmts)
+
+- [13. View dynamic library dependency](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#13-view-dynamic-library-dependency)

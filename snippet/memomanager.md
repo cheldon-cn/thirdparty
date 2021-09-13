@@ -6,7 +6,7 @@ this is the snippet code
 
 - [x86_64-w64-mingw32 ](https://github.com/cheldon-cn/): configure items for different host
   
-## 1. memManager
+# 1. memManager
 
 ```
 #include <vector>
@@ -129,7 +129,7 @@ void *CMemManager::Alloc(int size)
 
 ```
 
-## 2. --host=x86_64-w64-mingw32 
+# 2. --host=x86_64-w64-mingw32 
 
 ```
 ./configure --host=i686-w64-mingw32     --prefix=/f/Codes/openSource/githubmaster/libiconv1.16/libiconv             CC=i686-w64-mingw32-gcc             CPPFLAGS="-I/usr/local/mingw32/include -Wall"             LDFLAGS="-L/usr/local/mingw32/lib"
@@ -146,7 +146,7 @@ export PATH
 	
 ```
 
-## 3. arcgisonline url
+# 3. arcgisonline url
 
 https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/1/1/1
 
@@ -195,11 +195,11 @@ sources.append(["connections-xyz","Bing VirtualEarth", "", "", "", "http://ecn.t
 
 ```
 
-## 4.  北纬N：30°29′13.38″  东经E：114°28′49.83″
+# 4.  北纬N：30°29′13.38″  东经E：114°28′49.83″
 
   中心点经纬度：30.487051085698166, 114.48050921768188  北纬N：30°29′13.38″  东经E：114°28′49.83″
 
-## 5. GraphicsContext
+# 5. GraphicsContext
 ```
 public class LayoutControl extends Control {
     private static final int DEFAULT_WIDTH = 512;
@@ -358,7 +358,7 @@ public class LayoutControl extends Control {
 }
 ```
 
-## 6. Interaction Listener
+# 6. Interaction Listener
 ```
 
 import javafx.scene.input.KeyEvent;
@@ -435,7 +435,7 @@ public interface InteractionListener {
 }
 ```
 
-## 7. Callback
+# 7. Callback
 
 
 ```
@@ -604,7 +604,7 @@ JNIEXPORT void JNICALL Java_com_butter_controls_ControlNative_jni_1DeleteObj(JNI
 
 
 ```
-## 8. A dynamic link library (DLL) initialization routine failed
+# 8. A dynamic link library (DLL) initialization routine failed
 
 ![initialization routine failed](./img/8_initialization_routine_failed.png)
 
@@ -630,7 +630,7 @@ the method to solve this situation:
 
 
 
-## 9. Debug cpp module in Android studio
+# 9. Debug cpp module in Android studio
 
 ![Debug cpp module in Android studio](./img/9_debug_cpp_in_androidstudio.png)
 ```
@@ -670,19 +670,19 @@ STEPS:
 
 
 
-## 10. signal SIGBUS: illegal alignment
+# 10. signal SIGBUS: illegal alignment
 
 For some architecture,eg. SPARC、m68k, when access the illegal alignment address,the CPU will throw the SIGBUS signal;
 but for some other architecture,eg. IA-32 from Intel,that is OK;
 
 the last code for the legal alignment address usually is '0','4','8','C';
 
-### 10.1 WHAT is ALIGNMENT
+## 10.1 WHAT is ALIGNMENT
 
 
 ![10_signal_SIGBUS_illegal_alignment_align](./img/10_signal_SIGBUS_illegal_alignment_align.png)
 
-### 10.2 METHOD
+## 10.2 METHOD
 
 ```
 1. use memcpy ,not use this illegal alignment address directly
@@ -695,7 +695,7 @@ the last code for the legal alignment address usually is '0','4','8','C';
 ![10_signal_SIGBUS_illegal_alignment_method](./img/10_signal_SIGBUS_illegal_alignment_method.png)
 
 
-### 10.3 DEMO
+## 10.3 DEMO
 
 ```
 testDemo:
@@ -735,7 +735,7 @@ testDemo:
 
 ```
 
-### 10.4 Link ERROR
+## 10.4 Link ERROR
 
 ![initialization routine failed](./img/10_signal_SIGBUS_illegal_alignment.png)
 
@@ -768,12 +768,12 @@ Case description:
 ```
 
 
-## 11. token
+# 11. token
 
 ```
 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01
 ```
-## 12. OGCWMTS
+# 12. OGCWMTS
 
 ```
 1. OGC WMTS (Web MAP Tile Service) is a standard for web map; 
@@ -848,7 +848,7 @@ According the url above,we make the target url:
    access the original url in Arcgis pro 2.5;we get the tile stream and display normally;
    WHY? perhaps the wrong target url;
    How to get the right url;
-6. use fidder  (https://www.telerik.com/fiddler);
+6. use fiddler  (https://www.telerik.com/fiddler);
    run fiddler,at the same time,refresh the target layer in Arcgis pro 2.5;
    the fiddler get some useful information,in fiddler,pick the target line;
    get :
@@ -866,6 +866,61 @@ According the url above,we make the target url:
 
 
 ```
+
+
+# 13. View dynamic library dependency
+
+   * for Windows,  use dependency-walker
+     
+   * for linux,  use ldd command 
+    ```
+     # ldd libjpeg.so
+       ldd: warning: you do not have execution permission for `./libjpeg.so'
+	   linux-vdso.so.1 =>  (0x00007ffea15a2000)
+	   libc.so.6 => /lib64/libc.so.6 (0x00007f8949b12000)
+	   /lib64/ld-linux-x86-64.so.2 (0x00007f894a138000)
+    ```
+   * for android , use readelf in ndk,
+
+	```
+	PS D:\android\program\adt\ndk_r16b\toolchains\arm-linux-androideabi-4.9\prebuilt\windows-x86_64\arm-linux-androideabi\bin> .\readelf.exe -d D:\android\samples\app\libs\armeabi-v7a\libQt5Core.so
+
+	Dynamic section at offset 0x72f0a4 contains 33 entries:
+	Tag        Type                         Name/Value
+	0x00000003 (PLTGOT)                     0x730784
+	0x00000002 (PLTRELSZ)                   28896 (bytes)
+	0x00000017 (JMPREL)                     0x73c8c
+	0x00000014 (PLTREL)                     REL
+	0x00000011 (REL)                        0x6aba4
+	0x00000012 (RELSZ)                      37096 (bytes)
+	0x00000013 (RELENT)                     8 (bytes)
+	0x6ffffffa (RELCOUNT)                   1956
+	0x00000006 (SYMTAB)                     0x1f0
+	0x0000000b (SYMENT)                     16 (bytes)
+	0x00000005 (STRTAB)                     0x18b50
+	0x0000000a (STRSZ)                      236876 (bytes)
+	0x6ffffef5 (GNU_HASH)                   0x5289c
+	0x00000004 (HASH)                       0x5d790
+	0x00000001 (NEEDED)                     Shared library: [libz.so]
+	0x00000001 (NEEDED)                     Shared library: [libc++_shared.so]
+	0x00000001 (NEEDED)                     Shared library: [liblog.so]
+	0x00000001 (NEEDED)                     Shared library: [libm.so]
+	0x00000001 (NEEDED)                     Shared library: [libdl.so]
+	0x00000001 (NEEDED)                     Shared library: [libc.so]
+	0x0000000e (SONAME)                     Library soname: [libQt5Core.so]
+	0x0000001a (FINI_ARRAY)                 0x730088
+	0x0000001c (FINI_ARRAYSZ)               16 (bytes)
+	0x00000019 (INIT_ARRAY)                 0x730098
+	0x0000001b (INIT_ARRAYSZ)               12 (bytes)
+	0x0000001e (FLAGS)                      BIND_NOW
+	0x6ffffffb (FLAGS_1)                    Flags: NOW
+	0x6ffffff0 (VERSYM)                     0x679fc
+	0x6ffffffc (VERDEF)                     0x6ab28
+	0x6ffffffd (VERDEFNUM)                  1
+	0x6ffffffe (VERNEED)                    0x6ab44
+	0x6fffffff (VERNEEDNUM)                 3
+	0x00000000 (NULL)                       0x0
+	```
 
 
 
