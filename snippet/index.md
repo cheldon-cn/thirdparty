@@ -30,6 +30,10 @@ this is the snippet code
 
 - [13. View dynamic library dependency](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#13-view-dynamic-library-dependency)
 
-- [14. Makefile error make (e=2): The system cannot find the file specified](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#12-ogcwmts)
+- [14. Makefile error make (e=2): The system cannot find the file specified](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#14-makefile-error-make-e2-the-system-cannot-find-the-file-specified)
 
-- [15. compile Qt for android in Windows Environment](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#12-ogcwmts)
+- [15. compile Qt for android in Windows Environment](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#15-compile-qt-for-android-in-windows-environment)
+
+- [15.2. compile script](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#compile-script)
+
+- [15.3. Android linker: undefined reference to bsd_signal](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#android-linker-undefined-reference-to-bsd_signal)

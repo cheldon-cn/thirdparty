@@ -960,6 +960,11 @@ According the url above,we make the target url:
    what we should do is locate the target process path,make the compiler know the path,
    find the target process in the path;
 
+5. fro more information, please visit 
+   * https://stackoverflow.com/questions/33674973/makefile-error-make-e-2-the-system-cannot-find-the-file-specified  
+   or
+   * https://stackoverflow.com/questions/7291442/error-cannot-run-program-jar-createprocess-error-2-the-system-cannot-find-t
+
 # 15. compile Qt for android in Windows Environment
 
 * for more infomation,please visit https://doc.qt.io/qt-5/android-building.html 
@@ -1107,9 +1112,10 @@ extern "C" {
 
 ```
 PS. Looks like the bsd_signal symbol will be brought back to libc.so in NDK r13:
-for more information ,please visit https://stackoverflow.com/questions/36746904/android-linker-undefined-reference-to-bsd-signal
- or 
-https://github.com/android-ndk/ndk/issues/160#issuecomment-236295994
+for more information ,please visit 
+ * https://stackoverflow.com/questions/36746904/android-linker-undefined-reference-to-bsd-signal
+   
+ * https://github.com/android-ndk/ndk/issues/160#issuecomment-236295994
 
 
 
