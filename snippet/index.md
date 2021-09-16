@@ -29,3 +29,7 @@ this is the snippet code
 - [12. ogcwmts](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#12-ogcwmts)
 
 - [13. View dynamic library dependency](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#13-view-dynamic-library-dependency)
+
+- [14. Makefile error make (e=2): The system cannot find the file specified](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#12-ogcwmts)
+
+- [15. compile Qt for android in Windows Environment](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#12-ogcwmts)
