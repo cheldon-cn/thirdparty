@@ -1126,7 +1126,8 @@ then qmake generate *.pro file into the makefile whith the corresponding configu
 in the end ,we get the *.so file which link the dynamic c++  file "libc++_shared.so";
 
 ```
-PS D:\android\program\adt\ndk_r16b\toolchains\arm-linux-androideabi-4.9\prebuilt\windows-x86_64\arm-linux-androideabi\bin> .\readelf.exe -d E:\qt\libQt5Core.so
+PS D:\android\program\adt\ndk_r16b\toolchains\arm-linux-androideabi-4.9\prebuilt\windows-x86_64\arm-linux-androideabi\bin> 
+.\readelf.exe -d E:\qt\libQt5Core.so
 
 Dynamic section at offset 0x609670 contains 31 entries:
   Tag        Type                         Name/Value
@@ -1146,7 +1147,10 @@ Dynamic section at offset 0x609670 contains 31 entries:
 2. open the makefile,find the TAG "LIBS",from this tag,we know the libraries which libQt*.so depend on ,inculde libc++_shared.so ;
   
 	```
-	LIBS          = $(SUBLIBS)  D:/android/program/adt/ndk-r20b/platforms/android-21/arch-arm/usr/lib/libz.so E:/Qt/buildr20b/qtbase/lib/libqtpcre2.a -LD:\android\program\adt\ndk-r20b/sources/cxx-stl/llvm-libc++/libs/armeabi-v7a D:\android\program\adt\ndk-r20b/sources/cxx-stl/llvm-libc++/libs/armeabi-v7a/libc++.so.21 -llog -lz -lm -ldl -lc -LD:\android\program\adt\ndk-r20b/sources/cxx-stl/llvm-libc++/libs/armeabi-v7a D:\android\program\adt\ndk-r20b/sources/cxx-stl/llvm-libc++/libs/armeabi-v7a/libc++.so.21 -llog -lz -lm -ldl -lc
+	LIBS          = $(SUBLIBS)  D:/android/program/adt/ndk-r20b/platforms/android-21/arch-arm/usr/lib/libz.so 
+	E:/Qt/buildr20b/qtbase/lib/libqtpcre2.a 
+	-LD:\android\program\adt\ndk-r20b/sources/cxx-stl/llvm-libc++/libs/armeabi-v7a D:\android\program\adt\ndk-r20b/sources/cxx-stl/llvm-libc++/libs/armeabi-v7a/libc++.so.21 -llog -lz -lm -ldl -lc 
+	-LD:\android\program\adt\ndk-r20b/sources/cxx-stl/llvm-libc++/libs/armeabi-v7a D:\android\program\adt\ndk-r20b/sources/cxx-stl/llvm-libc++/libs/armeabi-v7a/libc++.so.21 -llog -lz -lm -ldl -lc
 
 	```
 
@@ -1177,7 +1181,8 @@ Dynamic section at offset 0x609670 contains 31 entries:
 6. rebuild Qt and check the file libQt*.so
   
 	```
-	PS D:\android\program\adt\ndk_r16b\toolchains\arm-linux-androideabi-4.9\prebuilt\windows-x86_64\arm-linux-androideabi\bin> .\readelf.exe -d E:\Qt\libQt5Core.so
+	PS D:\android\program\adt\ndk_r16b\toolchains\arm-linux-androideabi-4.9\prebuilt\windows-x86_64\arm-linux-androideabi\bin> 
+	.\readelf.exe -d E:\Qt\libQt5Core.so
 
 	Dynamic section at offset 0x440508 contains 32 entries:
 	Tag        Type                         Name/Value

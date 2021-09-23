@@ -40,7 +40,9 @@
 
 - [16. link  'libc++_static.a' when compile shared dynamic Qt](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#16-link-static-c--libc_statica-when-compile-shared-dynamic-qt)
 
+- [17. rewind anticlockwise polypolygon](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#17-rewind-anticlockwise-polypolygon)
 
+- [18. parse segments](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#18-parse-segments)
 
 
 
