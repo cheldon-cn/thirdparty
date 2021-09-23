@@ -37,3 +37,10 @@
 - [15.2. compile script](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#compile-script)
 
 - [15.3. Android linker: undefined reference to bsd_signal](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#android-linker-undefined-reference-to-bsd_signal)
+
+- [16. link  'libc++_static.a' when compile shared dynamic Qt](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#16-link-static-c--libc_statica-when-compile-shared-dynamic-qt)
+
+
+
+
+
