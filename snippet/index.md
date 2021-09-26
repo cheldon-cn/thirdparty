@@ -44,5 +44,8 @@
 
 - [18. parse segments](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#18-parse-segments)
 
+- [19. qt_no_clipboard](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#19-qt_no_clipboard)
 
-
+- [20. debug with add-dsym in AS](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#20-debug-with-add-dsym-in-as)
+  
+- [21. init Qt resource](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#21-init-qt-resource)

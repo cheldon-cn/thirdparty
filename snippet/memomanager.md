@@ -1503,8 +1503,36 @@ symbol file 'E:\Qt\build\armeabi-v7a\qtbase\plugins\platforms\android\libqtforan
 symbol file 'E:\Qt\build\armeabi-v7a\qtbase\lib\libQt5Gui.so' has been added to 'C:\Users\Administrator\.lldb\module_cache\remote-android\.cache\8D29BD13\libQt5Gui.so'
  ```
 
+# 21 init Qt resource
 
+ ```
+public class QtEnvironment {
+    public static int Init(Activity activity) {
+        String rootPath = android.os.Environment.getExternalStorageDirectory().getAbsolutePath();
+        String apkPath = activity.getApplicationInfo().publicSourceDir;
 
+        String nativeLibraryPrefix = activity.getApplicationInfo().nativeLibraryDir + "/";
+
+        DexClassLoader classLoader = new DexClassLoader("", // .jar/.apk files
+                activity.getDir("outdex", Context.MODE_PRIVATE).getAbsolutePath(), // directory where optimized DEX files should be written.
+                null, // libs folder (if exists)
+                activity.getClassLoader());
+
+        QtNative.setClassLoader(classLoader);
+
+        String[] qtLibs = {"Qt5Core","Qt5Gui","Qt5Widgets","qtforandroid"};
+        ArrayList<String> libraryList = new ArrayList<String>();
+
+        String libPrefix = nativeLibraryPrefix + "lib";
+        for (int i = 0; i < qtLibs.length; i++)
+            libraryList.add(libPrefix + qtLibs[i] + ".so");
+        QtNative.loadQtLibraries(libraryList);
+
+        return 1;
+    }
+
+}
+ ```
 
 
 
