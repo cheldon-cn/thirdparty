@@ -49,3 +49,7 @@
 - [20. debug with add-dsym in AS](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#20-debug-with-add-dsym-in-as)
   
 - [21. init Qt resource](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#21-init-qt-resource)
+
+- [22. Template specialization](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#22-template-specialization)
+
+- [23. Howt to access unaligned memory](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#23-howt-to-access-unaligned-memory)
