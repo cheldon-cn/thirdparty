@@ -1293,7 +1293,7 @@ void   ClockSpace::Rewind(DOT *tp, long n)
 
 ```
 
-# 18 Parse Segments 
+# 18. Parse Segments 
 
 ```
 woid testDemo()
@@ -1329,7 +1329,7 @@ int ParseSegments(std::string strValue, char chPartition, std::vector<std::strin
 }
   ```
 
-# 19 QT_NO_CLIPBOARD
+# 19. QT_NO_CLIPBOARD
 
 ## 19.1 problem description
 
@@ -1359,7 +1359,8 @@ some jni methods has been called ,but we cannot find the method,so program  sink
 
 
 1. to find the method is the essential way;
-2. but here we use another way in case that we have no so must information about the clipboard jni method;
+2. but here we use another way in case that we have no so much information about the clipboard jni method;
+   
    So if we do not call that logic function,just pass over it, the program do not sink;
 
 ### 19.2.1 HOW to pass over it?
@@ -1390,11 +1391,13 @@ next we exam the method;
 	 
 	for qtgui-config_p.h or qtgui-config.h, firstly we cannot find them in the source code folder;
 	we find them in the compile folder which has been created when run the configure command;
-	in qtgui-config_p.h or qtgui-config.h, we can find any macro defination;
+	in qtgui-config_p.h or qtgui-config.h, we can find many macro definition;
 
-3. we edit the file 'qtgui-config_p.h' by appending the defination of the macro  QT_NO_CLIPBOARD ;
+3. we edit the file 'qtgui-config_p.h' by appending the definition of the macro  QT_NO_CLIPBOARD ;
    then compile the source code again and test the code;
    OK,we success; prove that that method is OK;
+
+4. But  WHY we need edit the file?
 
 ```
 
@@ -1404,6 +1407,7 @@ next we exam the method;
 
 1. in file qtgui-config.h, when we search key words 'clipboard' ,
    we find '#define QT_FEATURE_clipboard 1';
+   
    so what create the file qtgui-config.h and define FEATURE_clipboard?
 
 2. in the folder which locate the file qtgui-config.h, we find file qtgui-config.pri;
@@ -1413,10 +1417,11 @@ next we exam the method;
 	QT.gui.disabled_features = angle combined-angle-lib dynamicgl opengles3 opengles31 opengles32 openvg
 	QT.gui.QT_CONFIG = accessibility action opengles2 clipboard colornames cssparser cursor desktopservices imageformat_xpm draganddrop opengl egl freetype imageformatplugin harfbuzz highdpiscaling ico im image_heuristic_mask image_text imageformat_bmp imageformat_jpeg imageformat_png imageformat_ppm imageformat_xbm movie pdf picture sessionmanager shortcut standarditemmodel systemtrayicon tabletevent texthtmlparser textodfwriter validator whatsthis wheelevent
 ```
+
 	in file qtgui-config.pri,clipboard is the enabled feature;
 	just list above;	
 
-	so what create the file qtgui-config.pri? How to make clipboard disabled ?
+3. so what create the file qtgui-config.pri? How to make clipboard disabled ?
 
 ###	 19.2.3 How to make clipboard disabled ?
 
@@ -1426,23 +1431,23 @@ next we exam the method;
    CHANGE from 
    ```
 	"clipboard": {
-				"label": "QClipboard",
-				"purpose": "Provides cut and paste operations.",
-				"section": "Kernel",
-				"condition": "!config.integrity && !config.qnx",
-				"output": [ "publicFeature", "feature" ]
-			},
+		"label": "QClipboard",
+		"purpose": "Provides cut and paste operations.",
+		"section": "Kernel",
+		"condition": "!config.integrity && !config.qnx",
+		"output": [ "publicFeature", "feature" ]
+	},
 	```
    into
 	```
 	"clipboard": {
-				"label": "QClipboard",
-				"purpose": "Provides cut and paste operations.",
-				"section": "Kernel",
-				"autoDetect": "config.msvc",
-				"condition": "!config.integrity && !config.qnx",
-				"output": [ "publicFeature", "feature" ]
-			},
+		"label": "QClipboard",
+		"purpose": "Provides cut and paste operations.",
+		"section": "Kernel",
+		"autoDetect": "config.msvc",
+		"condition": "!config.integrity && !config.qnx",
+		"output": [ "publicFeature", "feature" ]
+	},
 	```
 4. save the changes and reconfigure,
    locate the file qtgui-config.h , there is no QT_FEATURE_clipboard defination;
@@ -1454,9 +1459,9 @@ next we exam the method;
    
 
 
-# 20 debug with add-dsym in AS
+# 20. debug with add-dsym in AS
 
-## detail version
+## 20.1 detail version
 
 1. Compile the codes and Debug the app;
 2. in Debug Tab,select app Tab,then select LLDB Tab;
@@ -1476,13 +1481,13 @@ next we exam the method;
 8. Step into the attached library;
 
 
-## short version
+## 20.2 short version
 
-1.Debug ---> app --->LLDB
-2.pause
-3.add-dsym 
-4.resume
-5.debug
+1. Debug ---> app --->LLDB
+2. pause
+3. add-dsym 
+4. resume
+5. debug
 
  ```
 Executing commands in 'D:\android\Android Studio\bin\lldb\shared\stl_printers\load_script'.
@@ -1503,7 +1508,7 @@ symbol file 'E:\Qt\build\armeabi-v7a\qtbase\plugins\platforms\android\libqtforan
 symbol file 'E:\Qt\build\armeabi-v7a\qtbase\lib\libQt5Gui.so' has been added to 'C:\Users\Administrator\.lldb\module_cache\remote-android\.cache\8D29BD13\libQt5Gui.so'
  ```
 
-# 21 init Qt resource
+# 21. init Qt resource
 
  ```
 public class QtEnvironment {
@@ -1533,6 +1538,93 @@ public class QtEnvironment {
 
 }
  ```
+
+# 22. Template specialization
+
+ 1. we use template function which has the original operation 
+    to cover some or several cases;
+    but when template function  crash some special case,
+	the original operation cannot cover  ,
+    we may specialize the template function with the speicial operation  ;
+
+ 2. in common ,function name is same in different cases,
+    but with different parameter type and different operation;
+
+ ```
+template<typename T> bool i_FromString(T& t,std::string str)
+{
+	istringstream is(str);
+	is.imbue(LOC_CHS);
+	is >> t;
+	return true;
+}
+template<size_t N> inline bool i_FromString(char (&sz)[N],std::string str)
+{
+	if (N>0)
+	{
+		memset(sz,0,sizeof(char)*N);
+		strncpy(sz,str.c_str(),N-1);
+		return true;
+	}
+	return false;
+}
+template<> inline bool i_FromString(char*& t,std::string str)
+{
+	const char* pChVal = str.c_str();
+	lstrcpyn(t,pChVal,strlen(pChVal)+1);
+	return true;
+}
+
+template<> inline bool i_FromString(float& t,std::string str)
+{
+	if(str != "")
+	{
+		float fVal = atof(str.c_str());
+		memcpy(&t,&fVal,sizeof(float));
+		return true;
+	}
+	return false;
+}
+
+template<> inline bool i_FromString(double& t,std::string str)
+{
+	if(str != "")
+	{
+#if defined(BUTTER_ANDROID)
+		double dVal = atof(str.c_str());
+		memcpy(&t,&dVal,sizeof(double));
+#else
+		t = atof(str.c_str());
+#endif
+		return true;
+	}
+	return false;
+}
+
+template<> inline bool i_FromString(GUID& t,std::string str)
+{
+	CString   strTemp;
+	if(str != "")
+	{
+		strTemp = str.c_str();
+		CvtStringToGuid(strTemp,t);
+		return true;
+	}
+	return false;
+}
+
+template<> inline bool i_FromString(string& t,std::string str)
+{
+	t = str;
+	return true;
+}
+template<> inline bool i_FromString(CString& t, std::string str)
+{
+	t = str.c_str();
+	return true;
+}
+ ```
+
 
 
 
