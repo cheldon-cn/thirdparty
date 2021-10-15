@@ -1543,12 +1543,15 @@ public class QtEnvironment {
 
  1. we use template function which has the original operation 
     to cover some or several cases;
+
     but when template function  crash some special case,
 	the original operation cannot cover  ,
+
     we may specialize the template function with the speicial operation  ;
 
  2. in common ,function name is same in different cases,
-    but with different parameter type and different operation;
+    
+	but with different parameter type and different operation;
 
  ```
 template<typename T> bool i_FromString(T& t,std::string str)
@@ -1639,7 +1642,8 @@ template<> inline bool i_FromString(CString& t, std::string str)
 * when access the unligned memory directly,OS may sent SIGBUS error;
    
 * if read the unligned memory, use function 'get_unaligned(ptr)'
-   if write the unligned  memory,use memcpy();
+  
+  if write the unligned  memory,use memcpy();
 
 * for more information ,please visit https://www.kernel.org/doc/html/latest/core-api/unaligned-memory-access.html
 
@@ -1691,7 +1695,55 @@ template<> inline void i_AssignValue(float& dt, float& st)
 
 ```
 
+# 24. Unable to open DISPLAY
+```
+java.lang.reflect.InvocationTargetException
+Casued by:
+java.lang.unsupportedOperationException:Unable to open DISPLAY
 
+```
+## solution
+* echo $DISPLAY
+* export DISPLAY=:1
+* xhost +
+* run sh run.sh
+  
+# 25. compute time
+```
+//// for linux
+#include <sys/time.h>　　　//引入头文件
+int main()
+{
+    struct timeval t1,t2;
+    double timeuse;
+    gettimeofday(&t1,NULL);
+
+    fun();
+
+    gettimeofday(&t2,NULL);
+    timeuse = (t2.tv_sec - t1.tv_sec) + (double)(t2.tv_usec - t1.tv_usec)/1000000.0;
+
+    cout<<"time = "<<timeuse<<endl;  //（unit：ｓ）
+}
+
+/// for windows
+#include <windows.h>　　　
+int main()
+{
+    LARGE_INTEGER t1,t2,tc;
+    QueryPerformanceFrequency(&tc);
+    QueryPerformanceCounter(&t1);
+
+    fun() 
+
+    QueryPerformanceCounter(&t2);
+    time=(double)(t2.QuadPart-t1.QuadPart)/(double)tc.QuadPart; 
+    cout<<"time = "<<time<<endl;  //（unit：ｓ）
+}
+
+
+
+```
 
 -----
 Copyright 2020 - 2021 @ [cheldon](https://github.com/cheldon-cn/).
