@@ -53,3 +53,9 @@
 - [22. Template specialization](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#22-template-specialization)
 
 - [23. Howt to access unaligned memory](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#23-howt-to-access-unaligned-memory)
+
+- [24. Unable to open DISPLAY](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#24-unable-to-open-display)
+
+- [25. compute time cost](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#25-compute-time-cost)
+
+- [26. how to get tianditu token](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#26-how-to-get-tianditu-token)
