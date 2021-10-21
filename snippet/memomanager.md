@@ -1708,42 +1708,81 @@ java.lang.unsupportedOperationException:Unable to open DISPLAY
 * xhost +
 * run sh run.sh
   
-# 25. compute time
+# 25. compute time cost
 ```
-//// for linux
-#include <sys/time.h>　　　//引入头文件
+
 int main()
 {
-    struct timeval t1,t2;
-    double timeuse;
-    gettimeofday(&t1,NULL);
-
-    fun();
-
-    gettimeofday(&t2,NULL);
-    timeuse = (t2.tv_sec - t1.tv_sec) + (double)(t2.tv_usec - t1.tv_usec)/1000000.0;
-
-    cout<<"time = "<<timeuse<<endl;  //（unit：ｓ）
+	{
+		CHTime timecost;
+		fun1();
+	}
+	
+	{
+		CHTime timecost;
+		fun2();
+		timecost.getTime();
+	}
 }
 
+////**********************CHTime.h************************
+
+#ifdef WIN32
 /// for windows
-#include <windows.h>　　　
-int main()
+#include <windows.h>　
+#else //BUTTER_LINUX
+//// for linux
+#include <sys/time.h>　
+#endif
+
+class CHTime
 {
-    LARGE_INTEGER t1,t2,tc;
-    QueryPerformanceFrequency(&tc);
-    QueryPerformanceCounter(&t1);
+public:
+	CHTime(){ 
+		Begin();
+	}
+	~CHTime(){
+		End();
+	}
+	void Begin()
+	{
+#ifdef WIN32
+       QueryPerformanceFrequency(&m_freq);
+       QueryPerformanceCounter(&m_queryBegin);
+#else
+       gettimeofday(&m_begin,NULL);
+#endif
+	}
+	void End()
+	{
+#ifdef WIN32   
+       QueryPerformanceCounter(&m_queryEnd);
+       m_timeuse=(double)(m_queryEnd.QuadPart-m_queryBegin.QuadPart)/(double)m_freq.QuadPart * 1000.0; 
+#else
+       gettimeofday(&m_end,NULL);
+       m_timeuse = (m_end.tv_sec - m_begin.tv_sec) + (double)(m_end.tv_usec - m_begin.tv_usec)/1000.0;
+#endif
+      cout<<"timecost = "<<m_timeuse<<endl;  //（unit：ms）
+	}
+	double getTime()
+	{
+		End(); 
+		return m_timeuse;
+	}
+protected:	
+    double m_timeuse;///ms
 
-    fun() 
+#ifdef WIN32
+    LARGE_INTEGER m_queryBegin,m_queryEnd,m_freq;
+#else
+	struct timeval m_begin,m_end;
+#endif
 
-    QueryPerformanceCounter(&t2);
-    time=(double)(t2.QuadPart-t1.QuadPart)/(double)tc.QuadPart; 
-    cout<<"time = "<<time<<endl;  //（unit：ｓ）
 }
 
 
-
 ```
+
 
 -----
 Copyright 2020 - 2021 @ [cheldon](https://github.com/cheldon-cn/).
