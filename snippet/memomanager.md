@@ -2116,6 +2116,13 @@ target_link_libraries(demo ${HALCON_LIBRARIES} ${MYSQLCPPCONN_LIBRARIES})
 
   * HALCON_INCLUDE_DIR and HALCON_LIBRARY will be found.
   * MYSQLCPPCONN_INCLUDE_DIR and MYSQLCPPCONN_LIBRARY will be found.
+  
+# 29.tianditu-GetCapabilities
+
+   http://t0.tianditu.gov.cn/vec_c/wmts?tk=9a02b3cdd29cd346de4df04229797710&request=GetCapabilities&service=wmts
+
+
+
 
 
 
