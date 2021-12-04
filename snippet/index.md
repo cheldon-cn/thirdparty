@@ -59,3 +59,13 @@
 - [25. compute time cost](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#25-compute-time-cost)
 
 - [26. how to get tianditu token](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#26-how-to-get-tianditu-token)
+  
+- [27. compile cario](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#27-compile-cario)
+  
+- [28. QGuiApplication(int &argc, char **argv)](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#28qguiapplicationint-argc-char-argv)
+
+- [29. lib-config.cmake](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#29lib-configcmake)
+
+- [30. tianditu-GetCapabilities](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#30-tianditu-getcapabilities)
+  
+- [31. Install Zentao for linux](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#)
