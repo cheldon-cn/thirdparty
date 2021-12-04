@@ -68,4 +68,4 @@
 
 - [30. tianditu-GetCapabilities](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#30-tianditu-getcapabilities)
   
-- [31. Install Zentao for linux](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#)
+- [31. Install Zentao for linux](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#31install-zentao-for-linux)
