@@ -2306,7 +2306,28 @@ target_link_libraries(demo ${HALCON_LIBRARIES} ${MYSQLCPPCONN_LIBRARIES})
 			gitlab_rails['smtp_authentication'] = "login"
 			gitlab_rails['smtp_enable_starttls_auto'] = true
 			gitlab_rails['smtp_tls'] = true
+			
+* 9. login with root
 
+     username: root
+	 password: QjD1J3CZW3XOnJnWX5ieUt7V6GoSJjskvQiBNPnxBDc=
+	 password get from file 'initial_root_password' which located in ' /etc/gitlab'
+
+		[root@localhost gitlab]# pwd
+		/etc/gitlab
+		[root@localhost gitlab]# ls
+		gitlab.rb  gitlab-secrets.json  initial_root_password  trusted-certs
+		[root@localhost gitlab]# cat initial_root_password 
+		# WARNING: This value is valid only in the following conditions
+		#          1. If provided manually (either via `GITLAB_ROOT_PASSWORD` environment variable or via `gitlab_rails['initial_root_password']` setting in `gitlab.rb`, it was provided before database was seeded for the first time (usually, the first reconfigure run).
+		#          2. Password hasn't been changed manually, either via UI or via command line.
+		#
+		#          If the password shown here doesn't work, you must reset the admin password following https://docs.gitlab.com/ee/security/reset_user_password.html#reset-your-root-password.
+
+		Password: QjD1J3CZW3XOnJnWX5ieUt7V6GoSJjskvQiBNPnxBDc=
+
+		# NOTE: This file will be automatically deleted in the first reconfigure run after 24 hours.
+		[root@localhost gitlab]#
 
 
 
