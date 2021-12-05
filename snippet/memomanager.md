@@ -2176,7 +2176,28 @@ target_link_libraries(demo ${HALCON_LIBRARIES} ${MYSQLCPPCONN_LIBRARIES})
 		 cd /opt/zbox
 		 ./zbox stop
 		 ./zbox restart	 
-  
+		 
+* 10. if cannot visit，add port into firewall,if the firewall is active
+      
+			[root@localhost zbox]# systemctl status firewalld
+			● firewalld.service - firewalld - dynamic firewall daemon
+			   Loaded: loaded (/usr/lib/systemd/system/firewalld.service; enabled; vendor preset: enabled)
+			   Active: active (running) since 日 2021-12-05 11:36:48 CST; 1h 47min ago
+				 Docs: man:firewalld(1)
+			 Main PID: 846 (firewalld)
+				Tasks: 2
+			   CGroup: /system.slice/firewalld.service
+					   └─846 /usr/bin/python2 -Es /usr/sbin/firewalld --nofork --nopid
+
+			12月 05 11:36:46 localhost.localdomain systemd[1]: Starting firewalld - dynam...
+			12月 05 11:36:48 localhost.localdomain systemd[1]: Started firewalld - dynami...
+			Hint: Some lines were ellipsized, use -l to show in full.
+			[root@localhost zbox]# firewall-cmd --list-ports
+			80/tcp 8081/tcp
+			[root@localhost zbox]# firewall-cmd --zone=public --add-port=9091/tcp --permanentsuccess
+			[root@localhost zbox]# firewall-cmd --list-ports
+			80/tcp 8081/tcp
+			[root@localhost zbox]# reboot  
 
 # 32.Install Gitlab for linux
 
