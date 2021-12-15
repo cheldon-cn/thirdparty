@@ -2431,6 +2431,27 @@ target_link_libraries(demo ${HALCON_LIBRARIES} ${MYSQLCPPCONN_LIBRARIES})
 	#endif /* BUTTER_DEFINES_H_ */
 
 
+# 34.error: invalid token at start of a preprocessor expression
+
+	error: invalid token at start of a preprocessor expression
+	#if __amd64__ || __x86_64__ || _WIN64 || _M_X64
+	#endif   
+        
+
+in some place; define _WIN64
+
+    #define _WIN64
+
+Remove this line ;
+
+or change to
+
+	#ifdef __amd64__ || __x86_64__ || _WIN64 || _M_X64
+	#endif 
+
+
+
+
 
 
 
