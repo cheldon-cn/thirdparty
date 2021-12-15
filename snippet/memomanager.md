@@ -2330,6 +2330,107 @@ target_link_libraries(demo ${HALCON_LIBRARIES} ${MYSQLCPPCONN_LIBRARIES})
 		[root@localhost gitlab]#
 
 
+# 33. defines.h
+
+	/***********************************************************************
+	* Software License Agreement (BSD License)
+	*
+	* Copyright 2020-2021  cheldon (program68@126.com). All rights reserved.
+	*
+	* Redistribution and use in source and binary forms, with or without
+	* modification, are permitted provided that the following conditions
+	* are met:
+	*
+	* 1. Redistributions of source code must retain the above copyright
+	*    notice, this list of conditions and the following disclaimer.
+	* 2. Redistributions in binary form must reproduce the above copyright
+	*    notice, this list of conditions and the following disclaimer in the
+	*    documentation and/or other materials provided with the distribution.
+	*
+	* THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+	* IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+	* OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+	* IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+	* INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+	* NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+	* DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+	* THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+	* (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+	* THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+	*************************************************************************/
+
+	#ifndef BUTTER_DEFINES_H_
+	#define BUTTER_DEFINES_H_
+
+	
+	#ifdef BUTTER_VERSION_
+	#undef BUTTER_VERSION_
+	#endif
+	#define BUTTER_VERSION_ "1.2.5"
+
+	#ifdef BUTTER_EXPORT
+	#undef BUTTER_EXPORT
+	#endif
+	#ifdef WIN32
+	/* win32 dll export/import directives */
+	#ifdef BUTTER_EXPORTS
+	#define BUTTER_EXPORT __declspec(dllexport)
+	#elif defined(BUTTER_STATIC)
+	#define BUTTER_EXPORT
+	#else
+	#define BUTTER_EXPORT __declspec(dllimport)
+	#endif
+	#else
+	/* unix needs nothing */
+	#define BUTTER_EXPORT
+	#endif
+
+	#ifdef BUTTER_DEPRECATED
+	#undef BUTTER_DEPRECATED
+	#endif
+	#ifdef __GNUC__
+	#define BUTTER_DEPRECATED __attribute__ ((deprecated))
+	#elif defined(_MSC_VER)
+	#define BUTTER_DEPRECATED __declspec(deprecated)
+	#else
+	#pragma message("WARNING: You need to implement BUTTER_DEPRECATED for this compiler")
+	#define BUTTER_DEPRECATED
+	#endif
+
+	#undef BUTTER_PLATFORM_64_BIT
+	#undef BUTTER_PLATFORM_32_BIT
+	#if __amd64__ || __x86_64__ || _WIN64 || _M_X64
+	#define BUTTER_PLATFORM_64_BIT
+	#else
+	#define BUTTER_PLATFORM_32_BIT
+	#endif
+
+	#undef BUTTER_ARRAY_LEN
+	#define BUTTER_ARRAY_LEN(a) (sizeof(a)/sizeof(a[0]))
+
+	#ifdef __cplusplus
+	namespace butter {
+	#endif
+
+	enum butter_log_level
+	{
+		BUTTER_LOG_NONE = 0,
+		BUTTER_LOG_FATAL = 1,
+		BUTTER_LOG_ERROR = 2,
+		BUTTER_LOG_WARN = 3,
+		BUTTER_LOG_INFO = 4,
+		BUTTER_LOG_DEBUG = 5
+	};
+
+
+	#ifdef __cplusplus
+	}
+	#endif
+
+
+	#endif /* BUTTER_DEFINES_H_ */
+
+
 
 
 
