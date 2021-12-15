@@ -2451,6 +2451,72 @@ or change to
 
 
 
+# 35. Predefined MACROS from compiler、HardWare、OS
+
+## 《Calling conventions for different C++ compilers and operating systems》
+
+for more information ,
+
+please visit https://www.agner.org/optimize/calling_conventions.pdf  [page 56]
+
+or
+
+search key words "《Calling conventions for different C++ compilers and operating systems》"
+
+Most C++ compilers have a predefined macro containing the version number of the
+compiler. Programmers can use preprocessing directives to check for the existence of these
+macros in order to detect which compiler the program is compiled on and thereby fix
+problems with incompatible compilers.
+
+
+
+## Table 1. Compiler version predefined macros
+
+
+	Compiler             |        Predefined macro
+	Borland              |        __BORLANDC__
+	Codeplay VectorC     |        __VECTORC__
+	Digital Mars         |        __DMC__
+	Gnu                  |        __GNUC__
+	Intel                |        __INTEL_COMPILER
+	Microsoft            |        _MSC_VER
+	Pathscale            |        __PATHSCALE__
+	Symantec             |        __SYMANTECC__
+	Watcom               |        __WATCOMC__
+
+
+Unfortunately, not all compilers have well - documented macros telling which hardware
+platform and operating system they are compiling for.The following macros may or may not
+be defined :
+
+## Table 2. Hardware platform predefined macros
+
+	platform              |       Predefined macro
+	x86                   |      _M_IX86  __INTEL__  __i386__
+	x86-64                |      _M_X64   __x86_64__  __amd64
+	IA64                  |      __IA64__
+	DEC Alpha             |      __ALPHA__
+	Motorola Power PC     |      __POWERPC__
+	Any little endian     |      __LITTLE_ENDIAN__
+	Any big endian        |      __BIG_ENDIAN__
+
+
+## Table 3. Operating system predefined macros
+
+	Operating system       |    Predefined macro
+	DOS 16 bit             |    __MSDOS__   _MSDOS
+	Windows 16 bit         |    _WIN16
+	Windows 32 bit         |    _WIN32      __WINDOWS__
+	Windows 64 bit         |    _WIN64      _WIN32
+	Linux 32 bit           |    __unix__    __linux__
+	Linux 64 bit           |    __unix__    __linux__ __LP64__ __amd64
+	BSD                    |    __unix__    __BSD__   __FREEBSD__
+	Mac OS                 |    __APPLE__   __DARWIN__ __MACH__
+	OS / 2                 |    __OS2__
+
+
+
+
 
 
 
