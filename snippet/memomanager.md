@@ -2433,6 +2433,11 @@ target_link_libraries(demo ${HALCON_LIBRARIES} ${MYSQLCPPCONN_LIBRARIES})
 
 # 34.error: invalid token at start of a preprocessor expression
 
+for more information,visit
+
+ https://stackoverflow.com/questions/36317145/macro-in-objective-c-calling-isequaltostring-produces-error-about-invalid-token
+
+
 	error: invalid token at start of a preprocessor expression
 	#if __amd64__ || __x86_64__ || _WIN64 || _M_X64
 	#endif   
@@ -2515,10 +2520,65 @@ be defined :
 	OS / 2                 |    __OS2__
 
 
+# 36. process character
 
+	void process(const char* lpszString)
+	{
+		const char*		lpszBegin	= lpszString;
+		const char*		lpszEnd		= NULL;
 
+		// skip space 
+		while(::isspace(*lpszBegin))
+			lpszBegin = ::_tcsinc(lpszBegin);
 
+		// begine with '<' ?
+		if(*lpszBegin != _T('<'))
+			return 0;
 
+		// skip'<'
+		lpszBegin = ::_tcsinc(lpszBegin);
+
+		// if empty ,return
+		if(*lpszBegin == _T('>'))
+		   return;
+
+         bool bClosingTag =false;
+		// check label is character or not
+		if(!::isalpha(*lpszBegin))
+		{
+			bClosingTag = (*lpszBegin==_T('/'));
+			if(bClosingTag)
+				lpszBegin = ::_tcsinc(lpszBegin);
+			else
+				return 0;
+		}
+
+		bOpeningTag = !bClosingTag;
+		lpszEnd = lpszBegin;
+		do
+		{
+			// include (a-z, A-Z) \(0-9) \'-' \'-' \':' \'.'
+			if((!::isalnum(*lpszEnd)) && 
+				(*lpszEnd!=_T('-')) && (*lpszEnd!=_T(':')) && 
+				(*lpszEnd!=_T('_')) && (*lpszEnd!=_T('.')))
+			{
+				// if illegal
+				ASSERT(lpszEnd != lpszBegin);
+
+				// check state
+				if(*lpszEnd==NULL || ::isspace(*lpszEnd) || 
+					*lpszEnd == _T('>') || (*lpszEnd == _T('/') && 
+					(!bClosingTag)))
+				{
+					break;
+				}
+				return 0;
+			}
+
+			// contine process next
+			lpszEnd = ::_tcsinc(lpszEnd);
+		} while(true);
+	}
 
 
 -----
