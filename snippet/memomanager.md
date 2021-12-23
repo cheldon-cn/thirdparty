@@ -2580,6 +2580,45 @@ be defined :
 		} while(true);
 	}
 
+	
+# 37. no member named 'int64_t' in the global namespace using::int64_t
+
+when compile android,
+
+	7. #include <string>
+	8. #include <algorithm>
+   
+compile the lines above,get the error below:
+
+	Compile++ arm  : butterbase <= basetemplate.cpp
+	In file included from jni/../../../../base/basebutter.cpp:7:
+	D:/android/ndk_r16b/build//../sources/cxx-stl/llvm-libc++/include\cstdint:156:8: error: no member named 'int64_t' in the global namespace
+	using::int64_t;
+		~~^
+	In file included from jni/../../../../base/basebutter.cpp:8:
+	In file included from D:/android/ndk_r16b/build//../sources/cxx-stl/llvm-libc++/include\string:470:
+	In file included from D:/android/ndk_r16b/build//../sources/cxx-stl/llvm-libc++/include\string_view:169:
+	In file included from D:/android/ndk_r16b/build//../sources/cxx-stl/llvm-libc++/include\__string:56:
+	In file included from D:/android/ndk_r16b/build//../sources/cxx-stl/llvm-libc++/include\algorithm:643:
+	In file included from D:/android/ndk_r16b/build//../sources/cxx-stl/llvm-libc++/include\memory:658:
+	D:/android/ndk_r16b/build//../sources/cxx-stl/llvm-libc++/include\atomic:1873:17: error: use of undeclared identifier 'int64_t'
+	typedef atomic< int64_t> atomic_int64_t;
+          
+## Method:
+
+From
+
+	#include <string>
+	#include <algorithm>
+
+change to
+
+	typedef long long                int64_t;
+	#include <string>
+	#include <algorithm>
+
+
+
 
 -----
 Copyright 2020 - 2021 @ [cheldon](https://github.com/cheldon-cn/).
