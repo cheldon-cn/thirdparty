@@ -2617,8 +2617,72 @@ change to
 	#include <string>
 	#include <algorithm>
 
+# 38. Configure
 
 
+ ```
+
+./configure --host=arm-linux-androideabi --prefix=/install
+
+./configure --host=aarch64-linux-android --prefix=/install
+
+/configure --prefix=/mingw --enable-win32thread \
+--host=x86_64-w64-mingw32 --enable-static --enable-shared 
+
+
+ ```
+
+ ```
+--build=BUILD
+
+指定软件包安装的系统平台。如果没有指定，默认值将是'--host'选项的值。
+
+
+--host=HOST
+
+指定软件运行的系统平台。如果没有指定。将会运行`config.guess'来检测。
+
+
+--target=GARGET
+
+指定软件面向(target to)的系统平台。这主要在程序语言工具如编译器和汇编器上下文中起作用。如果没有指定，默认将使用'--host'选项的值。
+
+
+--disable-FEATURE
+
+一些软件包可以选择这个选项来提供为大型选项的编译时配置，例如使用Kerberos认证系统或者一个实验性的编译器最优配置。如果默认是提供这些特性，可以使用'--disable-FEATURE'来禁用它，这里'FEATURE'是特性的名字，例如：
+
+$ ./configure --disable-gui
+
+
+-enable-FEATURE[=ARG]
+
+相反的，一些软件包可能提供了一些默认被禁止的特性,可以使用'--enable-FEATURE'来起用它。这里'FEATURE'是特性的名字。一个特性可能会接受一个可选的参数。例如：
+
+$ ./configure --enable-buffers=128
+
+`--enable-FEATURE=no'与上面提到的'--disable-FEATURE'是同义的。
+
+
+--with-PACKAGE[=ARG]
+
+在自由软件社区里，有使用已有软件包和库的优秀传统。当用'configure'来配置一个源码树时，可以提供其他已经安装的软件包的信息。例如，倚赖于Tcl和Tk的BLT器件工具包。要配置BLT，可能需要给'configure'提供一些关于我们把Tcl和Tk装的何处的信息：
+
+ ```
+
+# 39. Rotate Marker
+
+ ```
+void RotateMarker(double x, double y, double dx, double dy, double angle, double& xO, double& yO)
+{
+	double dRad = angle*PI / 180.0;
+	double dCos = cos(dRad);
+	double dSin = sin(dRad);
+	xO = x*dCos - y*dSin + (1 - dCos)*dx + dSin*dy;
+	yO = x*dSin + y*dCos + (1 - dCos)*dy - dSin*dx;
+}
+
+ ```
 
 -----
 Copyright 2020 - 2021 @ [cheldon](https://github.com/cheldon-cn/).
