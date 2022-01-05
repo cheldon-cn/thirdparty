@@ -2674,6 +2674,12 @@ $ ./configure --enable-buffers=128
 # 39. Rotate Marker
 
  ```
+
+ // double x, y    the point before rotate;
+ // double dx, dy  the base point rotate around;
+ // double angle   roate angle in degree;
+ // double xO, yO  the point after rotate;
+
 void RotateMarker(double x, double y, double dx, double dy, double angle, double& xO, double& yO)
 {
 	double dRad = angle*PI / 180.0;
@@ -2685,5 +2691,243 @@ void RotateMarker(double x, double y, double dx, double dy, double angle, double
 
  ```
 
+ ## 40. CInternetSession 12057 不能连接到吊销服务器，或者未能获得最终响应 
+
+### ERROR_WINHTTP_SECURE_CERT_REV_FAILED [12057]
+
+```
+ERROR_WINHTTP_SECURE_CERT_REV_FAILED
+12057
+Indicates that revocation cannot be checked because the revocation server was offline (equivalent to CRYPT_E_REVOCATION_OFFLINE).
+```
+use the following function
+**CInternetSession::OpenURL()**;
+
+*CInternetSession* is a part of the Microsoft Foundation Classes C++ library.
+
+some options is related with 'Internet Explore';
+
+compare with windows 10 , windows server has different options;
+
+
+**Method:**
+
+1. open Internet Explore,find Tools button
+2. locate 'Advandced Tab' in Internet options Window;
+3. in node 'Security Options', unselect 'Check for server certificate revocation'
+   
+```
+打开 IE->Tools->Internet Options->Advanced Tab->Security Options->”Check for server certificate revocation(Requires Restart)”
+```
+
+![Internet Security Options](./img/40-internet_options_security.png)
+
+这个选项当前为选中状态（IE8默认是选中的）。取消这个选项，Bug 症状消失。经过测试发现只有 Windows Server 2003 Standard Edition 的 IE 默认选中该项，而且在其他平台即时此选项选中亦不会发生 Error 12057 (Microsoft’s Bug ? or with other options?)。决定通过编码解决这个问题。
+其实编码解决这个问题倒是很简单， 在 HttpOpenRequest 后增加如下代码，设置当前 Http 连接选项取消这个检查
+
+```
+DWORD dwFlags = 0;
+DWORD dwError = 0;
+DWORD dwBuffLen = sizeof(dwFlags);
+
+InternetQueryOption(m_hRequest, INTERNET_OPTION_SECURITY_FLAGS,(LPVOID)&dwFlags, &dwBuffLen);
+
+dwFlags |= SECURITY_FLAG_IGNORE_REVOCATION;
+
+InternetSetOption(m_hRequest, INTERNET_OPTION_SECURITY_FLAGS, (LPVOID)&dwFlags, sizeof(dwFlags)) ;
+
+```
+
+
+### How to Request URI
+
+1. with CHttpConnection::OpenRequest
+   
+```
+
+long Request(string strUri, byte** ppbuf, long& len)
+{
+	// MSDN：CInternetSession第一个参数标识调用Internet功能的应用程序或实体的名称（例如，“Microsoft Internet Browser”）。
+	//如果pstrAgent为NULL（缺省值），则框架将调用全局函数AfxGetAppName，该函数返回包含应用程序名称的以null结尾的字符串。
+	// 某些协议使用此字符串来标识服务器应用程序。
+
+	CInternetSession    session("BUTTER");
+	CHttpFile*	        pHttpFile = NULL;
+	long                ret = 0;
+	len = 0;
+	try
+	{
+		Log("OpenURL_ERROR", "pHttpFile: %p , Begin OpenRequest", pHttpFile);
+
+		DWORD dwFlags;
+		DWORD dwServerType;
+		CString strServer, strObject;
+		INTERNET_PORT nport;
+		AfxParseURL(strUri.c_str(), dwServerType, strServer, strObject, nport);
+
+		CHttpConnection* pHttpConnect = session.GetHttpConnection(strServer, INTERNET_FLAG_SECURE, nport, NULL, NULL);
+		if (pHttpConnect)
+		{
+			pHttpFile = (CHttpFile*)pHttpConnect->OpenRequest(CHttpConnection::HTTP_VERB_POST, strObject, NULL, 1,
+				NULL, NULL,
+				INTERNET_FLAG_RELOAD | INTERNET_FLAG_NO_CACHE_WRITE | INTERNET_FLAG_KEEP_CONNECTION |
+				INTERNET_FLAG_SECURE | INTERNET_FLAG_IGNORE_CERT_CN_INVALID | INTERNET_FLAG_IGNORE_CERT_DATE_INVALID
+				//SECURITY_FLAG_IGNORE_REVOCATION
+			);
+			if (pHttpFile)
+			{
+				//get web server option
+				pHttpFile->QueryOption(INTERNET_OPTION_SECURITY_FLAGS, dwFlags);
+				dwFlags |= SECURITY_FLAG_IGNORE_UNKNOWN_CA;  //忽略错误与未知的证书颁发机构
+				dwFlags |= SECURITY_FLAG_IGNORE_REVOCATION;  //忽略错误与撤销相关证书
+																//set web server option
+				pHttpFile->SetOption(INTERNET_OPTION_SECURITY_FLAGS, dwFlags);
+				if (pHttpFile->SendRequest())
+				{
+					//get response status if success, return 200
+					DWORD dwStatus = 0;
+					DWORD dwStatusLen = sizeof(dwStatus);
+					pHttpFile->QueryInfo(HTTP_QUERY_FLAG_NUMBER | HTTP_QUERY_STATUS_CODE, &dwStatus, &dwStatusLen, 0);
+
+					Log("URL_Query", "STATUS_CODE : %d ", dwStatus);
+
+					if (dwStatus == 200 )
+					{
+						QByteArray buffer;
+						char tmpBuf[1024];
+						UINT nReadLen = 0;
+						while (nReadLen = pHttpFile->Read((void*)tmpBuf, 1024))
+						{
+							buffer.append(tmpBuf, nReadLen);
+						}
+						pHttpFile->Close();
+						delete pHttpFile;
+
+						if (!buffer.isEmpty())
+						{
+							len = buffer.length();
+							*ppbuf = new byte[len];
+							memcpy(*ppbuf, buffer.data(), len);
+						}
+						ret = 1;
+					}
+					else
+					    ret = -1;
+				}else{
+				    ret = -2;
+				}
+			}
+			else{
+				ret = -3;
+			}
+		}else
+			ret = -4;
+	}
+	catch (CInternetException* e)
+	{
+		char szMsg[MAX_PATH] = { "/0" };
+		e->GetErrorMessage(szMsg, MAX_PATH);
+		Log("URL_ERROR", "error: [%d , %s ; pHttpFile: %p , url:  %s ] ", e->m_dwError, szMsg, pHttpFile,strUri.c_str());
+
+		e->Delete();
+
+		if (pHttpFile)
+		{
+			pHttpFile->Close();
+			delete pHttpFile;
+			pHttpFile = NULL;
+		}
+	}
+
+	if (!pHttpFile)
+		Log("URL_ERROR", "pHttpFile: %p ", pHttpFile);
+
+	session.Close();
+	return ret;
+}
+
+```
+
+2. with CInternetSession::OpenURL
+
+```
+
+long Request(string strUri, byte** ppbuf, long& len)
+{
+	len = 0;
+	CInternetSession    session("BUTTER");
+	CHttpFile*	        pHttpFile = NULL;
+	long                ret = 0;
+
+	try
+	{
+		LPCTSTR	 pheader = "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.63 Safari/537.36";
+		session.SetOption(INTERNET_OPTION_USER_AGENT, (LPVOID)pheader, strlen(pheader));
+		session.SetOption(INTERNET_OPTION_CONNECT_TIMEOUT, 5000);
+	    
+		DWORD dwFlag = INTERNET_FLAG_TRANSFER_BINARY | INTERNET_FLAG_DONT_CACHE | INTERNET_FLAG_RELOAD;
+
+		pHttpFile = (CHttpFile*)session.OpenURL(strUri.c_str(), 1, dwFlag, pheader);
+		if(pHttpFile)
+		{
+			//get response status if success, return 200
+			DWORD dwStatus = 0;
+			DWORD dwStatusLen = sizeof(dwStatus);
+			pHttpFile->QueryInfo(HTTP_QUERY_FLAG_NUMBER | HTTP_QUERY_STATUS_CODE, &dwStatus, &dwStatusLen, 0);
+
+			Log("URL_Query", "STATUS_CODE : %d ", dwStatus);
+
+			if (dwStatus == 200 )
+			{
+				QByteArray buffer;
+				char tmpBuf[1024];
+				UINT nReadLen = 0;
+				while (nReadLen = pHttpFile->Read((void*)tmpBuf, 1024))
+				{
+					buffer.append(tmpBuf, nReadLen);
+				}
+				pHttpFile->Close();
+				delete pHttpFile;
+
+				if (!buffer.isEmpty())
+				{
+					len = buffer.length();
+					*ppbuf = new byte[len];
+					memcpy(*ppbuf, buffer.data(), len);
+				}
+				ret = 1;
+			}
+		}
+		else
+		    ret = -1;
+		
+	}
+	catch (CInternetException* e)
+	{
+		char szMsg[MAX_PATH] = { "/0" };
+		e->GetErrorMessage(szMsg, MAX_PATH);
+		Log("URL_ERROR", "error: [%d , %s ; pHttpFile: %p , url:  %s ] ", e->m_dwError, szMsg, pHttpFile, strUri.c_str());
+
+		e->Delete();
+		if (pHttpFile)
+		{
+			pHttpFile->Close();
+			delete pHttpFile;
+			pHttpFile = NULL;
+		}
+	}
+
+	if (!pHttpFile)
+	{
+		Log("URL_ERROR", "pHttpFile: %p ", pHttpFile);
+		ret = -2;
+	}
+	
+	session.Close();
+	return ret;
+}
+
+```
+
 -----
-Copyright 2020 - 2021 @ [cheldon](https://github.com/cheldon-cn/).
+Copyright 2020 - 2022 @ [cheldon](https://github.com/cheldon-cn/).
