@@ -774,6 +774,7 @@ Case description:
 
 ```
 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01
+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01
 ```
 # 12. OGCWMTS
 
@@ -2691,7 +2692,7 @@ void RotateMarker(double x, double y, double dx, double dy, double angle, double
 
  ```
 
- ## 40. CInternetSession 12057 不能连接到吊销服务器，或者未能获得最终响应 
+ # 40. CInternetSession 12057 不能连接到吊销服务器，或者未能获得最终响应 
 
 ### ERROR_WINHTTP_SECURE_CERT_REV_FAILED [12057]
 
@@ -2928,6 +2929,80 @@ long Request(string strUri, byte** ppbuf, long& len)
 }
 
 ```
+
+ # 41. Mapbox satelite url token
+
+
+ 1. visit url http://www.mapbox.cn/mapbox-gl-js/example/satellite-map/ ，
+ 2. from the example,use F12 --> NetWork --> get the request url :
+    https://api.mapbox.com/v4/mapbox.satellite/14/13402/6763.webp?sku=1015TlSrLHf3s&access_token=pk.eyJ1IjoiZXhhbXBsZXMiLCJhIjoiY2p1dHRybDR5MGJuZjQzcGhrZ2doeGgwNyJ9.a-vxW4UaxOoUMWUTGnEArw
+ 3. from the url above,get the token "pk.eyJ1IjoiZXhhbXBsZXMiLCJhIjoiY2p1dHRybDR5MGJuZjQzcGhrZ2doeGgwNyJ9.a-vxW4UaxOoUMWUTGnEArw";
+
+## vector tile
+https://docs.mapbox.com/api/maps/vector-tiles/
+
+https://api.mapbox.com/v4/{tileset_id}/{zoom}/{x}/{y}.{format}
+
+https://api.mapbox.com/v4/mapbox.mapbox-streets-v8/12/1171/1566.mvt?style=mapbox://styles/mapbox/streets-v11@00&access_token=YOUR_MAPBOX_ACCESS_TOKEN
+
+## raster tile
+https://api.mapbox.com/v4/{tileset_id}/{zoom}/{x}/{y}{@2x}.{format}
+
+https://api.mapbox.com/v4/mapbox.satellite/1/0/0@2x.jpg90?access_token=YOUR_MAPBOX_ACCESS_TOKEN
+
+## template
+
+https://docs.mapbox.com/api/maps/static-tiles/
+
+https://api.mapbox.com/styles/v1/{username}/{style_id}/tiles/{tilesize}/{z}/{x}/{y}{@2x}
+
+Retrieve raster tiles from a Mapbox Studio style.
+
+The returned raster tile will be 512 pixels by 512 pixels by default.
+If the queried tileset contains raster layers, the returned tile will be a JPEG.
+If the queried tileset contains only vector layers, the returned tile will be a PNG.
+
+* demo
+
+https://api.mapbox.com/styles/v1/mapbox/satellite-v9/tiles/512/2/3/1@2x?access_token=pk.eyJ1IjoiZXhhbXBsZXMiLCJhIjoiY2p1dHRybDR5MGJuZjQzcGhrZ2doeGgwNyJ9.a-vxW4UaxOoUMWUTGnEArw
+
+ ## mapbox demo
+
+```
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset='utf-8' />
+	<title>显示卫星地图</title>
+	<meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+	<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.1.1/mapbox-gl.js'></script>
+	<link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.1.1/mapbox-gl.css' rel='stylesheet' />
+	<style>
+		body { margin:0; padding:0; }
+		#map { position:absolute; top:0; bottom:0; width:100%; }
+	</style>
+</head>
+<body>
+
+<div id='map'></div>
+<script>
+mapboxgl.accessToken = 'pk.eyJ1IjoiZXhhbXBsZXMiLCJhIjoiY2p1dHRybDR5MGJuZjQzcGhrZ2doeGgwNyJ9.a-vxW4UaxOoUMWUTGnEArw';
+var map = new mapboxgl.Map({
+	container: 'map',
+	zoom: 9,
+	center: [137.9150899566626, 36.25956997955441],
+	style: 'mapbox://styles/mapbox/satellite-v9'
+});
+</script>
+
+</body>
+</html>
+
+```
+
+
+
+
 
 -----
 Copyright 2020 - 2022 @ [cheldon](https://github.com/cheldon-cn/).
