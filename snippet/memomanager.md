@@ -3000,9 +3000,25 @@ var map = new mapboxgl.Map({
 
 ```
 
+# 42 compile podofo
+
+```
+get tar file 'podofo-0.9.6.tar.gz'
+
+tar zxvf podofo-0.9.6.tar.gz
+
+mkdir buildpdf
+
+cd buildpdf
+
+cmake ../podofo-0.9.6 -DCMAKE_INSTALL_PREFIX=/home/cycle/src/intall -DPODOFO_BUILD_SHARED:BOOL=TRUE -DPODOFO_BUILD_STATIC:BOOL=FALSE -DPNG_LIBRARY_RELEASE:FILEPATH=/home/cycle/sdk/3rd/png/lib/libpng.so -DPNG_PNG_INCLUDE_DIR:PATH=/home/cycle/sdk/3rd/png/include/libpng16
+
+make
+
+make install
 
 
-
+```
 
 -----
 Copyright 2020 - 2022 @ [cheldon](https://github.com/cheldon-cn/).
