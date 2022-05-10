@@ -3020,5 +3020,109 @@ make install
 
 ```
 
+# 43  brush rotate
+
+![pdfpainter Brush rotate angle](./img/43-pdfpainter_brush_rotate_angle.png)
+
+```
+PdfPainter m_painter;
+void  DrawRect(double dStartX, double dStartY, double dEndX, double dEndY)
+{
+	m_painter.DrawLine(dStartX, dStartY, dStartX, dEndY);
+	m_painter.DrawLine(dStartX, dEndY, dEndX, dEndY);
+	m_painter.DrawLine(dEndX, dEndY, dEndX, dStartY);
+	m_painter.DrawLine(dEndX, dStartY, dStartX, dStartY);
+
+	m_painter.DrawLine(dStartX, dStartY, dEndX, dEndY);
+	m_painter.DrawLine(dStartX, dEndY, dEndX, dStartY);
+}
+
+void  Fill(bool useEvenOddRule)
+{
+	PdfXObject* m_pXPattern = new PdfXObject(PdfRect(0, 0, patWid,patHei), new PdfMemDocument());
+
+	if (m_bBeginPattern) {
+		PdfPainter painter;
+		painter.SetPage(m_pXPattern);
+		painter.Fill();
+		painter.FinishPage();
+	}
+	else {
+		if (m_pXPattern != NULL)
+		{
+			m_painter.Save();
+			m_painter.ClosePath();
+			m_painter.Clip(true);
+
+			QBrush *pBrush;
+			D_RECT  rc = {0.0}; 
+			memcpy(&rc, &m_pathRect, sizeof(D_RECT));
+			double dOrigin = 0.0;
+			double xScale, yScale; xScale = yScale = 1.0;
+			double xStep = m_pXPattern->GetPageSize().GetWidth()*xScale, yStep = m_pXPattern->GetPageSize().GetHeight()*yScale;
+			
+			QTransform  trans;
+			if (pBrush)
+				trans = pBrush->transform();
+
+			QRectF rect = trans.mapRect(QRectF(rc.xmin, rc.ymax, rc.xmax - rc.xmin, rc.ymax - rc.ymin));
+			QPointF center = rect.center();
+			QPointF  bl = rect.bottomLeft();
+			QPointF  tr = rect.topRight();
+
+			double xBound = rc.xmax - rc.xmin;
+			double yBound = rc.ymax - rc.ymin;
+
+			m_painter.DrawXObject((rc.xmax + rc.xmin) / 2, (rc.ymax + rc.ymin) / 2, m_pXPattern, xScale, yScale);
+
+			m_painter.SetTransformationMatrix(trans.m11(), trans.m21(), trans.m12(), trans.m22(), 0, 0);
+
+			DrawRect(bl.rx() + 1.5 - yBound, bl.ry() + 1.5, tr.rx() - 1.5 - yBound, tr.ry() - 1.5);
+
+			//m_painter.DrawLine(center.rx(), center.ry(), (rc.xmax + rc.xmin) / 2.0, (rc.ymax + rc.ymin) / 2.0);
+			m_painter.DrawLine(center.rx(), center.ry(), 0, 0);
+
+			//	DrawRect(0, 0, xStep, yStep);
+			m_painter.DrawLine(0, 0, xStep, yStep);
+
+			m_painter.DrawXObject(center.rx(), center.ry(), m_pXPattern, xScale, yScale);
+
+			m_painter.DrawXObject(center.rx() - yBound, center.ry(), m_pXPattern, xScale, yScale);
+			m_painter.DrawXObject(center.rx() - yBound - xStep, center.ry(), m_pXPattern, xScale, yScale);
+			m_painter.DrawXObject(center.rx() - yBound + xStep, center.ry(), m_pXPattern, xScale, yScale);
+
+			double xmin = bl.rx() - yBound;
+			double xmax = tr.rx() - yBound;
+			double ymin = min(bl.ry(), tr.ry());
+			double ymax = max(bl.ry(), tr.ry());
+
+			int nXmin = floor((xmin - dOrigin) / xStep);
+			int nXmax = ceil((xmax - dOrigin) / xStep);
+			int nYmin = floor((ymin - dOrigin) / yStep);
+			int nYmax = ceil((ymax - dOrigin) / yStep);
+
+			for (int i = nXmin; i <= nXmax; ++i)
+			{
+				for (int j = nYmin; j <= nYmax; ++j)
+				{
+					D_DOT tmpDot = {};
+					tmpDot.x = dOrigin + i * xStep;
+					tmpDot.y = dOrigin + j * yStep;
+					m_painter.DrawXObject(tmpDot.x, tmpDot.y, m_pXPattern, xScale, yScale);
+				}
+			}
+
+			m_painter.Restore();
+		}
+		else
+		{
+			m_painter.Fill();
+		}
+		DELETEPOINTER(m_pXPattern);
+	}
+}
+
+```
+
 -----
 Copyright 2020 - 2022 @ [cheldon](https://github.com/cheldon-cn/).
