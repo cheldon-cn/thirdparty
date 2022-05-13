@@ -3002,6 +3002,8 @@ var map = new mapboxgl.Map({
 
 # 42 compile podofo
 
+## 1. steps
+
 ```
 get tar file 'podofo-0.9.6.tar.gz'
 
@@ -3019,6 +3021,159 @@ make install
 
 
 ```
+
+## 2. compile only with jpeg / png / freetype without OpenSSL and tiff
+
+### 1. modify the CMakeLists.txt;
+   located  'FIND_PACKAGE(*libname*)'
+   and make it invalid;
+   
+```
+change from 
+FIND_PACKAGE(LIBCRYPTO)
+FIND_PACKAGE(LIBIDN)
+FIND_PACKAGE(TIFF)
+FIND_PACKAGE(OpenSSL)
+to
+
+#FIND_PACKAGE(LIBCRYPTO)
+#FIND_PACKAGE(LIBIDN)
+#FIND_PACKAGE(TIFF)
+#FIND_PACKAGE(OpenSSL)
+
+```
+### 2. change the library path
+   
+jpeg.so / png.so / freetype.so located in folder '/home/x64/program' which is the prefer folder rather than the default folder such as '/usr/lib64';
+
+```
+[core@localhost pdf]$ echo $LD_LIBRARY_PATH
+/home/x64/program
+
+[core@localhost pdf]$ export PATH=$LD_LIBRARY_PATH:$PATH
+[core@localhost pdf]$ echo $PATH
+/home/x64/program:/usr/lib64/ccache:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/core/.local/bin:/home/core/bin
+```
+
+### 3. configure and compile 
+
+```
+[core@localhost pdf]$   cmake ../podofo-0.9.6 -DCMAKE_INSTALL_PREFIX=/home/cycle/bin/install -DPODOFO_BUILD_SHARED:BOOL=TRUE -DPODOFO_BUILD_STATIC:BOOL=FALSE  -DPODOFO_NO_FONTMANAGER:BOOL=TRUE -DLIBJPEG_INCLUDE_DIR=/home/core/sdk/3rd/jpeg/include_linux_x86_64  -DPNG_PNG_INCLUDE_DIR=/home/core/sdk/3rd/png/include
+-- The C compiler identification is GNU 4.9.3
+-- The CXX compiler identification is GNU 4.9.3
+-- Check for working C compiler: /usr/lib64/ccache/cc
+-- Check for working C compiler: /usr/lib64/ccache/cc -- works
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Check for working CXX compiler: /usr/lib64/ccache/c++
+-- Check for working CXX compiler: /usr/lib64/ccache/c++ -- works
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+WANT_LIB64 unset; assuming normal library directory names
+Will install libraries to /home/cycle/bin/install/lib
+-- Looking for strings.h
+-- Looking for strings.h - found
+-- Looking for arpa/inet.h
+-- Looking for arpa/inet.h - found
+-- Looking for winsock2.h
+-- Looking for winsock2.h - not found
+-- Looking for mem.h
+-- Looking for mem.h - not found
+-- Looking for ctype.h
+-- Looking for ctype.h - found
+-- Looking for sys/types.h
+-- Looking for sys/types.h - found
+-- Looking for stdint.h
+-- Looking for stdint.h - found
+-- Looking for BaseTsd.h
+-- Looking for BaseTsd.h - not found
+-- Looking for sys/types.h
+-- Looking for sys/types.h - found
+-- Looking for stdint.h
+-- Looking for stdint.h - found
+-- Looking for stddef.h
+-- Looking for stddef.h - found
+-- Check size of long int
+-- Check size of long int - done
+-- Check size of int64_t
+-- Check size of int64_t - done
+-- Check if the system is big endian
+-- Searching 16 bit integer
+-- Check size of unsigned short
+-- Check size of unsigned short - done
+-- Using unsigned short
+-- Check if the system is big endian - little endian
+Using gcc specific compiler options
+-- Found ZLIB: /home/x64/program/libz.so  
+Found zlib headers in /usr/local/include, library at /home/x64/program/libz.so
+OpenSSL's libCrypto not found. Encryption support will be disabled
+Libidn not found. AES-256 Encryption support will be disabled
+-- Found LIBJPEG: /home/x64/program/libjpeg.so  
+Found libjpeg headers in /home/core/sdk/3rd/jpeg/include_linux_x86_64, library at /home/x64/program/libjpeg.so
+Libtiff not found. TIFF support will be disabled
+-- Found ZLIB: /home/x64/program/libz.so (found version "1.2.3") 
+-- Found PNG: /home/x64/program/libpng.so (found version "1.6.38.git") 
+Found LibPng headers in /home/core/sdk/3rd/png/include;/usr/local/include, library at /home/x64/program/libpng.so;/home/x64/program/libz.so
+-- Could NOT find UNISTRING (missing: UNISTRING_INCLUDE_DIR UNISTRING_LIBRARY) 
+LibUnistring not found. Unistring support will be disabled
+-- Ensure you cppunit installed version is at least 1.12.0
+Cppunit not found. No unit tests will be built.
+Found freetype library at /usr/lib64/libfreetype.so, headers /usr/include/freetype2
+-- Found PkgConfig: /usr/bin/pkg-config (found version "0.28") 
+-- Checking for module 'fontconfig'
+--   Found fontconfig, version 2.11.1
+-- Found Fontconfig: fontconfig;freetype  
+-- Could NOT find Lua50 (missing: LUA_LIBRARIES LUA_INCLUDE_DIR) 
+-- Could NOT find Lua (missing: LUA_LIBRARIES LUA_INCLUDE_DIR) 
+Lua not found - PoDoFoImpose and PoDoFoColor will be built without Lua support
+Building multithreaded version of PoDoFo.
+-- Looking for pthread.h
+-- Looking for pthread.h - found
+-- Looking for pthread_create
+-- Looking for pthread_create - not found
+-- Looking for pthread_create in pthreads
+-- Looking for pthread_create in pthreads - not found
+-- Looking for pthread_create in pthread
+-- Looking for pthread_create in pthread - found
+-- Found Threads: TRUE  
+Building shared PoDoFo library
+Pkg-config found, creating a pkg-config file for linking against shared library.
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/core/tmp/5.12/pdf
+
+
+```
+
+### 4. compile and install
+   
+```
+make install
+```
+
+### 5. check it
+
+```
+[root@localhost program]# ldd libpodofo.so
+ldd: warning: you do not have execution permission for `./libpodofo.so'
+linux-vdso.so.1 =>  (0x00007ffdf2174000)
+libz.so.1 => /home/x64/program/libz.so.1 (0x00007fbc8ec80000)
+libjpeg.so.9 => /home/x64/program/libjpeg.so.9 (0x00007fbc8ea27000)
+libpthread.so.0 => /lib64/libpthread.so.0 (0x00007fbc8e80b000)
+libfreetype.so.6 => /home/x64/program/libfreetype.so.6 (0x00007fbc8e55b000)
+libpng16.so.16 => /home/x64/program/libpng16.so.16 (0x00007fbc8e313000)
+libstdc++.so.6 => /lib64/libstdc++.so.6 (0x00007fbc8e00c000)
+libm.so.6 => /lib64/libm.so.6 (0x00007fbc8dd0a000)
+libgcc_s.so.1 => /lib64/libgcc_s.so.1 (0x00007fbc8daf4000)
+libc.so.6 => /lib64/libc.so.6 (0x00007fbc8d727000)
+/lib64/ld-linux-x86-64.so.2 (0x00007fbc8f312000)
+
+```
+
 
 # 43  brush rotate
 
