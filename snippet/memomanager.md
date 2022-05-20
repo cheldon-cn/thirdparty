@@ -3279,5 +3279,52 @@ void  Fill(bool useEvenOddRule)
 
 ```
 
+# 44 . Matrix to angle
+
+```
+/**************Matrix***********
+ *     | m11     m12     0 |
+ *     | m21     m22     0 |
+ *     | 0       0       1 |
+ ************************/
+
+double ComputeAngleByMatix()
+{
+	double angle = 0;
+	double m11 = m_matrix.m11();
+	double m21 = m_matrix.m21();
+	double m12 = m_matrix.m12();
+	double m22 = m_matrix.m22();
+	float sy = sqrt(m11*m11 + m21*m21);
+	bool singular = sy < 1e-6;
+	if (!singular)
+		angle = atan2(m21, m11);
+	else 
+		angle = 0;
+
+	double dAn = angle * 180 / PI;
+	return dAn;
+}
+```
+
+# 45 .  Rotate the point around the center point
+
+![Rotate the point around the center point](./img/45-rotate_angle_refer_line.png)
+ 
+* Note the refer line ;
+  
+  
+```
+bool RotateDot(double &dotX, double &dotY, double centerX, double centerY, double dAngle)
+{
+	double		x = 0.0, y = 0.0;
+	x = dotX - centerX;
+	y = dotY - centerY;
+	dotX = centerX + x*cos(dAngle) - y*sin(dAngle);
+	dotY = centerY + x*sin(dAngle) + y*cos(dAngle);
+	return true;
+}
+```
+
 -----
 Copyright 2020 - 2022 @ [cheldon](https://github.com/cheldon-cn/).
