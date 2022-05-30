@@ -3326,5 +3326,18 @@ bool RotateDot(double &dotX, double &dotY, double centerX, double centerY, doubl
 }
 ```
 
+# 46.  unknow function in c sharp setttings 
+
+VS2019调试模式， 在调试的过程中,表达式计算器中发生内部错误，c#编译器内部错误 调试堆栈显示  未知函数
+
+解决办法：
+
+	工具--选项--调试--常规，将“使用托管兼容模式”勾选中即可，如下图所示：
+
+![c sharp setttings ](./img/46-c_sharp_settings.png)
+ 
+
+
+
 -----
 Copyright 2020 - 2022 @ [cheldon](https://github.com/cheldon-cn/).
