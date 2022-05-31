@@ -3336,7 +3336,18 @@ VS2019调试模式， 在调试的过程中,表达式计算器中发生内部错
 
 ![c sharp setttings ](./img/46-c_sharp_settings.png)
  
+# 47.  3d model url 
 
+Gltf/obj模型下载
+
+https://github.com/KhronosGroup/glTF
+
+https://playcanvas.com/
+https://playcanvas.com/viewer
+
+https://www.kenney.nl/
+
+https://sketchfab.com/
 
 
 -----
