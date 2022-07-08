@@ -3059,6 +3059,9 @@ jpeg.so / png.so / freetype.so located in folder '/home/x64/program' which is th
 
 ```
 [core@localhost pdf]$   cmake ../podofo-0.9.6 -DCMAKE_INSTALL_PREFIX=/home/cycle/bin/install -DPODOFO_BUILD_SHARED:BOOL=TRUE -DPODOFO_BUILD_STATIC:BOOL=FALSE  -DPODOFO_NO_FONTMANAGER:BOOL=TRUE -DLIBJPEG_INCLUDE_DIR=/home/core/sdk/3rd/jpeg/include_linux_x86_64  -DPNG_PNG_INCLUDE_DIR=/home/core/sdk/3rd/png/include
+
+cmake ../podofo-0.9.6 -DCMAKE_INSTALL_PREFIX=/home/cycle/pdf-shared -DPODOFO_BUILD_SHARED:BOOL=TRUE -DPODOFO_BUILD_STATIC:BOOL=FALSE -DPODOFO_NO_FONTMANAGER:BOOL=TRUE  -DPNG_LIBRARY_RELEASE:FILEPATH=/home/cycle/program/libpng16.so -DPNG_PNG_INCLUDE_DIR:PATH=/home/cycle/3rd/png/include -DLIBJPEG_LIBRARY_RELEASE:FILEPATH=/home/cycle/program/libjpeg.so -DLIBJPEG_INCLUDE_DIR:PATH=/home/cycle/3rd/jpeg/include_linux_x86_64 -DFREETYPE_INCLUDE_DIR_FT2BUILD:PATH=/home/cycle/3rd/freetype/include/freetype2 -DFREETYPE_INCLUDE_DIR_FTHEADER:PATH=/home/cycle/3rd/freetype/include/freetype2 -DFREETYPE_LIBRARY_RELEASE:FILEPATH=/home/cycle/3rd/freetype/lib/libfreetype.so 
+
 -- The C compiler identification is GNU 4.9.3
 -- The CXX compiler identification is GNU 4.9.3
 -- Check for working C compiler: /usr/lib64/ccache/cc
@@ -3354,6 +3357,49 @@ https://sketchfab.com/
 http://tjj.wuhan.gov.cn/tjfw/tjnj/
 
 
+# 49. compile Freetype
+
+1. get the source code 'freetype-2.12.1.tar'
+2. locate the folder of the freetype tar file ,eg: /home/ft
+   cd /home/ft
+3. unzip the tar file; 
+   tar xvf freetype-2.12.1.tar
+4. open root folder of freetype
+   cd /home/ft/freetype-2.12.1
+5. ./configure --prefix=/home/ft/ft-static --enable-static --with-png=no
+6. if with png,configure '--with-png=yes';
+   perhaps compiler complain that can not find 'png.h';
+   for this case,set LIBPNG_CFLAGS and LIBPNG_LIBS;
+
+   ./configure --prefix=/home/ft/ft-shared --enable-shared LIBPNG_CFLAGS='-I/home/png/include' LIBPNG_LIBS='-L/home/program -lpng16' 
+
+7. make install
+8. locate folder '/home/ft/ft-static',get the compiled library and header file;
+
+
+# 50. fPIC
+
+1、-fPIC 作用于编译阶段，在编译动态库时(.so文件)告诉编译器产生与位置无关代码(Position-Independent Code)，若未指定-fPIC选项编译.so文件，则在加载动态库时需进行重定向。
+
+2、64位编译器下编译生成动态库时，出现以下错误：
+
+/usr/lib64/gcc/x86_64-suse-linux/4.3/../../../../x86_64-suse-linux/bin/ld: ../../CI/script/server/lib/libz.a(adler32.o): relocation R_X86_64_32 against `.text' can not be used when making a shared object; recompile with -fPIC
+
+../../CI/script/server/lib/libz.a: could not read symbols: Bad value
+
+原因：提示说需要-fPIC编译，然后在链接动态库的地方加上-fPIC的参数编译结果还是报错，需要把共享库所用到的所有静态库都采用-fPIC编译一遍，才可以成功的在64位环境下编译出动态库。
+
+
+    add_compile_options(-fPIC)
+	
+```
+/usr/bin/ld: /home/core2/master/sdk/3rd/podofo/linux_x86_64/libpodofo.a(PdfArray.cpp.o): relocation R_X86_64_32S against symbol `_ZTVN6PoDoFo8PdfArrayE' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /home/core2/master/sdk/3rd/podofo/linux_x86_64/libpodofo.a(PdfCanvas.cpp.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /home/core2/master/sdk/3rd/podofo/linux_x86_64/libpodofo.a(PdfColor.cpp.o): relocation R_X86_64_32S against symbol `_ZTVN6PoDoFo8PdfColorE' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /home/core2/master/sdk/3rd/podofo/linux_x86_64/libpodofo.a(PdfDataType.cpp.o): relocation R_X86_64_32S against symbol `_ZTVN6PoDoFo11PdfDataTypeE' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /home/core2/master/sdk/3rd/podofo/linux_x86_64/libpodofo.a(PdfDictionary.cpp.o): relocation R_X86_64_32S against symbol `_ZTVN6PoDoFo13PdfDictionaryE' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /home/core2/master/sdk/3rd/podofo/linux_x86_64/libpodofo.a(PdfEncodingFactory.cpp.o): relocation R_X86_64_32 against symbol `_ZN6PoDoFo18PdfEncodingFactory7s_mutexE' can not be used when making a shared object; recompile with -fPIC
+```
 
 -----
 Copyright 2020 - 2022 @ [cheldon](https://github.com/cheldon-cn/).
