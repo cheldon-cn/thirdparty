@@ -3401,5 +3401,85 @@ http://tjj.wuhan.gov.cn/tjfw/tjnj/
 /usr/bin/ld: /home/core2/master/sdk/3rd/podofo/linux_x86_64/libpodofo.a(PdfEncodingFactory.cpp.o): relocation R_X86_64_32 against symbol `_ZN6PoDoFo18PdfEncodingFactory7s_mutexE' can not be used when making a shared object; recompile with -fPIC
 ```
 
+# 51. build podofo with static freetype library which is independent with png lib
+
+  case: podofo lib depend on png 、jpeg 、freetype, besides this, freetype library also depend on png, they may conflict with each other because of the unmatched version;
+```
+  podofo
+    |-----png
+	|-----jpeg
+	|-----freetype
+	         |------png
+			 |------bz
+```
+ in linux, freetype usually can be located and found in the system path,we cannot remove it because the OS use it; if we wanna promote the version,we must have the root authority;
+ for somewhere,we may just need link  freetype which has the special version, the same file in system path perhaps is not what we need;
+
+ so we assemble the static freetype into the target library,here is podofo;
+
+ ## 1. compile and build the static freetype
+   
+```
+	../freetype-2.12.1/configure --prefix=/home/cycle/install/static --enable-static --enable-shared=no --with-png=no --with-bzip2=no --with-pic
+```
+* --enable-static --enable-shared=no
+  build static library
+
+* --with-bzip2=no
+  static freetype need static bzip,if donnot have static bzip,ignore it;
+
+* --with-pic
+  when making a shared object,should compile with -fPIC
+
+	/usr/bin/ld: /home/bin/podofo/libpodofo.a(PdfColor.cpp.o): relocation R_X86_64_32S against symbol `_ZTVN6PoDoFo8PdfColorE' can not be used when making a shared object; recompile with -fPIC
+
+## 2. compile podofo with the static freetype
+   
+```
+    mkfir pdf
+    cd pdf
+    cmake ../podofo-0.9.6 -DCMAKE_INSTALL_PREFIX=/home/cycle/install/pdf/share  -DPODOFO_BUILD_SHARED:BOOL=TRUE -DPODOFO_BUILD_STATIC:BOOL=FALSE -DPODOFO_NO_FONTMANAGER:BOOL=TRUE  -DPNG_LIBRARY_RELEASE:FILEPATH=/home/cycle/bin/libpng16.so -DPNG_PNG_INCLUDE_DIR:PATH=/home/cycle/sdk/3rd/png/include -DLIBJPEG_LIBRARY_RELEASE:FILEPATH=/home/cycle/bin/libjpeg.so -DLIBJPEG_INCLUDE_DIR:PATH=/home/cycle/sdk/3rd/jpeg/include_linux_x86_64 -DFREETYPE_INCLUDE_DIR_FT2BUILD:PATH=/home/cycle/install/static/include/freetype2 -DFREETYPE_INCLUDE_DIR_FTHEADER:PATH=/home/cycle/install/static/include/freetype2 -DFREETYPE_LIBRARY_RELEASE:FILEPATH=/home/cycle/install/static/lib/libfreetype.a 
+	make 
+	make install
+```
+## 3. check the target lib
+    
+BEFORE
+```
+[cycle@localhost p]$ ldd /home/cycle/bin/libpodofo.so
+libz.so.1 => /home/cycle/bin/libz.so.1 (0x000000fff64a8000)
+libjpeg.so.9 => /home/cycle/bin/libjpeg.so.9 (0x000000fff6424000)
+libpthread.so.0 => /lib64/libpthread.so.0 (0x000000fff63bc000)
+libfreetype.so.6 => /lib64/libfreetype.so.6 (0x000000fff62f0000)
+libpng16.so.16 => /home/cycle/bin/libpng16.so.16 (0x000000fff6288000)
+libstdc++.so.6 => /lib64/libstdc++.so.6 (0x000000fff611c000)
+libm.so.6 => /lib64/libm.so.6 (0x000000fff6020000)
+libgcc_s.so.1 => /lib64/libgcc_s.so.1 (0x000000fff5fbc000)
+libc.so.6 => /lib64/libc.so.6 (0x000000fff5dd0000)
+/lib64/ld.so.1 (0x000000fff6818000)
+libbz2.so.1 => /lib64/libbz2.so.1 (0x000000fff5dac000)
+```
+
+AFTER
+
+```
+[cycle@localhost p]$ ldd /home/cycle/bin/libpodofo.so
+libz.so.1 => /home/cycle/bin/libz.so.1 (0x000000ffea934000)
+libjpeg.so.9 => /home/cycle/bin/libjpeg.so.9 (0x000000ffea8b0000)
+libpthread.so.0 => /lib64/libpthread.so.0 (0x000000ffea848000)
+libpng16.so.16 => /home/cycle/bin/libpng16.so.16 (0x000000ffea7e0000)
+libstdc++.so.6 => /lib64/libstdc++.so.6 (0x000000ffea674000)
+libm.so.6 => /lib64/libm.so.6 (0x000000ffea578000)
+libgcc_s.so.1 => /lib64/libgcc_s.so.1 (0x000000ffea514000)
+libc.so.6 => /lib64/libc.so.6 (0x000000ffea328000)
+/lib64/ld.so.1 (0x000000ffead44000)
+```
+
+
+
+
+
+
+
 -----
 Copyright 2020 - 2022 @ [cheldon](https://github.com/cheldon-cn/).
