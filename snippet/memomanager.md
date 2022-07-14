@@ -3409,8 +3409,9 @@ http://tjj.wuhan.gov.cn/tjfw/tjnj/
     |-----png
 	|-----jpeg
 	|-----freetype
-	         |------png
-			 |------bz
+	        |------png
+			|------bz
+			
 ```
  in linux, freetype usually can be located and found in the system path,we cannot remove it because the OS use it; if we wanna promote the version,we must have the root authority;
  for somewhere,we may just need link  freetype which has the special version, the same file in system path perhaps is not what we need;
@@ -3474,6 +3475,156 @@ libgcc_s.so.1 => /lib64/libgcc_s.so.1 (0x000000ffea514000)
 libc.so.6 => /lib64/libc.so.6 (0x000000ffea328000)
 /lib64/ld.so.1 (0x000000ffead44000)
 ```
+
+# 52. JNLP
+
+```
+Microsoft Windows [版本 6.1.7601]
+版权所有 (c) 2009 Microsoft Corporation。保留所有权利。
+
+C:\Users\Administrator>keytool -v
+用法错误: 没有提供命令
+密钥和证书管理工具
+
+命令:
+
+ -certreq            生成证书请求
+ -changealias        更改条目的别名
+ -delete             删除条目
+ -exportcert         导出证书
+ -genkeypair         生成密钥对
+ -genseckey          生成密钥
+ -gencert            根据证书请求生成证书
+ -importcert         导入证书或证书链
+ -importpass         导入口令
+ -importkeystore     从其他密钥库导入一个或所有条目
+ -keypasswd          更改条目的密钥口令
+ -list               列出密钥库中的条目
+ -printcert          打印证书内容
+ -printcertreq       打印证书请求的内容
+ -printcrl           打印 CRL 文件的内容
+ -storepasswd        更改密钥库的存储口令
+
+使用 "keytool -command_name -help" 获取 command_name 的用法
+
+C:\Users\Administrator>F:
+
+F:\>cd F:\program\web\tomcat-10.0.21\webapps\jnlp
+
+F:\program\web\tomcat-10.0.21\webapps\jnlp>keytool -genkey -keystore keycookies
+-alias kcookies
+输入密钥库口令:
+密钥库口令太短 - 至少必须为 6 个字符
+输入密钥库口令:
+再次输入新口令:
+您的名字与姓氏是什么?
+  [Unknown]:  cycle
+您的组织单位名称是什么?
+  [Unknown]:  cycle
+您的组织名称是什么?
+  [Unknown]:  cycle
+您所在的城市或区域名称是什么?
+  [Unknown]:  wh
+您所在的省/市/自治区名称是什么?
+  [Unknown]:  HN
+该单位的双字母国家/地区代码是什么?
+  [Unknown]:  CHN
+CN=cycle, OU=cycle, O=cycle, L=wh, ST=HN, C=CHN是否正确?
+  [否]:  y
+
+输入 <kcookies> 的密钥口令
+        (如果和密钥库口令相同, 按回车):
+再次输入新口令:
+
+Warning:
+JKS 密钥库使用专用格式。建议使用 "keytool -importkeystore -srckeystore keycookie
+s -destkeystore keycookies -deststoretype pkcs12" 迁移到行业标准格式 PKCS12。
+
+F:\program\web\tomcat-10.0.21\webapps\jnlp>keytool -list -keystore keycookies
+输入密钥库口令:
+密钥库类型: JKS
+密钥库提供方: SUN
+
+您的密钥库包含 1 个条目
+
+kcookies, 2022-7-13, PrivateKeyEntry,
+证书指纹 (SHA1): F0:FA:A9:1E:60:E6:81:43:37:45:0C:37:DD:8A:62:E2:41:71:CC:75
+
+Warning:
+JKS 密钥库使用专用格式。建议使用 "keytool -importkeystore -srckeystore keycookie
+s -destkeystore keycookies -deststoretype pkcs12" 迁移到行业标准格式 PKCS12。
+
+F:\program\web\tomcat-10.0.21\webapps\jnlp>jarsigner -keystore keycookies butter
+_cookies-1.5-6.jar kcookies
+输入密钥库的密码短语:
+jar 已签名。
+
+警告:
+签名者证书将在六个月内过期。
+未提供 -tsa 或 -tsacert, 此 jar 没有时间戳。如果没有时间戳, 则在签名者证书的到期
+日期 (2022-10-11) 或以后的任何撤销日期之后, 用户可能无法验证此 jar。
+
+F:\program\web\tomcat-10.0.21\webapps\jnlp>jarsigner -keystore keycookies butter
+_ribbon-1.2-6.jar kcookies
+输入密钥库的密码短语:
+jar 已签名。
+
+警告:
+签名者证书将在六个月内过期。
+未提供 -tsa 或 -tsacert, 此 jar 没有时间戳。如果没有时间戳, 则在签名者证书的到期
+日期 (2022-10-11) 或以后的任何撤销日期之后, 用户可能无法验证此 jar。
+
+F:\program\web\tomcat-10.0.21\webapps\jnlp>jarsigner -keystore keycookies butter
+_base-1.0.1-6.jar kcookiess
+输入密钥库的密码短语:
+jarsigner: 找不到kcookiess的证书链。kcookiess必须引用包含私有密钥和相应的公共密
+钥证书链的有效密钥库密钥条目。
+
+F:\program\web\tomcat-10.0.21\webapps\jnlp>jarsigner -keystore keycookies butter
+_jni-1.5-6.jar kcookies
+输入密钥库的密码短语:
+jar 已签名。
+
+F:\program\web\tomcat-10.0.21\webapps\jnlp>
+
+```
+
+
+# 53. publish java web to tomcat server
+
+1. prepare tomcat server
+    * visit the official website: https://tomcat.apache.org/ ;
+	* download the tomcat install package corresponding with your OS;
+	* unzip the package into folder such as '../tomcat-10.0.21',
+	  in the folder \tomcat-10.0.21\bin ,find the bat file 'startup.bat'
+	* click the bat file , then in chrome explore ,visit url 'http://localhost:8080/'
+      if find some information about tomcat ,that show tomcat is prepared OK;
+
+2. create java web project
+   * open IntelliJ IDEA,create 'new Module' with 'Maven'
+   * 'Create form archetype' select 'maven-archetype-webapp',press 'NEXT'
+   * input 'GroupId' 'ArctifactId' 'Version' ,press 'NEXT'
+   * select Maven Directory,press 'NEXT'
+   * then configure the Module above
+   * in 'Project Structure',' Project Settings' --> 'Facets',add web facet will be added to the selected Module above;
+
+3. package web project into '*.war'
+   * in Maven tree,select the target module,compile and package
+   * we can get the target war file 'moudle-name.war' in folder '/moudle-name/target/';
+
+
+4. publish and check
+   * copy the target war file 'moudle-name.war' into tomcat folder 'tomcat-10.0.21\webapps '
+
+5. check and visit web service
+   * start tomcat, then visit url 'http://localhost:8080/module-name/'
+   * we get some information such as 'Hello world!'
+
+
+```
+```
+
+
 
 
 
