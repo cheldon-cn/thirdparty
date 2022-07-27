@@ -3822,8 +3822,94 @@ public:
 
 ```
 
+# 56. ostringstream
+
+```
+#include <string>
+#include <list>
+#include <vector>
+#include <memory>
+#include <sstream>
+#include <algorithm>
+#include <iomanip>
+#include <utility>
+#include <set>
+#include <cstring>
+#include <cstdio>
+
+class IExportable {
+public:
+	virtual std::string ToJson() = 0;
+	virtual std::string ToXml() = 0;
+	virtual std::string ToCsv() = 0;
+	virtual std::string ToText() = 0;
+};
+
+class OleSummary : public IExportable {
+public:
+	std::string FullName;
+	unsigned long long Size;
+
+	virtual std::string ToJson() {
+		std::ostringstream str;
+		str << "{ \"path\" : \"" << helper::JsonEscape(this->FullName) << "\", \"size\" : \"" << this->Size << "\"}";
+		return str.str();
+	}
+	virtual std::string ToXml() {
+		std::ostringstream str;
+		str << "<item>";
+		str << "<path>" << this->FullName << "</path>";
+		str << "<size>" << this->Size << "</size>";
+		str << "</item>";
+		return str.str();
+	}
+	virtual std::string ToText() {
+		std::ostringstream str;
+		str << this->FullName << "\t" << this->Size;
+		return str.str();
+	}
+	virtual std::string ToCsv() {
+		std::ostringstream str;
+		str << this->FullName << "," << this->Size;
+		return str.str();
+	}
+};
+
+class ExtensionInfo : public IExportable {
+public:
+	std::string Extension;
+	unsigned short Version;
+	std::string VersionName;
+public:
+	virtual std::string ToJson() {
+		std::ostringstream str;
+		str << "{ \"extension\" : \"" << this->Extension << "\", \"version\" : \"" << this->Version << "\", \"name\" : \"" << this->VersionName << "\"}";
+		return str.str();
+	}
+	virtual std::string ToXml() {
+		std::ostringstream str;
+		str << "<item>";
+		str << "<extension>" << this->Extension << "</extension>";
+		str << "<version>" << this->Version << "</version>";
+		str << "<name>" << this->VersionName << "</name>";
+		str << "</item>";
+		return str.str();
+	}
+	virtual std::string ToText() {
+		std::ostringstream str;
+		str << this->Extension << "\t" << this->Version << "\t" << this->VersionName;
+		return str.str();
+	}
+	virtual std::string ToCsv() {
+		std::ostringstream str;
+		str << this->Extension << "," << this->Version << "," << this->VersionName;
+		return str.str();
+	}
+};
 
 
+
+```
 
 
 -----
