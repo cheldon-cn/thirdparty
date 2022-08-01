@@ -3912,5 +3912,114 @@ public:
 ```
 
 
+# 57 . declare DLL IMPORT or Export
+
+## FBXSDK
+
+```
+#if defined(FBXSDK_SHARED)
+	#if defined(FBXSDK_COMPILER_MSC) || defined(FBXSDK_COMPILER_INTEL)
+		#define FBXSDK_DLLIMPORT __declspec(dllimport)
+		#define FBXSDK_DLLEXPORT __declspec(dllexport)
+	#elif defined(FBXSDK_COMPILER_GNU) && (__GNUC__ >= 4)
+		#define FBXSDK_DLLIMPORT __attribute__((visibility("default")))
+		#define FBXSDK_DLLEXPORT __attribute__((visibility("default")))
+	#else
+		#define FBXSDK_DLLIMPORT
+		#define FBXSDK_DLLEXPORT
+	#endif
+#else
+	#define FBXSDK_DLLIMPORT
+	#define FBXSDK_DLLEXPORT
+#endif
+```
+
+## FILEGDB
+```
+#ifndef EXPORT_FILEGDB_API
+# if defined __linux__ || defined __APPLE__
+#  define EXT_FILEGDB_API
+# else
+#  define EXT_FILEGDB_API _declspec(dllimport)
+# endif
+#else
+# if defined __linux__ || defined __APPLE__
+#  define EXT_FILEGDB_API __attribute__((visibility("default")))
+# else
+#  define EXT_FILEGDB_API _declspec(dllexport)
+# endif
+#endif
+```
+
+
+## PODOFO
+
+```
+#if defined(_WIN32)
+    #if defined(COMPILING_SHARED_PODOFO)
+        #define PODOFO_API __declspec(dllexport)
+        #define PODOFO_DOC_API __declspec(dllexport)
+	#elif defined(USING_SHARED_PODOFO)
+		#define PODOFO_API __declspec(dllimport)
+        #define PODOFO_DOC_API __declspec(dllimport)
+    #else
+        #define PODOFO_API
+        #define PODOFO_DOC_API
+    #endif
+    /* PODOFO_LOCAL doesn't mean anything on win32, it's to exclude
+     * symbols from the export table with gcc4. */
+    #define PODOFO_LOCAL
+#else
+    #if defined(PODOFO_HAVE_GCC_SYMBOL_VISIBILITY)
+        /* Forces inclusion of a symbol in the symbol table, so
+           software outside the current library can use it. */
+        #define PODOFO_API __attribute__ ((visibility("default")))
+        #define PODOFO_DOC_API __attribute__ ((visibility("default")))
+        /* Within a section exported with PODOFO_API, forces a symbol to be
+           private to the library / app. Good for private members. */
+        #define PODOFO_LOCAL __attribute__ ((visibility("hidden")))
+        /* Forces even stricter hiding of methods/functions. The function must
+         * absolutely never be called from outside the module even via a function
+         * pointer.*/
+        #define PODOFO_INTERNAL __attribute__ ((visibility("internal")))
+    #else
+        #define PODOFO_API
+        #define PODOFO_DOC_API
+        #define PODOFO_LOCAL
+        #define PODOFO_INTERNAL
+    #endif
+#endif
+```
+
+## QT
+
+```
+#elif defined(__ARMCC__) || defined(__CC_ARM)
+#  define Q_CC_RVCT
+/* work-around for missing compiler intrinsics */
+#  define __is_empty(X) false
+#  define __is_pod(X) false
+#  define Q_DECL_DEPRECATED __attribute__ ((__deprecated__))
+#  ifdef Q_OS_LINUX
+#    define Q_DECL_EXPORT     __attribute__((visibility("default")))
+#    define Q_DECL_IMPORT     __attribute__((visibility("default")))
+#    define Q_DECL_HIDDEN     __attribute__((visibility("hidden")))
+#  else
+#    define Q_DECL_EXPORT     __declspec(dllexport)
+#    define Q_DECL_IMPORT     __declspec(dllimport)
+#  endif
+```
+
+
+
+
+
+
+
+
+
+
+
+
 -----
 Copyright 2020 - 2022 @ [cheldon](https://github.com/cheldon-cn/).
