@@ -4011,9 +4011,153 @@ public:
 ```
 
 
+# 58. character string Converter
+
+```
+//// charsConverter.h //////
+class CharsConverter
+{
+public:
+	wchar_t *a2w(const char *pszSrc);
+	char *   w2a(const wchar_t *wcharStr);
+public:
+	CharsConverter();
+	~CharsConverter();
+private:
+	long     m_hchar;
+	long	 m_hwchar;
+};
+
+#define USE_CHAR_CONVERTER	CharsConverter  g_char_string_converter;
+#define A2W(a)	    g_char_string_converter.a2w(a)
+#define W2A(w)    	g_char_string_converter.w2a(w)
 
 
+//// charsConverter.cpp //////
 
+#include <sys/types.h>
+#include <unistd.h>
+
+#include <stdlib.h>
+#include <stdio.h>
+
+#include <time.h>
+#include <unistd.h>
+#include <dlfcn.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <sys/ipc.h>
+#include <sys/sem.h>
+#include <pthread.h>
+
+#include <wchar.h>
+#include <locale.h>
+
+#include <string>
+#include <list>
+
+typedef list<char *> charList;
+typedef list<wchar_t *> wcharList;
+
+CharsConverter::CharsConverter()
+{
+	m_hchar = 0;
+	m_hwchar = 0;
+
+	charList *pcharList = new charList();
+	if (pcharList != NULL)
+	{
+		m_hchar = (long)pcharList;
+	}
+	wcharList *pwcharList = new wcharList();
+	if (pwcharList != NULL)
+	{
+		m_hwchar = (long)pwcharList;
+	}
+}
+CharsConverter::~CharsConverter()
+{
+	charList::iterator strchar;
+	wcharList::iterator strwchar;
+
+	charList *pcharList = (charList *)m_hchar;
+	if(pcharList!=NULL)
+	{
+		for ( strchar = pcharList->begin( ); strchar != pcharList->end( ); strchar++ )
+		{
+			if (*strchar != NULL) delete[](char *)(*strchar);
+			*strchar = NULL;
+		}
+
+		delete pcharList;
+		pcharList=NULL;
+		m_hchar = 0;
+	}
+	wcharList *pwcharList = (wcharList *)m_hwchar;
+	if(pwcharList!=NULL)
+	{
+		for ( strwchar = pwcharList->begin( ); strwchar != pwcharList->end( ); strwchar++ )
+		{
+			if (*strwchar != NULL) delete[](char *)(*strwchar);
+			*strwchar = NULL;
+		}
+
+		delete pwcharList;
+		pwcharList=NULL;
+		m_hwchar = 0;
+	}
+}
+wchar_t *CharsConverter::a2w(const char *pszSrc)
+{
+	if(pszSrc==NULL)
+		return NULL;
+
+	wchar_t* pwcs = NULL; 
+	int size = 0; 
+	setlocale(LC_ALL, "zh_CN.GB2312"); 
+	size = mbstowcs(NULL,pszSrc,0); 
+	if (size <= 0) return NULL;
+
+	pwcs = new wchar_t[size+1]; 
+	if (pwcs == NULL) return NULL;
+	size = mbstowcs(pwcs, pszSrc, size+1); 
+	pwcs[size] = 0; 
+
+	wcharList *pwcharList = (wcharList *)m_hwchar;
+	if (pwcharList)
+	{
+		pwcharList->push_back( pwcs );
+	}
+
+	return pwcs; 
+}
+char *CharsConverter::w2a(const wchar_t *wcharStr)
+{
+	if(wcharStr==NULL)
+		return NULL;
+
+	char* str = NULL; 
+	int   size = 0; 
+	setlocale(LC_ALL, "zh_CN.UTF8"); 
+	size = wcstombs( NULL, wcharStr, 0); 
+	str = new char[size + 1]; 
+	if (str == NULL) return NULL;
+
+	wcstombs( str, wcharStr, size); 
+	str[size] = '\0';
+
+	charList *pcharList = (charList *)m_hchar;
+	if (pcharList)
+	{
+		pcharList->push_back( str );
+	}
+
+	return  str; 
+}
+
+```
 
 
 
