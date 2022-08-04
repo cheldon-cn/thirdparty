@@ -4313,6 +4313,140 @@ int testGUID()
 
 ```
 
+# 60. loadlibrary and GetSystemInfo
+
+```
+
+#include <sys/types.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <time.h>
+#include <unistd.h>
+#include <dlfcn.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <sys/ipc.h>
+#include <sys/sem.h>
+#include <pthread.h>
+#include <wchar.h>
+#include <locale.h>
+#include <string>
+#include <list>
+#include <err.h>
+#include <pwd.h>
+
+#if defined(_IOS_)
+#include <sys/sysctl.h>
+#else
+#include <sys/sysinfo.h>
+#include <malloc.h>
+#endif
+#include <unistd.h>
+#include <iphlpapi.h>
+#include <sys/statvfs.h>
+
+#ifndef STDAPI
+#define STDAPI __stdcall
+#endif
+
+typedef INT_PTR (FAR STDAPI *FARPROC)();
+typedef PVOID HLIBMODULE
+BOOL STDAPI FreeLibrary (  HLIBMODULE hLibModule )
+{
+	return(FALSE);
+}
+
+char * str2lower(char *dst)
+{
+	if(dst==NULL)
+		return (NULL);		
+
+	int i=0;
+	while(dst[i]!='\0')		
+	{
+		if(dst[i]>='A' && dst[i]<='Z')
+			dst[i] +=32;
+		i++;
+	}
+
+	return (dst);
+}
+
+HLIBMODULE STDAPI LoadLibraryA(LPCSTR pszFullFileName)
+{
+ 	char szPath[MAX_PATH]		= {0};
+	std::string strFileName			= pszFullFileName;
+	std::string strDllName;
+	long	nPos				= strFileName.find_last_of("/");
+	strDllName = strFileName.substr(nPos+1,strFileName.length()-nPos);
+ 	strcpy(szPath,strDllName.c_str());
+ 	std::string path = str2lower(szPath);
+	std::string name;
+	if (strcasecmp(path.substr(path.length()-4,4).c_str(),".dll")==0)
+	{
+		long pos=path.rfind('/');
+		if(pos>=0)
+		{
+			name=path.substr(0,pos+1);
+			name+="lib";
+			name+=path.substr(pos+1,path.length()-3-(pos+1));
+			name+="so";
+		}
+		else
+		{
+			name="lib";
+			name+=path.substr(0,path.length()-3);
+			name+="so";
+		}
+	}
+	else
+		name=path;
+
+	return((HLIBMODULE)dlopen(name.c_str(),RTLD_LAZY));
+}
+FARPROC STDAPI GetProcAddress (  HLIBMODULE hModule,  LPCSTR lpProcName )
+{
+	return((FARPROC)dlsym(hModule,lpProcName));
+}
+
+#if defined(_IOS_)
+VOID STDAPI GetSystemInfo(  LPSYSTEM_INFO pSysInfo )
+{
+	if(!pSysInfo) return;
+    size_t length = 0;
+    static const int names[] ={CTL_KERN, KERN_PROC, KERN_PROC_ALL, 0};
+    sysctl((int *)names, (sizeof(names)/sizeof(names[0]))-1, NULL, &length, NULL, 0);
+    pSysInfo->dwPageSize = sysconf(_SC_PAGESIZE);
+    pSysInfo->dwAllocationGranularity = 64000; 
+    pSysInfo->dwNumberOfProcessors = (length/sizeof(kinfo_proc));
+}
+#else
+VOID STDAPI GetSystemInfo(  LPSYSTEM_INFO pSysInfo )
+{
+	if(!pSysInfo) return;
+    struct sysinfo   sys1;
+    sysinfo(&sys1);
+    pSysInfo->dwPageSize = sysconf(_SC_PAGESIZE);
+    pSysInfo->dwAllocationGranularity = 64000; 
+    pSysInfo->dwNumberOfProcessors = sys1.procs;
+}
+#endif
+
+
+```
+
+
+
+
+
+
+
+
+
+
 
 
 
