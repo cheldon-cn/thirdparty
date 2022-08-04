@@ -4159,8 +4159,159 @@ char *CharsConverter::w2a(const wchar_t *wcharStr)
 
 ```
 
+# 59.   __uuid(T)  
 
+```
+#include <iostream>
+#include <memory.h>
+#include <assert.h>
 
+using namespace std;
+
+#define nybble_from_hex(c)      ((c>='0'&&c<='9')?(c-'0'):((c>='a'&&c<='f')?(c-'a' + 10):((c>='A'&&c<='F')?(c-'A' + 10):0)))
+#define byte_from_hex(c1, c2)   ((nybble_from_hex(c1)<<4)|nybble_from_hex(c2))
+
+typedef struct _GUID {
+	unsigned long  Data1;
+	unsigned short Data2;
+	unsigned short Data3;
+	unsigned char  Data4[8];
+} GUID;
+
+static GUID GUID_NULL = { 0, 0, 0,{ 0, 0, 0, 0, 0, 0, 0 ,0 } };
+
+#ifndef _REFGUID_DEFINED
+#define _REFGUID_DEFINED
+#ifdef __cplusplus
+#define REFGUID const GUID &
+#else
+#define REFGUID const GUID * __MIDL_CONST
+#endif
+#endif
+
+__inline int IsEqualGUID(REFGUID rguid1, REFGUID rguid2)
+{
+	return !memcmp(&rguid1, &rguid2, sizeof(GUID));
+}
+
+#ifdef __cplusplus
+__inline bool operator==(REFGUID guidOne, REFGUID guidOther)
+{
+	return !!IsEqualGUID(guidOne, guidOther);
+}
+
+__inline bool operator!=(REFGUID guidOne, REFGUID guidOther)
+{
+	return !(guidOne == guidOther);
+}
+#endif
+
+struct Initializable : public GUID
+{
+	explicit
+		Initializable(char const (&spec)[37])
+		: GUID()
+	{
+		for (int i = 0; i < 8; ++i)
+		{
+			Data1 = (Data1 << 4) | nybble_from_hex(spec[i]);
+		}
+		assert(spec[8] == '-');
+		for (int i = 9; i < 13; ++i)
+		{
+			Data2 = (Data2 << 4) | nybble_from_hex(spec[i]);
+		}
+		assert(spec[13] == '-');
+		for (int i = 14; i < 18; ++i)
+		{
+			Data3 = (Data3 << 4) | nybble_from_hex(spec[i]);
+		}
+		assert(spec[18] == '-');
+		for (int i = 19; i < 23; i += 2)
+		{
+			Data4[(i - 19) / 2] = (nybble_from_hex(spec[i]) << 4) | nybble_from_hex(spec[i + 1]);
+		}
+		assert(spec[23] == '-');
+		for (int i = 24; i < 36; i += 2)
+		{
+			Data4[2 + (i - 24) / 2] = (nybble_from_hex(spec[i]) << 4) | nybble_from_hex(spec[i + 1]);
+		}
+	}
+};
+
+template<class T>
+inline
+auto __my_uuidof()
+-> GUID const &
+{
+	return GUID_NULL;
+}
+
+#define CPPX_GNUC_UUID_FOR( name, spec )            \
+template<>                                          \
+inline                                              \
+auto __my_uuidof<name>()                            \
+    -> GUID const&                                  \
+{                                                   \
+    using ::operator"" _uuid;                       \
+    static GUID the_uuid = spec ## _uuid;           \
+                                                    \
+    return the_uuid;                                \
+}                                                   \
+                                                    \
+template<>                                          \
+inline                                              \
+auto __my_uuidof<name*>()                           \
+    -> GUID const&                                  \
+{ return __my_uuidof<name>(); }                     \
+                                                    \
+static_assert( true, "" )
+
+auto operator"" _uuid(char const* const s, size_t const size)
+-> GUID
+{
+	return Initializable(reinterpret_cast<char const (&)[37]>(*s));
+}
+
+#define CPPX_UUID_FOR    CPPX_GNUC_UUID_FOR
+
+#define __uuid(T)       __my_uuidof<T>()
+
+struct Foo {};
+CPPX_UUID_FOR(Foo, "dbe41a75-d5da-402a-aff7-cd347877ec00");
+
+Foo foo;
+
+template <class T>
+void QueryInterface(T** p)
+{
+	if (p == NULL)
+		return;
+
+	GUID guid = "dbe41a75-d5da-402a-aff7-cd347877ec00"_uuid;
+	if (__uuid(T) == guid)
+	{
+		*p = &foo;
+	}
+	else
+	{
+		*p = NULL;
+	}
+
+	return;
+}
+
+int testGUID()
+{
+	Foo* p = NULL;
+	QueryInterface(&p);
+
+	cout << "p: " << p << ", &foo: " << &foo << endl;
+
+	return 0;
+}
+
+```
 
 
 
