@@ -4444,9 +4444,8 @@ VOID STDAPI GetSystemInfo(  LPSYSTEM_INFO pSysInfo )
 
 ```
 
-#ifndef __REFER_HEADER_DEFINED
-#define __REFER_HEADER_DEFINED
-
+#ifndef __REFERENCE_HEADER_DEFINED
+#define __REFERENCE_HEADER_DEFINED
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -4558,7 +4557,7 @@ typedef union _LARGE_INTEGER {
 
 
 
-#endif ///__REFER_HEADER_DEFINED
+#endif ///__REFERENCE_HEADER_DEFINED
 
 ```
 
