@@ -4440,6 +4440,139 @@ VOID STDAPI GetSystemInfo(  LPSYSTEM_INFO pSysInfo )
 
 
 
+# 61. reference.h
+
+```
+
+#ifndef __REFER_HEADER_DEFINED
+#define __REFER_HEADER_DEFINED
+
+
+#include <stdio.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <inttypes.h>
+#include <stddef.h>
+
+
+typedef struct IStream IStream;
+typedef struct IStorage IStorage;
+
+typedef struct _XGUID
+{
+	uint32_t	Data1;
+	uint16_t	Data2;
+	uint16_t	Data3;
+	uint8_t	    Data4[8];
+} XGUID, GUID, CLSID, IID;
+
+#if !defined(WCHAR) && !defined(__BORLANDC__)
+typedef uint16_t	WCHAR;
+typedef WCHAR	*   LPWSTR;
+#endif
+typedef uint16_t	WORD;
+typedef uint32_t	DWORD;
+
+
+#ifndef FARSTRUCT
+#define FARSTRUCT
+#endif
+
+#if !defined(WIN32)
+typedef struct FARSTRUCT tagFILETIME
+{
+	DWORD dwLowDateTime;
+	DWORD dwHighDateTime;
+} FILETIME;
+#endif
+
+#ifndef TRUE
+#define TRUE 1
+#endif
+
+#ifndef FALSE
+#define FALSE 0
+#endif
+
+#define FARSTRUCT
+#define interface struct
+#define DECLARE_INTERFACE(iface) interface iface
+#define DECLARE_INTERFACE_(iface, baseiface) interface iface: public baseiface
+
+typedef int32_t SCODE;
+typedef int32_t HRESULT;
+
+#define NOERROR 0
+
+#ifdef __cplusplus
+    #define EXTERN_C    extern "C"
+#else
+    #define EXTERN_C    extern
+#endif
+
+
+typedef int           BOOL, *LPBOOL;
+typedef BOOL          BOOLEAN;
+typedef unsigned char BYTE;
+typedef char          CHAR, *PCHAR;
+typedef unsigned char UCHAR;
+typedef uint32_t	  UINT;
+typedef int32_t	      INT;
+typedef int32_t	      LONG;
+typedef int16_t	      SHORT;
+typedef uint16_t	  USHORT;
+typedef DWORD         ULONG;
+typedef void          VOID;
+typedef LONG          NTSTATUS, *PNTSTATUS;
+
+typedef void *        LPVOID;
+typedef char *        LPSTR;
+typedef const char *  LPCSTR;
+
+// NOTE: 
+// for other compilers some form of 64 bit integer support 
+// has to be provided
+#ifdef _MSC_VER
+typedef __int64                LONGLONG;
+typedef unsigned __int64       ULONGLONG;
+#else
+// should work with most Unix compilers
+// FIXME: portability
+typedef long long int          LONGLONG;
+typedef unsigned long long int ULONGLONG;
+#endif
+
+typedef union _LARGE_INTEGER {
+	struct {
+		DWORD LowPart;
+		LONG HighPart;
+	} u;
+	LONGLONG QuadPart;
+} LARGE_INTEGER, *PLARGE_INTEGER;
+
+#define LISet32(li, v)     ((li).u.HighPart = ((LONG)(v)) < 0 ? -1 : 0, (li).u.LowPart = (v))
+#define LISetLow(li, v)    ((li).u.LowPart = (v))
+#define LISetHigh(li, v)   ((li).u.HighPart = (v))
+#define LIGetLow(li)       ((li).u.LowPart)
+#define LIGetHigh(li)      ((li).u.HighPart)
+
+
+
+#endif ///__REFER_HEADER_DEFINED
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
