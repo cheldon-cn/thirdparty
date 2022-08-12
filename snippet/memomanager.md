@@ -4769,7 +4769,7 @@ inline void  _itoa(int v, char* string, int radix)
 
 ```
 
-# 62. time.hxx
+# 63. time.hxx
 
 ```
 
@@ -4888,7 +4888,7 @@ delete pstatstg;
 
 
 
-# 63. compress and decompress
+# 64. compress and decompress
 
 ```
 #include "zlib.h"
@@ -4976,7 +4976,7 @@ std::string decode(std::string &message, bool &was_compressed) {
 ```
 
 
-# 64. ifstream and ofstream
+# 65. ifstream and ofstream
 
 ```
 
@@ -5027,7 +5027,7 @@ void Write(const char *outdir, int z, int tx, int ty, std::string const &buff) {
 
 
 
-# 65. disperse ellipse arc
+# 66. disperse ellipse arc
 
 ```
 
