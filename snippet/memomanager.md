@@ -4754,17 +4754,226 @@ inline void  _itoa(int v, char* string, int radix)
 }
 #endif /* _MSC_VER */
 
+
+#define ocslen      _tcslen
+#define ocscpy      _tcscpy
+#define ocscmp      _tcscmp
+#define ocscat      _tcscat
+#define ocschr      _tcschr
+#define soprintf    _tprintf
+#define oprintf     _tprintf
+#define ocsnicmp    _tcsnicmp
+
+
 #endif  /* #ifndef __TCHAR_DEFINED */
+
+```
+
+# 62. time.hxx
+
+```
+
+#include <time.h>
+#include <limits.h>
+#include <assert.h>
+#include "reference.hxx"
+
+
+// Time type
+typedef FILETIME TIME_T;
+#define STDAPI_(type)  type
+
+// Number of seconds difference betwen FILETIME (since 1601 00:00:00) 
+// and time_t (since 1970 00:00:00)
+//
+// This should be a constant difference between the 2 time formats
+//
+#ifdef __GNUC__ // cater to differences of compiler syntax
+const LONGLONG ci64DiffFTtoTT=11644473600LL; 
+#else          //  __GNUC__
+const LONGLONG ci64DiffFTtoTT=11644473600;
+#endif         //  __GNUC__
+
+STDAPI_(void) FileTimeToTimeT(const FILETIME *pft, time_t *ptt)
+{
+    ULONGLONG llFT = pft->dwHighDateTime;
+    llFT = (llFT << 32) | (pft->dwLowDateTime);
+    // convert to seconds 
+    // (note that all fractions of seconds will be lost)
+    llFT = llFT/10000000;       
+    llFT -= ci64DiffFTtoTT;         // convert to time_t 
+    assert(llFT <= ULONG_MAX);
+    *ptt = (time_t) llFT;
+}
+
+STDAPI_(void) TimeTToFileTime(const time_t *ptt, FILETIME *pft)
+{
+    ULONGLONG llFT = *ptt;
+    llFT += ci64DiffFTtoTT;         // convert to file time
+    // convert to nano-seconds
+    for (int i=0; i<7; i++)         // mulitply by 10 7 times
+    {        
+        llFT = llFT << 1;           // llFT = 2x
+        llFT += (llFT << 2);        // llFT = 4*2x + 2x = 10x
+    }
+    pft->dwLowDateTime  = (DWORD) (llFT & 0xffffffff);
+    pft->dwHighDateTime = (DWORD) (llFT >> 32);
+}
+
+inline SCODE CoFileTimeNow(TIME_T *pft)
+{
+    time_t tt;
+    time(&tt);
+    TimeTToFileTime(&tt, pft);
+    return S_OK;
+}
+
+
+```
+
+
+```
+#include <stdlib.h>
+
+#include <sys/stat.h>
+#include "time.hxx"
+#include "h/tchar.h"
+
+#ifdef _WIN32
+#include <io.h> // to get definition of wunlink
+#else
+#include <unistd.h>
+// get the correct stat structure
+#endif
+
+#include <stdlib.h>
+
+typedef struct FARSTRUCT tagSTATSTG
+{
+    TCHAR__ FAR* pwcsName;
+    DWORD type;
+    ULARGE_INTEGER cbSize;
+    FILETIME mtime;
+    FILETIME ctime;
+    FILETIME atime;
+    DWORD grfMode;
+    DWORD grfLocksSupported;
+    CLSID clsid;
+    DWORD grfStateBits;
+    DWORD reserved;
+} STATSTG;
+
+STATSTG*  pstatstg = new STATSTG();
+
+char *_pszName="/home/memory.io";    
+// we always use ANSI char when dealing with
+struct _stat buf;
+int result = _stat(_pszName, &buf);
+if (!result)  // fill in zeros
+{
+	pstatstg->atime.dwLowDateTime = 0;
+	pstatstg->mtime.dwLowDateTime = 0;
+	pstatstg->ctime.dwLowDateTime = 0;
+}
+else
+{
+	TimeTToFileTime(&buf.st_atime, &pstatstg->atime);
+	TimeTToFileTime(&buf.st_mtime, &pstatstg->mtime);
+	TimeTToFileTime(&buf.st_ctime, &pstatstg->ctime);
+}
+delete pstatstg;
+
 
 ```
 
 
 
+# 63. compress and decompress
+
+```
+#include "zlib.h"
+
+// https://github.com/mapbox/mapnik-vector-tile/blob/master/src/vector_tile_compression.hpp
+bool is_compressed(std::string const &data) {
+	return data.size() > 2 && (((uint8_t) data[0] == 0x78 && (uint8_t) data[1] == 0x9C) || ((uint8_t) data[0] == 0x1F && (uint8_t) data[1] == 0x8B));
+}
+
+// https://github.com/mapbox/mapnik-vector-tile/blob/master/src/vector_tile_compression.hpp
+int decompress(std::string const &input, std::string &output) {
+	z_stream inflate_s;
+	inflate_s.zalloc = Z_NULL;
+	inflate_s.zfree = Z_NULL;
+	inflate_s.opaque = Z_NULL;
+	inflate_s.avail_in = 0;
+	inflate_s.next_in = Z_NULL;
+	if (inflateInit2(&inflate_s, 32 + 15) != Z_OK) {
+		fprintf(stderr, "error: %s\n", inflate_s.msg);
+	}
+	inflate_s.next_in = (Bytef *) input.data();
+	inflate_s.avail_in = input.size();
+	size_t length = 0;
+	do {
+		output.resize(length + 2 * input.size());
+		inflate_s.avail_out = 2 * input.size();
+		inflate_s.next_out = (Bytef *) (output.data() + length);
+		int ret = inflate(&inflate_s, Z_FINISH);
+		if (ret != Z_STREAM_END && ret != Z_OK && ret != Z_BUF_ERROR) {
+			fprintf(stderr, "error: %s\n", inflate_s.msg);
+			return 0;
+		}
+
+		length += (2 * input.size() - inflate_s.avail_out);
+	} while (inflate_s.avail_out == 0);
+	inflateEnd(&inflate_s);
+	output.resize(length);
+	return 1;
+}
+
+// https://github.com/mapbox/mapnik-vector-tile/blob/master/src/vector_tile_compression.hpp
+int compress(std::string const &input, std::string &output) {
+	z_stream deflate_s;
+	deflate_s.zalloc = Z_NULL;
+	deflate_s.zfree = Z_NULL;
+	deflate_s.opaque = Z_NULL;
+	deflate_s.avail_in = 0;
+	deflate_s.next_in = Z_NULL;
+	deflateInit2(&deflate_s, Z_BEST_COMPRESSION, Z_DEFLATED, 31, 8, Z_DEFAULT_STRATEGY);
+	deflate_s.next_in = (Bytef *) input.data();
+	deflate_s.avail_in = input.size();
+	size_t length = 0;
+	do {
+		size_t increase = input.size() / 2 + 1024;
+		output.resize(length + increase);
+		deflate_s.avail_out = increase;
+		deflate_s.next_out = (Bytef *) (output.data() + length);
+		int ret = deflate(&deflate_s, Z_FINISH);
+		if (ret != Z_STREAM_END && ret != Z_OK && ret != Z_BUF_ERROR) {
+			return -1;
+		}
+		length += (increase - deflate_s.avail_out);
+	} while (deflate_s.avail_out == 0);
+	deflateEnd(&deflate_s);
+	output.resize(length);
+	return 0;
+}
 
 
+std::string decode(std::string &message, bool &was_compressed) {
+	std::string src;
 
+	if (is_compressed(message)) {
+		std::string uncompressed;
+		decompress(message, uncompressed);
+		src = uncompressed;
+		was_compressed = true;
+	} else {
+		src = message;
+		was_compressed = false;
+	}
+	return src;
+}
 
-
+```
 
 
 
