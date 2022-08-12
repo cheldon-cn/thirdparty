@@ -3263,7 +3263,7 @@ void  Fill(bool useEvenOddRule)
 			{
 				for (int j = nYmin; j <= nYmax; ++j)
 				{
-					D_DOT tmpDot = {};
+					DOT tmpDot = {};
 					tmpDot.x = dOrigin + i * xStep;
 					tmpDot.y = dOrigin + j * yStep;
 					m_painter.DrawXObject(tmpDot.x, tmpDot.y, m_pXPattern, xScale, yScale);
@@ -5027,6 +5027,106 @@ void Write(const char *outdir, int z, int tx, int ty, std::string const &buff) {
 
 
 
+# 65. disperse ellipse arc
+
+```
+
+//==============================DisperseEllipseArc()==============================
+/// @brief 椭圆弧段离散化。
+///
+/// 椭圆弧段离散化。
+///
+/// @param [out] ddArcBuff  离散化后的点序列。
+/// @param [out] lBuflen    离散化后点的个数。
+/// @param [in]  dStep      离散化的步长(弧度单位)。
+/// @param [in]  center     椭圆中心点。
+/// @param [in]  dAxis_a    椭圆a半径。
+/// @param [in]  dAxis_b    椭圆b半径。
+/// @param [in]  dAngle     椭圆倾斜角度（弧度，以椭圆中心点为中心，逆时针转）
+/// @param [in]  beginAngle 起始弧度。
+/// @param [in]  endAngle   终止弧度。
+///
+/// @return <=0 失败，>0成功。
+//================================================================================
+// Revision history : 1
+// pay attention to the special case: the end angle is less than the begin angle;
+// fix the case by dividing into 2 blocks,modified by cheldon ,2018.10.11
+// Revision history : 2
+// make sure the beginAngle and EndAngle is In rad unit, not in degree unit,
+// maybe need some flag to make difference between rad and degree,by cheldon,2018.11.1
+
+long DisperseEllipseArc(DOT **ddArcBuff, long& lBuflen, double dStep, DOT &center, double dAxis_a, double dAxis_b, double dAngle, double beginAngle, double endAngle)
+{
+	long rtn = 0;
+	if (dStep <= ZERO_FLOAT)	return 0;
+
+	double a0 = fabs(dAxis_a);
+	double b0 = fabs(dAxis_b);
+	if (a0 < 1 && b0 < 1) return rtn;
+	
+	const double dloop = 2 * PI;
+	while (beginAngle - dloop > ZERO_FLOAT) {
+		beginAngle -= dloop;
+	}
+	while (endAngle - dloop > ZERO_FLOAT) {
+		endAngle -= dloop;
+	}
+
+	double	dAngBegin = beginAngle, dAngEnd = endAngle;
+	int nNum = static_cast<int>((2 * PI) / dStep);
+	int nBegin = static_cast<int>(dAngBegin / dStep);
+	int nEnd = static_cast<int>(dAngEnd / dStep);
+
+	if (nBegin < nEnd)
+	{
+		lBuflen = nEnd - nBegin + 1;
+	}
+	else
+	{
+		lBuflen = nNum - (nBegin - nEnd) + 1;
+	}
+
+	*ddArcBuff = new DOT[lBuflen + 1];//
+
+	double	cosa = cos(dAngle), sina = sin(dAngle);
+	double	ang = 0; double x1 = 0, y1 = 0;
+	double   x = a0*cos(ang);
+	double   y = b0*sin(ang);
+	int   nCount = 0;
+	for (int nIndex = 0; nIndex <= nNum; nIndex++)
+	{
+		x = a0*cos(ang);
+		y = b0*sin(ang);
+		x1 = cosa*x - sina*y + center.x;
+		y1 = sina*x + cosa*y + center.y;
+
+		//if begin < end , num = end -begin; else divide into 2 blocks:[begin,2*PI] [0,end];
+		if (nBegin <= nEnd && (nIndex >= nBegin && nIndex <= nEnd))
+		{
+			(*ddArcBuff)[nCount].x = x1;
+			(*ddArcBuff)[nCount].y = y1;
+			nCount++;
+		}
+		else if (nBegin > nEnd && (nIndex >= 0 && nIndex <= nEnd))
+		{
+			int  nOffset = nIndex + nNum - nBegin;
+			(*ddArcBuff)[nOffset].x = x1;
+			(*ddArcBuff)[nOffset].y = y1;
+		}
+		else if (nBegin > nEnd && (nIndex >= nBegin && nIndex <= nNum))
+		{
+			(*ddArcBuff)[nCount].x = x1;
+			(*ddArcBuff)[nCount].y = y1;
+			nCount++;
+		}
+
+		ang += dStep;
+	}
+
+	rtn = lBuflen;
+	return rtn;
+}
+```
 
 
 
