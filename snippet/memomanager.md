@@ -4976,8 +4976,54 @@ std::string decode(std::string &message, bool &was_compressed) {
 ```
 
 
+# 64. ifstream and ofstream
+
+```
+
+include  <stdio.h>
+#include <sys/types.h>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <sys/stat.h>
+
+#if defined(_WIN32)
+#include <afx.h>
+#include <atlconv.h>
+#define mkdirectory(path) CreateDirectory(path, NULL)
+#define SLASH "\\"
+#else
+#define mkdirectory(path) mkdir(path, S_IRWXU | S_IRWXG | S_IRWXO)
+#define SLASH "/"
+#endif
+
+std::string Read(std::string strPath) {
+	std::ifstream strFile(strPath, std::ios::in | std::ios::binary);
+	std::ostringstream contents;
+	contents << strFile.rdbuf();
+	strFile.close();
+
+	return (contents.str());
+}
+
+void Write(const char *outdir, int z, int tx, int ty, std::string const &buff) {
+	mkdirectory(outdir);
+	std::string curdir(outdir);
+	std::string slash(SLASH);
+	std::string newdir = curdir + slash + std::to_string(z);
+	mkdirectory(newdir.c_str());
+	newdir = newdir + SLASH + std::to_string(tx);
+	mkdirectory(newdir.c_str());
+	newdir = newdir + SLASH + std::to_string(ty) + ".buf";
+
+	std::ofstream strFile(newdir, std::ios::out | std::ios::binary);
+	strFile.write(buff.data(), buff.size());
+	strFile.close();
+}
 
 
+```
 
 
 
