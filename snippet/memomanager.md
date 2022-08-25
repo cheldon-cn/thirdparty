@@ -5132,27 +5132,27 @@ long DisperseEllipseArc(DOT **ddArcBuff, long& lBuflen, double dStep, DOT &cente
 # 67. MoveFirst and MoveNext for set
 
 ```
-
-
 #define  BEFORE_OF_SET  -1
 #define  END_OF_SET     -10000
 
+class Model;
+
 struct tagModelSet
 {
-	std::vector<CModel*> set;
+	std::vector<Model*> set;
 	long        		 cursor;
 };
 
-class  CModelSet
+class  ModelSet
 {
 public:
-	CModelSet();
-	virtual ~CModelSet();
+	ModelSet();
+	virtual ~ModelSet();
 
-	CModel*	New();
+	Model*	New();
 	long    MoveFirst();
 	long	MoveNext();
-	CModel*	Get();
+	Model*	Get();
 	long	RemoveAll();
 	long    GetSize();
 private:
@@ -5161,45 +5161,45 @@ private:
 
 
 
-CModelSet::CModelSet()
+ModelSet::ModelSet()
 {
 	m_pObj=new tagModelSet;
 	m_pObj->cursor=-1;
 }
 
-CModelSet::~CModelSet()
+ModelSet::~ModelSet()
 {
 	RemoveAll();	
 	delete m_pObj;
 }
 
-CModel*	CModelSet::New()
+Model*	ModelSet::New()
 {
-	CModel *pt=new CModel;
+	Model *pt=new Model;
 	m_pObj->set.push_back(pt);
 	return pt;
 }
 
-long		CModelSet::MoveFirst()
+long		ModelSet::MoveFirst()
 {
 	if(m_pObj->set.size()==0) return END_OF_SET;
 	m_pObj->cursor=0;
 	return 1;
 }
 
-long		CModelSet::MoveNext()
+long		ModelSet::MoveNext()
 {
 	if(m_pObj->set.size()<=m_pObj->cursor+1) return END_OF_SET;
 	m_pObj->cursor++;
 	return 1;
 }
 
-CModel*	CModelSet::Get()
+Model*	ModelSet::Get()
 {
 	return m_pObj->set[m_pObj->cursor];
 }
 
-long		CModelSet::RemoveAll()
+long		ModelSet::RemoveAll()
 {
 	for(long i=0;i<m_pObj->set.size();i++)
 		delete m_pObj->set[i];
@@ -5208,7 +5208,7 @@ long		CModelSet::RemoveAll()
 	return 1;
 }
 
-long CModelSet::GetSize()
+long ModelSet::GetSize()
 {
 	if (m_pObj == NULL)
 		return 0;
@@ -5216,7 +5216,78 @@ long CModelSet::GetSize()
 	return m_pObj->set.size();
 }
 
+////////////////////////////////////
+/// How to use model set
+///////////////////////////////////
+void TestModelSet()
+{
+	ModelSet models;
+	Model * pNewModel = models.New();
+	////////////////////////////////////
+	//// update model
+	///////////////////////////////////
+	if (models.MoveFirst() == END_OF_SET)
+	  return;
+	do 
+	{
+		Model*	pModel = models.Get();
+		if (!pModel)
+			continue;
+	    //// do something  
 
+	} while (models.MoveNext() != END_OF_SET);
+
+}
+
+
+```
+
+
+# 68. create the new object smartly
+
+```
+typedef std::basic_stringstream<char,std::char_traits<char>,std::allocator<char> > StringStream;
+typedef std::map<std::string, Model* > ModelMap;
+
+static  long nGenNextName = 0;
+Model* CreateModel(const std::string& modelName, ModelType type)
+{
+	if (modelName.size() == 0)
+	{
+		StringStream str;
+		str << "name_" << nGenNextName++;
+		modelName = str.str();
+	}
+
+	///check whether find the target name
+	/// if find, return the target
+	/// if not, create new one and push it into cache;
+
+	ModelMap::iterator iter = mModels.find(modelName);
+	if (iter != mModels.end())
+	{
+		if (iter->second->mType == type)
+		{
+			return iter->second;
+		}
+		else
+		{
+			return NULL;
+		}
+	}
+
+	Model* pModel = new Model(modelName, type);
+
+	mModels[modelName] = pModel;
+	return pModel;
+	
+}
+
+```
+
+# 69. 
+
+```
 ```
 
 -----
