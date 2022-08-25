@@ -5129,8 +5129,95 @@ long DisperseEllipseArc(DOT **ddArcBuff, long& lBuflen, double dStep, DOT &cente
 ```
 
 
+# 67. MoveFirst and MoveNext for set
+
+```
 
 
+#define  BEFORE_OF_SET  -1
+#define  END_OF_SET     -10000
+
+struct tagModelSet
+{
+	std::vector<CModel*> set;
+	long        		 cursor;
+};
+
+class  CModelSet
+{
+public:
+	CModelSet();
+	virtual ~CModelSet();
+
+	CModel*	New();
+	long    MoveFirst();
+	long	MoveNext();
+	CModel*	Get();
+	long	RemoveAll();
+	long    GetSize();
+private:
+	tagModelSet	*m_pObj;
+};
+
+
+
+CModelSet::CModelSet()
+{
+	m_pObj=new tagModelSet;
+	m_pObj->cursor=-1;
+}
+
+CModelSet::~CModelSet()
+{
+	RemoveAll();	
+	delete m_pObj;
+}
+
+CModel*	CModelSet::New()
+{
+	CModel *pt=new CModel;
+	m_pObj->set.push_back(pt);
+	return pt;
+}
+
+long		CModelSet::MoveFirst()
+{
+	if(m_pObj->set.size()==0) return END_OF_SET;
+	m_pObj->cursor=0;
+	return 1;
+}
+
+long		CModelSet::MoveNext()
+{
+	if(m_pObj->set.size()<=m_pObj->cursor+1) return END_OF_SET;
+	m_pObj->cursor++;
+	return 1;
+}
+
+CModel*	CModelSet::Get()
+{
+	return m_pObj->set[m_pObj->cursor];
+}
+
+long		CModelSet::RemoveAll()
+{
+	for(long i=0;i<m_pObj->set.size();i++)
+		delete m_pObj->set[i];
+	m_pObj->set.clear();
+	m_pObj->cursor=-1;
+	return 1;
+}
+
+long CModelSet::GetSize()
+{
+	if (m_pObj == NULL)
+		return 0;
+
+	return m_pObj->set.size();
+}
+
+
+```
 
 -----
 Copyright 2020 - 2022 @ [cheldon](https://github.com/cheldon-cn/).
