@@ -5285,10 +5285,152 @@ Model* CreateModel(const std::string& modelName, ModelType type)
 
 ```
 
-# 69. 
+# 69. mutex 
+
+```
+///////////////////////////////////////////
+
+void *Thread_CreateMutex();
+void  Thread_DestroyMutex( void *phMutex );
+int   Thread_AcquireMutex( void *phMutex, double dfWaitInSeconds );
+void  Thread_ReleaseMutex( void *phMutex );
+
+#define Thread_MutexHolder(x)  MutexHolder mutex_holder(x,-1.0);
+
+class MutexHolder
+{
+public:
+	MutexHolder( void *phMutex, double dfWaitInSeconds = -1.0);
+	~MutexHolder();
+
+private:
+	void       *m_phMutex;  ///Thread_CreateMutex
+};
+
+
+
+#ifndef MIN
+#define MIN(a,b)            (((a) < (b)) ? (a) : (b))
+#endif
+
+///////////////////////////////////////////
+
+#ifdef __linux__
+#include <pthread.h>
+#endif
+
+void *Thread_CreateMutex()
+{
+
+#ifndef __linux__
+	CRITICAL_SECTION *pcs = NULL;
+	pcs = (CRITICAL_SECTION *)malloc(sizeof(*pcs));
+	if (pcs)
+	{
+		InitializeCriticalSectionAndSpinCount(pcs, 4000);
+		return (void*)pcs;
+	}
+	return NULL;
+
+#else
+	pthread_mutex_t mutex;
+	pthread_mutex_init(&mutex, NULL);
+	return (void*)&mutex;
+	//pthred_mutexattr_init(mutex->attr);
+	//pthred_mutexattr_settype(mutex->attr,PTHREAD_MUTEX_RECURSIVE);
+	//pthred_mutex_init(mutex->mtx, mutex->attr);
+#endif
+
+}
+
+void  Thread_DestroyMutex( void *phMutex )
+{
+#ifndef __linux__
+	CRITICAL_SECTION *pcs = (CRITICAL_SECTION *)phMutex;
+	DeleteCriticalSection(pcs);
+	free(pcs);
+#else
+	pthread_mutex_t *mutex = (pthread_mutex_t *)phMutex;
+	pthread_mutex_destroy(mutex);
+#endif	
+}
+
+int   Thread_AcquireMutex( void *phMutex, double dfWaitInSeconds )
+{
+#ifndef __linux__
+	CRITICAL_SECTION *pcs = (CRITICAL_SECTION *)phMutex;
+	BOOL ret = FALSE;
+	if (dfWaitInSeconds > 0.0) {
+		while ((ret = TryEnterCriticalSection(pcs)) == 0 && dfWaitInSeconds > 0.0)
+		{
+			Sleep((DWORD)(MIN(dfWaitInSeconds, 0.125) * 1000.0));
+			dfWaitInSeconds -= 0.125;
+		}
+
+		return ret;
+		}
+	else {
+		EnterCriticalSection(pcs);
+		return 1;
+	}
+	return 0;
+#else
+	pthread_mutex_t *mutex = (pthread_mutex_t *)phMutex;
+	BOOL ret = FALSE;
+	if (dfWaitInSeconds > 0.0) {
+		while ((ret = pthread_mutex_trylock(mutex)) == 0 && dfWaitInSeconds > 0.0)
+		{
+			Sleep((DWORD)(MIN(dfWaitInSeconds, 0.125) * 1000.0));
+			dfWaitInSeconds -= 0.125;
+		}
+
+		return ret;
+	}
+	else {
+		pthread_mutex_lock(mutex);
+		return 1;
+	}
+	return 0;
+#endif
+}
+
+void  Thread_ReleaseMutex( void *phMutex )
+{
+#ifndef __linux__
+	CRITICAL_SECTION *pcs = (CRITICAL_SECTION *)phMutex;
+	LeaveCriticalSection(pcs);
+#else
+	pthread_mutex_t *mutex = (pthread_mutex_t *)phMutex;
+	pthread_mutex_unlock(mutex);
+#endif
+}
+
+MutexHolder::MutexHolder(void *phMutex, double dfWaitInSeconds)
+{
+	Thread_AcquireMutex(phMutex,dfWaitInSeconds);
+	m_phMutex = phMutex;
+}
+
+MutexHolder::~MutexHolder()
+{
+	if (m_phMutex != NULL)
+	{
+		Thread_ReleaseMutex(m_phMutex);
+		m_phMutex = NULL;
+	}
+}
+
+
+```
+
+
+# 70.  
 
 ```
 ```
+
+
+
 
 -----
 Copyright 2020 - 2022 @ [cheldon](https://github.com/cheldon-cn/).
