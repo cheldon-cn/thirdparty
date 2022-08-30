@@ -5511,7 +5511,63 @@ unsigned int Hash(const char* data, size_t n, unsigned int seed)
 
 ```
 
+# 71.  compute the tail point base on the angle and length 
 
+
+```
+////////////////////ComputeTail//////////////////////////////////
+/// [in]    x      |  the origin point x
+/// [in]    y      |  the origin point y
+/// [in]    angle  |  orientation angle
+/// [in]    len    |  distance from the origin point
+/// [out]   xTail  |  the tail point x
+/// [out]   ytail  |  the tail point y  
+///////////////////////////////////////////////////////////////
+
+int  ComputeTail(double x, double y, double angle, double len, double& xTail, double& yTail)
+{
+
+	double dTanAng = tan(angle);
+	double div = (sqrt(1 + dTanAng*dTanAng));
+
+	if (fabs(angle - 0.5*PI) < 1E-5)
+	{
+		xTail = x;
+		yTail = y + len;
+	}
+	else if (fabs(angle - 1.5*PI) < 1E-5)
+	{
+		xTail = x;
+		yTail = y - len;
+	}
+	else
+	{
+		if ((angle > 0.0 && angle < 0.5*PI) || (angle > 1.5*PI && angle < 2.0*PI))
+		{
+			xTail = x + len / div;
+		}
+		else if ((angle > 0.5*PI && angle < PI) || (angle > PI && angle < 1.5*PI))
+		{
+			xTail = x - len / div;
+		}
+		yTail = y + dTanAng*(xTail - x);
+	}
+
+	return 1;
+}
+
+/////////////////////////////
+///// How to use/////////////
+/////////////////////////////
+double angle = 60;
+while (angle > 360)
+	angle -= 360;
+double xOri = 0, yOri = 0;
+double xTail = 0.0, yTail = 0.0;
+ComputeTail(xOri, yOri, angle * PI / 180, len, xTail, yTail);
+
+
+```
 
 
 -----
