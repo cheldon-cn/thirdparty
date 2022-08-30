@@ -1294,7 +1294,7 @@ void   ClockSpace::Rewind(DOT *tp, long n)
 
 ```
 
-# 18. Parse Segments 
+# 18. Parse Segments in string
 
 ```
 woid testDemo()
@@ -1328,6 +1328,30 @@ int ParseSegments(std::string strValue, char chPartition, std::vector<std::strin
 	}
 	return idx;
 }
+
+
+int  Replace(std::string& strTarget, char src, char tar)
+{
+	size_t nPos = strTarget.npos; size_t nCount = 0;
+	while ((nPos = strTarget.find(src)) != strTarget.npos)
+	{
+		strTarget.replace(nPos, sizeof(char), sizeof(char), tar);
+		nCount++;
+	}
+	return nCount;
+}
+
+int  Erase(std::string& strTarget, char tar)
+{
+	size_t nPos = strTarget.npos; size_t nCount = 0;
+	while ((nPos = strTarget.find(tar)) != strTarget.npos)
+	{
+		strTarget.erase(nPos,1);
+		nCount++;
+	}
+	return nCount;
+}
+
   ```
 
 # 19. QT_NO_CLIPBOARD
@@ -5424,9 +5448,67 @@ MutexHolder::~MutexHolder()
 ```
 
 
-# 70.  
+# 70.  Hash string 
+
 
 ```
+unsigned int       DecodeFixed32(const char* ptr);
+unsigned int       Hash(const char* data, size_t n, unsigned int seed = 0);
+
+
+unsigned int DecodeFixed32(const char* ptr)
+{
+	if (1)
+	{
+		// Load the raw bytes
+		unsigned int result;
+		memcpy(&result, ptr, sizeof(result));  // gcc optimizes this to a plain load
+		return result;
+	}
+	else
+	{
+		return ((static_cast<unsigned int>(ptr[0]))
+			| (static_cast<unsigned int>(ptr[1]) << 8)
+			| (static_cast<unsigned int>(ptr[2]) << 16)
+			| (static_cast<unsigned int>(ptr[3]) << 24));
+	}
+}
+
+unsigned int Hash(const char* data, size_t n, unsigned int seed)
+{
+	// Similar to murmur hash
+	const unsigned int m = 0xc6a4a793;
+	const unsigned int r = 24;
+	const char* limit = data + n;
+	unsigned int h = seed ^ (n * m);
+
+	// Pick up four bytes at a time
+	while (data + 4 <= limit) {
+		unsigned int w = DecodeFixed32(data);
+		data += 4;
+		h += w;
+		h *= m;
+		h ^= (h >> 16);
+	}
+
+	// Pick up remaining bytes
+	switch (limit - data) {
+	case 3:
+		h += data[2] << 16;
+		// fall through
+	case 2:
+		h += data[1] << 8;
+		// fall through
+	case 1:
+		h += data[0];
+		h *= m;
+		h ^= (h >> r);
+		break;
+	}
+	return h;
+}
+
+
 ```
 
 
