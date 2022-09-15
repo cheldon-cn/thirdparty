@@ -1352,6 +1352,12 @@ int  Erase(std::string& strTarget, char tar)
 	return nCount;
 }
 
+bool  IsMatch(const std::string& strSrc, const std::string& strTarget)
+{
+	return (strSrc.find(strTarget) != strSrc.npos) ? true : false;
+}
+
+
   ```
 
 # 19. QT_NO_CLIPBOARD
@@ -5456,6 +5462,8 @@ unsigned int       DecodeFixed32(const char* ptr);
 unsigned int       Hash(const char* data, size_t n, unsigned int seed = 0);
 
 
+#include <cstddef>
+#include <cstdint>
 unsigned int DecodeFixed32(const char* ptr)
 {
 	if (1)
@@ -5474,7 +5482,7 @@ unsigned int DecodeFixed32(const char* ptr)
 	}
 }
 
-unsigned int Hash(const char* data, size_t n, unsigned int seed)
+unsigned int Hash(const char* data, size_t n, unsigned int seed) /// leveldb-hash
 {
 	// Similar to murmur hash
 	const unsigned int m = 0xc6a4a793;
@@ -5494,13 +5502,13 @@ unsigned int Hash(const char* data, size_t n, unsigned int seed)
 	// Pick up remaining bytes
 	switch (limit - data) {
 	case 3:
-		h += data[2] << 16;
+		h += static_cast<unsigned char>(data[2]) << 16;
 		// fall through
 	case 2:
-		h += data[1] << 8;
+		h += static_cast<unsigned char>(data[1]) << 8;
 		// fall through
 	case 1:
-		h += data[0];
+		h += static_cast<unsigned char>(data[0]);
 		h *= m;
 		h ^= (h >> r);
 		break;
@@ -5568,6 +5576,63 @@ ComputeTail(xOri, yOri, angle * PI / 180, len, xTail, yTail);
 
 
 ```
+
+# 72.  key byte 
+
+
+```
+__int64   MakeKey(int type, int code)
+{
+	return ((__int64)(type) << 32) + (code);
+}
+
+unsigned int DecodeFixed32(const char* ptr)
+{
+	return ((static_cast<unsigned int>(ptr[0]))
+			| (static_cast<unsigned int>(ptr[1]) << 8)
+			| (static_cast<unsigned int>(ptr[2]) << 16)
+			| (static_cast<unsigned int>(ptr[3]) << 24));
+}
+
+```
+
+# 73. func(param) = delete;
+
+```
+
+#include <cstdio>
+class TestClass
+{
+public:
+    void func(int data) { printf("data: %d\n", data); }
+};
+int main(void)
+{
+    TestClass obj;
+    obj.func(100);
+    obj.func(100.0); /// convert float to interger quietly;
+    return 0;
+}
+
+//////////////////////////////
+
+#include <cstdio>
+class TestClass
+{
+public:
+    void func(int data) { printf("data: %d\n", data); }
+    void func(double data) = delete;  ////this function is forbidden;
+};
+int main(void)
+{
+    TestClass obj;
+    obj.func(100);
+    obj.func(100.0);  /// will complain " error: use of deleted function"  when compiling
+    return 0;
+}
+
+```
+
 
 
 -----
