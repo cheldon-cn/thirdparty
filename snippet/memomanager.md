@@ -6389,5 +6389,87 @@ static size_t GetProcessMemory()
 }
 
 ```
+
+# 79  readelf -h pdfdemo
+
+
+```
+readelf -h pdfdemo
+ELF 头：
+  Magic：  7f 45 4c 46 02 01 01 00 00 00 00 00 00 00 00 00
+  类别:                              ELF64
+  数据:                              2 补码，小端序 (little endian)
+  版本:                              1 (current)
+  OS/ABI:                            UNIX - System V
+  ABI 版本:                          0
+  类型:                              EXEC (可执行文件)
+  系统架构:                          Advanced Micro Devices X86-64
+  版本:                              0x1
+  入口点地址：              0x4007b0
+  程序头起点：              64 (bytes into file)
+  Start of section headers:          37096 (bytes into file)
+  标志：             0x0
+  本头的大小：       64 (字节)
+  程序头大小：       56 (字节)
+  Number of program headers:         9
+  节头大小：         64 (字节)
+  节头数量：         38
+  字符串表索引节头： 37
+
+
+readelf -h mdmapper
+ELF 头：
+  Magic：  7f 45 4c 46 02 01 01 00 00 00 00 00 00 00 00 00
+  类别:                              ELF64
+  数据:                              2 补码，小端序 (little endian)
+  版本:                              1 (current)
+  OS/ABI:                            UNIX - System V
+  ABI 版本:                          0
+  类型:                              DYN (共享目标文件)
+  系统架构:                          Advanced Micro Devices X86-64
+  版本:                              0x1
+  入口点地址：              0x960
+  程序头起点：              64 (bytes into file)
+  Start of section headers:          37064 (bytes into file)
+  标志：             0x0
+  本头的大小：       64 (字节)
+  程序头大小：       56 (字节)
+  Number of program headers:         7
+  节头大小：         64 (字节)
+  节头数量：         36
+  字符串表索引节头： 35
+
+```
+
+```
+[os@localhost program]$ readelf -h mdmapper
+ELF 头：
+  Magic：  7f 45 4c 46 02 01 01 00 00 00 00 00 00 00 00 00
+  类别:                              ELF64
+  数据:                              2 补码，小端序 (little endian)
+  版本:                              1 (current)
+  OS/ABI:                            UNIX - System V
+  ABI 版本:                          0
+  类型:                              EXEC (可执行文件)
+  系统架构:                          Advanced Micro Devices X86-64
+  版本:                              0x1
+  入口点地址：              0x400900
+  程序头起点：              64 (bytes into file)
+  Start of section headers:          61592 (bytes into file)
+  标志：             0x0
+  本头的大小：       64 (字节)
+  程序头大小：       56 (字节)
+  Number of program headers:         9
+  节头大小：         64 (字节)
+  节头数量：         38
+  字符串表索引节头： 37
+
+```
+
+# 80  LD_LIBRARY_PATH
+export BUTTER_DEV_DIR=/home/os/butter
+export BUTTER_DEV_SDK=$BUTTER_DEV_DIR/sdk
+export LD_LIBRARY_PATH=$BUTTER_DEV_DIR/bin/program
+
 -----
 Copyright 2020 - 2022 @ [cheldon](https://github.com/cheldon-cn/).
