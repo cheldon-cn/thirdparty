@@ -5824,5 +5824,284 @@ config.status: executing depfiles commands
 config.status: executing libtool commands
 ```
 
+# 75 .build cario on windows
+
+## 1.STEPS
+```
+1. get cario tar file 'cairo-1.16.0.tar.xz',open the folder in which contain target file;
+2. uncompress the tar file above, 
+   tar -zxvf  cairo-1.16.0.tar.xz
+3. open cygwin env,cd cairo-1.16.0
+4.configure -help ,get some detail about configure
+  pay attention about '--host='  to set the target environment which match with the target os;
+  if wanna depend on png library,please set 'png_CFLAGS' and 'png_LIBS' ;
+  if counter error: 'configure: error: recommended script surface backend feature could not be enabled,
+  checking whether cairo's script surface backend feature could be enabled... no (requires zlib http://www.gzip.org/zlib/)',
+5.when configure ok,then make and make install
+6.search the builded header file and library file in the target folder which depend on the flag '--prefix' 
+7.enjoy it;
+```
+## 2. INSTANCE
+```
+Administrator@YR170812-LMCY /cygdrive/f/cario/cairo-1.16.0/bd
+$  ../configure --prefix=/cygdrive/f/cario/install/cario --host=x86_64-w64-mingw32  png_CFLAGS='-I/cygdrive/f/cario/install/png/include' png_LIBS='-L/cygdrive/f/cario/install/png/lib  -lpng16' png_REQUIRES="libpng16" pixman_CFLAGS='-I/cygdrive/f/cario/install/pixman/include/pixman-1' pixman_LIBS='-L/cygdrive/f/cario/install/pixman/lib  -lpixman-1'  CFLAGS='-I/cygdrive/f/cario/install/zlib/include' LIBS='-L/cygdrive/f/cario/install/zlib/lib -lz' --enable-ft=no
+
+checking for x86_64-w64-mingw32-gcc... x86_64-w64-mingw32-gcc
+checking whether the C compiler works... yes
+checking for C compiler default output file name... a.exe
+checking for suffix of executables... .exe
+checking whether we are cross compiling... no
+checking for suffix of object files... o
+checking whether we are using the GNU C compiler... yes
+checking whether x86_64-w64-mingw32-gcc accepts -g... yes
+checking for x86_64-w64-mingw32-gcc option to accept ISO C89... none needed
+checking whether x86_64-w64-mingw32-gcc understands -c and -o together... yes
+checking how to run the C preprocessor... x86_64-w64-mingw32-gcc -E
+
+checking whether make sets $(MAKE)... yes
+checking for style of include used by make... GNU
+checking whether make supports nested variables... yes
+checking dependency style of x86_64-w64-mingw32-gcc... gcc3
+checking whether make supports nested variables... (cached) yes
+checking for x86_64-w64-mingw32-ar... x86_64-w64-mingw32-ar
+checking the archiver (x86_64-w64-mingw32-ar) interface... ar
+checking build system type... x86_64-unknown-cygwin
+checking host system type... x86_64-w64-mingw32
+checking how to print strings... printf
+checking for a sed that does not truncate output... /usr/bin/sed
+checking for fgrep... /usr/bin/grep -F
+checking for ld used by x86_64-w64-mingw32-gcc... /usr/x86_64-w64-mingw32/bin/ld.exe
+checking if the linker (/usr/x86_64-w64-mingw32/bin/ld.exe) is GNU ld... yes
+checking for BSD- or MS-compatible name lister (nm)... /usr/bin/x86_64-w64-mingw32-nm -B
+checking the name lister (/usr/bin/x86_64-w64-mingw32-nm -B) interface... BSD nm
+checking whether ln -s works... yes
+checking the maximum length of command line arguments... 8192
+checking how to convert x86_64-unknown-cygwin file names to x86_64-w64-mingw32 format... func_convert_file_cygwin_to_w32
+checking how to convert x86_64-unknown-cygwin file names to toolchain format... func_convert_file_noop
+checking for /usr/x86_64-w64-mingw32/bin/ld.exe option to reload object files... -r
+checking for x86_64-w64-mingw32-objdump... x86_64-w64-mingw32-objdump
+checking how to recognize dependent libraries... file_magic ^x86 archive import|^x86 DLL
+checking for x86_64-w64-mingw32-dlltool... x86_64-w64-mingw32-dlltool
+checking how to associate runtime and link libraries... func_cygming_dll_for_implib
+checking for x86_64-w64-mingw32-ar... (cached) x86_64-w64-mingw32-ar
+
+checking whether stripping libraries is possible... yes
+checking if libtool supports shared libraries... yes
+checking whether to build shared libraries... yes
+checking whether to build static libraries... yes
+checking for x86_64-w64-mingw32-pkg-config... /usr/bin/x86_64-w64-mingw32-pkg-config
+checking pkg-config is at least version 0.9.0... yes
+checking for gtk-doc... no
+
+checking whether x86_64-w64-mingw32-gcc supports -Wunused-but-set-variable -Wno-unused-but-set-variable... yes
+checking which warning flags were supported...  -Wall -Wextra -Wmissing-declarations -Werror-implicit-function-declaration -Wpointer-arith -Wwrite-strings -Wsign-compare -Wpacked -Wswitch-enum -Wmissing-format-attribute -Wvolatile-register-var -Wstrict-aliasing=2 -Winit-self -Wunsafe-loop-optimizations -Wno-missing-field-initializers -Wno-unused-parameter -Wno-attributes -Wno-long-long -Winline -fno-strict-aliasing -fno-common -Wp,-D_FORTIFY_SOURCE=2 -Wno-unused-but-set-variable
+checking how to enable unused result warnings... __attribute__((__warn_unused_result__))
+checking how to allow undefined symbols in shared libraries used by test suite... -Wl,--allow-shlib-undefined
+checking whether byte ordering is bigendian... no
+checking whether float word ordering is bigendian... no
+checking for native atomic primitives... cxx11
+checking whether atomic ops require a memory barrier... no
+checking size of void *... 8
+checking size of int... 4
+checking size of long... 4
+checking size of long long... 8
+checking size of size_t... 8
+
+checking for VALGRIND... no
+no
+checking for compress in -lz... yes
+checking zlib.h usability... yes
+checking zlib.h presence... no
+configure: WARNING: zlib.h: accepted by the compiler, rejected by the preprocessor!
+configure: WARNING: zlib.h: proceeding with the compiler's result
+checking for zlib.h... yes
+checking for lzo2a_decompress in -llzo2... no
+checking for dlsym in -ldl... no
+checking for dlsym... no
+
+checking whether cairo's Xlib surface backend feature could be enabled... no (requires X development libraries)
+checking for cairo's Xlib Xrender surface backend feature...
+checking whether cairo's Xlib Xrender surface backend feature could be enabled... no (requires --enable-xlib)
+checking for cairo's XCB surface backend feature...
+checking for xcb... no
+checking whether cairo's XCB surface backend feature could be enabled... no (requires xcb >= 1.6 xcb-render >= 1.6 https://xcb.freedesktop.org)
+checking for cairo's XCB/SHM functions feature...
+checking whether cairo's XCB/SHM functions feature could be enabled... no (requires --enable-xcb)
+checking for cairo's Quartz surface backend feature...
+
+checking for cairo's Microsoft Windows font backend feature...
+checking whether cairo's Microsoft Windows font backend feature could be enabled... yes
+checking for gs... no
+configure: WARNING: Win32 Printing backend will not be tested since ghostscript is not available
+checking for cairo's PNG functions feature...
+checking for png... yes
+checking whether cairo's PNG functions feature could be enabled... yes
+checking for cairo's EGL functions feature...
+checking whether cairo's EGL functions feature could be enabled... no (not required by any backend)
+checking for cairo's GLX functions feature...
+checking whether cairo's GLX functions feature could be enabled... no (not required by any backend)
+checking for cairo's WGL functions feature...
+checking whether cairo's WGL functions feature could be enabled... no (not required by any backend)
+checking for cairo's script surface backend feature...
+checking whether cairo's script surface backend feature could be enabled... yes
+
+checking for FT_HAS_COLOR... yes
+checking for cairo's PostScript surface backend feature...
+checking whether cairo's PostScript surface backend feature could be enabled... yes
+checking for gs... no
+configure: WARNING: PS backend will not be tested since ghostscript is not available
+checking for LIBSPECTRE... no
+checking for cairo's PDF surface backend feature...
+checking whether cairo's PDF surface backend feature could be enabled... yes
+checking for POPPLER... no
+configure: WARNING: PDF backend will not be tested since poppler >= 0.17.4 is not available
+checking for cairo's SVG surface backend feature...
+checking whether cairo's SVG surface backend feature could be enabled... yes
+checking for LIBRSVG... no
+configure: WARNING: SVG backend will not be tested since librsvg >= 2.35.0 is not available
+checking for cairo's image surface backend feature...
+checking for pixman... yes
+checking whether cairo's image surface backend feature could be enabled... yes
+checking for cairo's mime surface backend feature...
+checking whether cairo's mime surface backend feature could be enabled... yes
+checking for cairo's recording surface backend feature...
+checking whether cairo's recording surface backend feature could be enabled... yes
+checking for cairo's observer surface backend feature...
+checking whether cairo's observer surface backend feature could be enabled... yes
+checking for cairo's user font backend feature...
+checking whether cairo's user font backend feature could be enabled... yes
+checking for cairo's pthread feature...
+checking whether cairo's pthread feature could be enabled... yes
+
+checking that generated files are newer than configure... done
+configure: creating ./config.status
+config.status: creating src/cairo.pc
+config.status: creating cairo-uninstalled.pc
+config.status: creating src/cairo-win32.pc
+config.status: creating cairo-win32-uninstalled.pc
+config.status: creating src/cairo-win32-font.pc
+config.status: creating cairo-win32-font-uninstalled.pc
+config.status: creating src/cairo-png.pc
+config.status: creating cairo-png-uninstalled.pc
+config.status: creating src/cairo-script.pc
+config.status: creating cairo-script-uninstalled.pc
+config.status: creating src/cairo-ft.pc
+config.status: creating cairo-ft-uninstalled.pc
+config.status: creating src/cairo-ps.pc
+config.status: creating cairo-ps-uninstalled.pc
+config.status: creating src/cairo-pdf.pc
+config.status: creating cairo-pdf-uninstalled.pc
+config.status: creating src/cairo-svg.pc
+config.status: creating cairo-svg-uninstalled.pc
+config.status: creating Makefile
+config.status: creating boilerplate/Makefile
+config.status: creating src/Makefile
+config.status: creating test/Makefile
+config.status: creating test/pdiff/Makefile
+config.status: creating perf/Makefile
+config.status: creating perf/micro/Makefile
+config.status: creating util/Makefile
+config.status: creating util/cairo-fdr/Makefile
+config.status: creating util/cairo-gobject/Makefile
+config.status: creating util/cairo-missing/Makefile
+config.status: creating util/cairo-script/Makefile
+config.status: creating util/cairo-script/examples/Makefile
+config.status: creating util/cairo-sphinx/Makefile
+config.status: creating util/cairo-trace/Makefile
+config.status: creating util/cairo-trace/cairo-trace
+config.status: creating doc/Makefile
+config.status: creating doc/public/Makefile
+config.status: creating config.h
+config.status: executing depfiles commands
+config.status: executing libtool commands
+config.status: executing ../build/Makefile.win32.features commands
+config.status: creating ../build/Makefile.win32.features
+config.status: ../build/Makefile.win32.features is unchanged
+config.status: executing ../src/Makefile.am.features commands
+config.status: creating ../src/Makefile.am.features
+config.status: ../src/Makefile.am.features is unchanged
+config.status: executing ../src/Makefile.win32.features commands
+config.status: creating ../src/Makefile.win32.features
+config.status: ../src/Makefile.win32.features is unchanged
+config.status: executing ../boilerplate/Makefile.am.features commands
+config.status: creating ../boilerplate/Makefile.am.features
+config.status: ../boilerplate/Makefile.am.features is unchanged
+config.status: executing ../boilerplate/Makefile.win32.features commands
+config.status: creating ../boilerplate/Makefile.win32.features
+config.status: ../boilerplate/Makefile.win32.features is unchanged
+config.status: executing src/cairo-features.h commands
+config.status: creating src/cairo-features.h
+config.status: src/cairo-features.h is unchanged
+config.status: executing src/cairo-supported-features.h commands
+config.status: creating src/cairo-supported-features.h
+config.status: src/cairo-supported-features.h is unchanged
+config.status: executing ../build/Makefile.win32.features-h commands
+config.status: creating ../build/Makefile.win32.features-h
+config.status: ../build/Makefile.win32.features-h is unchanged
+config.status: executing cairo-trace commands
+
+cairo (version 1.16.0 [release]) will be compiled with:
+
+The following surface backends:
+  Image:         yes (always builtin)
+  Recording:     yes (always builtin)
+  Observer:      yes (always builtin)
+  Mime:          yes (always builtin)
+  Tee:           no (disabled, use --enable-tee to enable)
+  XML:           no (disabled, use --enable-xml to enable)
+  Xlib:          no (requires X development libraries)
+  Xlib Xrender:  no (requires --enable-xlib)
+  Qt:            no (disabled, use --enable-qt to enable)
+  Quartz:        no (requires CoreGraphics framework)
+  Quartz-image:  no (disabled, use --enable-quartz-image to enable)
+  XCB:           no (requires xcb >= 1.6 xcb-render >= 1.6 https://xcb.freedesktop.org)
+  Win32:         yes
+  OS2:           no (disabled, use --enable-os2 to enable)
+  CairoScript:   yes
+  PostScript:    yes
+  PDF:           yes
+  SVG:           yes
+  OpenGL:        no (disabled, use --enable-gl to enable)
+  OpenGL ES 2.0: no (disabled, use --enable-glesv2 to enable)
+  OpenGL ES 3.0: no (disabled, use --enable-glesv3 to enable)
+  BeOS:          no (disabled, use --enable-beos to enable)
+  DirectFB:      no (disabled, use --enable-directfb to enable)
+  OpenVG:        no (disabled, use --enable-vg to enable)
+  DRM:           no (disabled, use --enable-drm to enable)
+  Cogl:          no (disabled, use --enable-cogl to enable)
+
+The following font backends:
+  User:          yes (always builtin)
+  FreeType:      no (disabled, use --enable-ft to enable)
+  Fontconfig:    no (disabled, use --enable-ft to enable)
+  Win32:         yes
+  Quartz:        no (requires CoreGraphics framework)
+
+The following functions:
+  PNG functions:   yes
+  GLX functions:   no (not required by any backend)
+  WGL functions:   no (not required by any backend)
+  EGL functions:   no (not required by any backend)
+  X11-xcb functions: no (disabled, use --enable-xlib-xcb to enable)
+  XCB-shm functions: no (requires --enable-xcb)
+
+The following features and utilities:
+  cairo-trace:                no (requires dynamic linker and zlib and real pthreads)
+  cairo-script-interpreter:   yes
+
+And the following internal features:
+  pthread:       yes
+  gtk-doc:       no
+  gcov support:  no
+  symbol-lookup: no (requires bfd)
+  test surfaces: no (disabled, use --enable-test-surfaces to enable)
+  ps testing:    no (requires libspectre)
+  pdf testing:   no (requires poppler-glib >= 0.17.4)
+  svg testing:   no (requires librsvg-2.0 >= 2.35.0)
+  win32 printing testing:    no (requires ghostscript)
+
+
+
+```
 -----
 Copyright 2020 - 2022 @ [cheldon](https://github.com/cheldon-cn/).
