@@ -132,6 +132,33 @@ void *CMemManager::Alloc(int size)
 # 2. --host=x86_64-w64-mingw32 
 
 ```
+--cygwin64
+------lib
+----------gcc
+--------------i686-pc-cygwin
+--------------i686-w64-mingw32
+--------------x86_64-pc-cygwin
+--------------x86_64-w64-mingw32
+```
+
+```
+--msys64
+------mingw64\lib\gcc
+----------x86_64-w64-mingw32
+------mingw32\lib\gcc
+----------i686-w64-mingw32
+```
+
+```
+--Android
+------ndk-r20b\toolchains\llvm\prebuilt\windows-x86_64\lib\gcc
+--------------aarch64-linux-android
+--------------arm-linux-androideabi
+--------------x86_64-linux-android
+--------------i686-linux-android
+```
+
+```
 ./configure --host=i686-w64-mingw32     --prefix=/f/Codes/openSource/githubmaster/libiconv1.16/libiconv             CC=i686-w64-mingw32-gcc             CPPFLAGS="-I/usr/local/mingw32/include -Wall"             LDFLAGS="-L/usr/local/mingw32/lib"
 ```
 
@@ -1870,7 +1897,7 @@ STEPS:
 
 		cd /home/src/code/cairo-1.17.2
 
-		./configure --prefix=/home/src/code/cario --enable-ps pixman_CFLAGS='-I/home/src/code/pixman/include/pixman-1' pixman_LIBS='-L/home/src/code/pixman/lib -lpixman-1'
+		./configure --prefix=/home/src/code/cario --enable-ps pixman_CFLAGS='-I/home/src/code/pixman/include/pixman-1' pixman_LIBS='-L/home/src/code/pixman/lib -lpixman-1'  png_CFLAGS='-I/home/os/git/ins/png/include' png_LIBS='-L/home/os/git/ins/png/lib  -lpng16'
 
 		make
 
@@ -5633,7 +5660,169 @@ int main(void)
 
 ```
 
+# 74. compile pixman on windows
 
+## 1.STEPS
+```
+1. get pixman tar file 'pixman-0.40.0.tar.gz',open the folder in which contain target file;
+2. uncompress the tar file above, 
+   tar -zxvf  pixman-0.40.0.tar.gz
+3. open cygwin env,cd pixman-0.40.0
+4.configure -help ,get some detail about configure
+  pay attention about '--host='  to set the target environment which match with the target os;
+  if wanna depend on png library,please set 'PNG_fLAGS' and 'PNG_LIBS' 
+5.when configure ok,then make and make install
+6.search the builded header file and library file in the target folder which depend on the flag '--prefix' 
+7.enjoy it;
+```
+## 2. INSTANCE
+```
+Administrator@0812-P /cygdrive/f/cario/pixman-0.40.0/build
+$ ../configure --prefix=/cygdrive/f/cario/cygwin/pixman --host=x86_64-w64-mingw32  PNG_CFLAGS='-I/cygdrive/f/cario/install/png/include' PNG_LIBS='-L/cygdrive/f/cario/install/png/lib -lpng16'
+checking for a BSD-compatible install... /usr/bin/install -c
+checking whether build environment is sane... yes
+checking for a thread-safe mkdir -p... /usr/bin/mkdir -p
+checking for gawk... gawk
+checking whether make sets $(MAKE)... yes
+checking whether make supports nested variables... yes
+checking whether make supports nested variables... (cached) yes
+checking build system type... x86_64-w64-mingw32
+checking host system type... x86_64-w64-mingw32
+checking for x86_64-w64-mingw32-gcc... x86_64-w64-mingw32-gcc
+checking whether the C compiler works... yes
+checking for C compiler default output file name... a.exe
+checking for suffix of executables... .exe
+checking whether we are cross compiling... no
+checking for suffix of object files... o
+checking whether we are using the GNU C compiler... yes
+checking whether x86_64-w64-mingw32-gcc accepts -g... yes
+checking for x86_64-w64-mingw32-gcc option to accept ISO C89... none needed
+checking whether x86_64-w64-mingw32-gcc understands -c and -o together... yes
+checking whether make supports the include directive... yes (GNU style)
+checking dependency style of x86_64-w64-mingw32-gcc... gcc3
+checking dependency style of x86_64-w64-mingw32-gcc... gcc3
+checking how to print strings... printf
+checking for a sed that does not truncate output... /usr/bin/sed
+checking for grep that handles long lines and -e... /usr/bin/grep
+checking for egrep... /usr/bin/grep -E
+checking for fgrep... /usr/bin/grep -F
+checking for ld used by x86_64-w64-mingw32-gcc... /usr/x86_64-w64-mingw32/bin/ld.exe
+checking if the linker (/usr/x86_64-w64-mingw32/bin/ld.exe) is GNU ld... yes
+checking for BSD- or MS-compatible name lister (nm)... /usr/bin/x86_64-w64-mingw32-nm -B
+checking the name lister (/usr/bin/x86_64-w64-mingw32-nm -B) interface... BSD nm
+checking whether ln -s works... yes
+checking the maximum length of command line arguments... 8192
+checking how to convert x86_64-w64-mingw32 file names to x86_64-w64-mingw32 format... func_convert_file_msys_to_w32
+checking how to convert x86_64-w64-mingw32 file names to toolchain format... func_convert_file_msys_to_w32
+checking for /usr/x86_64-w64-mingw32/bin/ld.exe option to reload object files... -r
+checking for x86_64-w64-mingw32-objdump... x86_64-w64-mingw32-objdump
+checking how to recognize dependent libraries... file_magic ^x86 archive import|^x86 DLL
+checking for x86_64-w64-mingw32-dlltool... x86_64-w64-mingw32-dlltool
+checking how to associate runtime and link libraries... func_cygming_dll_for_implib
+checking for x86_64-w64-mingw32-ar... x86_64-w64-mingw32-ar
+checking for archiver @FILE support... @
+checking for x86_64-w64-mingw32-strip... x86_64-w64-mingw32-strip
+checking for x86_64-w64-mingw32-ranlib... x86_64-w64-mingw32-ranlib
+checking command to parse /usr/bin/x86_64-w64-mingw32-nm -B output from x86_64-w64-mingw32-gcc object... ok
+checking for sysroot... no
+checking for a working dd... /usr/bin/dd
+checking how to truncate binary pipes... /usr/bin/dd bs=4096 count=1
+checking for x86_64-w64-mingw32-mt... no
+checking for mt... mt
+checking if mt is a manifest tool... yes
+checking how to run the C preprocessor... x86_64-w64-mingw32-gcc -E
+checking for ANSI C header files... yes
+checking for sys/types.h... yes
+checking for sys/stat.h... yes
+checking for stdlib.h... yes
+checking for string.h... yes
+checking for memory.h... yes
+checking for strings.h... yes
+checking for inttypes.h... yes
+checking for stdint.h... yes
+checking for unistd.h... yes
+checking for dlfcn.h... no
+checking for objdir... .libs
+checking if x86_64-w64-mingw32-gcc supports -fno-rtti -fno-exceptions... no
+checking for x86_64-w64-mingw32-gcc option to produce PIC... -DDLL_EXPORT -DPIC
+checking if x86_64-w64-mingw32-gcc PIC flag -DDLL_EXPORT -DPIC works... yes
+checking if x86_64-w64-mingw32-gcc static flag -static works... yes
+checking if x86_64-w64-mingw32-gcc supports -c -o file.o... yes
+checking if x86_64-w64-mingw32-gcc supports -c -o file.o... (cached) yes
+checking whether the x86_64-w64-mingw32-gcc linker (/usr/x86_64-w64-mingw32/bin/ld.exe) supports shared libraries... yes
+checking whether -lc should be explicitly linked in... yes
+checking dynamic linker characteristics... Win32 ld.exe
+checking how to hardcode library paths into programs... immediate
+checking whether stripping libraries is possible... yes
+checking if libtool supports shared libraries... yes
+checking whether to build shared libraries... yes
+checking whether to build static libraries... yes
+checking for getisax... no
+checking whether byte ordering is bigendian... no
+checking for inline... inline
+checking whether the compiler supports -Werror... yes
+checking size of long... 4
+checking whether __SUNPRO_C is declared... no
+checking whether __amd64 is declared... yes
+checking whether the compiler supports -Wall... yes
+checking whether the compiler supports -Wdeclaration-after-statement... yes
+checking whether the compiler supports -Wno-unused-local-typedefs... yes
+checking whether the compiler supports -fno-strict-aliasing... yes
+checking for x86_64-w64-mingw32-gcc option to support OpenMP... -fopenmp
+checking whether the compiler supports -fvisibility=hidden... no
+checking whether the compiler supports -xldscope=hidden... no
+checking whether to use Loongson MMI assembler... no
+checking whether to use MMX intrinsics... yes
+checking whether to use SSE2 intrinsics... yes
+checking whether to use SSSE3 intrinsics... yes
+checking whether to use VMX/Altivec intrinsics... no
+checking whether to use ARM SIMD assembler... no
+checking whether to use ARM NEON assembler... no
+checking whether to use ARM IWMMXT intrinsics... no
+checking whether to use MIPS DSPr2 assembler... no
+checking whether to use GNU-style inline assembler... yes
+checking for x86_64-w64-mingw32-pkg-config... /usr/bin/x86_64-w64-mingw32-pkg-config
+checking pkg-config is at least version 0.9.0... yes
+checking for pixman_version_string in -lpixman-1... no
+checking for posix_memalign... no
+checking for sigaction... no
+checking for alarm... yes
+checking sys/mman.h usability... no
+checking sys/mman.h presence... no
+checking for sys/mman.h... no
+checking for mmap... no
+checking for mprotect... yes
+checking for getpagesize... yes
+checking fenv.h usability... yes
+checking fenv.h presence... yes
+checking for fenv.h... yes
+checking for feenableexcept in -lm... no
+checking whether FE_DIVBYZERO is declared... yes
+checking for gettimeofday... yes
+checking sys/time.h usability... yes
+checking sys/time.h presence... yes
+checking for sys/time.h... yes
+checking for library containing sqrtf... none required
+checking for thread local storage (TLS) support... __thread
+checking for pthreads... yes
+checking for __attribute__((constructor))... yes
+checking for __float128... yes
+checking for __builtin_clz... yes
+checking for GCC vector extensions... yes
+checking for PNG... yes
+checking that generated files are newer than configure... done
+configure: creating ./config.status
+config.status: creating pixman-1.pc
+config.status: creating pixman-1-uninstalled.pc
+config.status: creating Makefile
+config.status: creating pixman/Makefile
+config.status: creating pixman/pixman-version.h
+config.status: creating demos/Makefile
+config.status: creating test/Makefile
+config.status: creating config.h
+config.status: executing depfiles commands
+config.status: executing libtool commands
+```
 
 -----
 Copyright 2020 - 2022 @ [cheldon](https://github.com/cheldon-cn/).
