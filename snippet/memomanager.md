@@ -6502,5 +6502,51 @@ static const std::locale LOC_CHS("");
 static const std::locale LOC_CHS("chs"); //简体中文本地化设置
 #endifd
 ```
+
+# 82  Delete data in Directory and sub directory
+
+```
+//删除dir目录以及其子目录下的所有文件信息
+void DeleteDirectoryData(string dir)
+{
+#ifdef _WIN32
+		int nFind = 0;
+#else
+		int nFind = 1;
+#endif
+	_finddata_t		fileInfo;
+	string			curDir = dir;
+
+	if (curDir[curDir.length() - 1] == '/')
+		curDir.append("*");
+	else
+		curDir.append("/*");
+
+	intptr_t intptr = _findfirst(curDir.c_str(), &fileInfo);//获取目录下的第一个文件信息
+	if (intptr == -1) return;
+	do
+	{
+		std::string fileName = fileInfo.name;
+		if (fileName == ".." || fileName == ".") continue;
+		unsigned int attri = fileInfo.attrib;
+		string subdir;
+		subdir.append(dir); subdir.append("/"); subdir.append(fileName);
+
+		if ((attri&_A_SUBDIR) == _A_SUBDIR)
+		{
+			DeleteDirectoryData(subdir);
+			rmdir(subdir.c_str());
+		}
+		else
+		{
+			//删除文件
+			remove(subdir.c_str());
+		}
+	} while (_findnext(intptr, &fileInfo)  == nFind);//若目录中下一个文件信息不为空
+
+	_findclose(intptr);
+}
+
+```
 -----
 Copyright 2020 - 2022 @ [cheldon](https://github.com/cheldon-cn/).
