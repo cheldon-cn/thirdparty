@@ -6471,5 +6471,36 @@ export BUTTER_DEV_DIR=/home/os/butter
 export BUTTER_DEV_SDK=$BUTTER_DEV_DIR/sdk
 export LD_LIBRARY_PATH=$BUTTER_DEV_DIR/bin/program
 
+
+# 81  locale::facet::_S_create_c_locale name not valid
+
+when running execute file , load the dependent librarys,
+some variables in the librarys will be instanced before entry into main function
+ 
+```
+Data Load
+
+terminate called after throwing an instance of 'std::runtime_error'
+  what():  locale::facet::_S_create_c_locale name not valid
+
+Program received signal SIGABRT, Aborted.
+
+```
+From 
+
+```
+static const std::locale LOC_CHS("chs"); //简体中文本地化设置
+```
+ Change To
+
+```
+#if (defined(BUTTER_LINUX))                //2017.12.26 cycle
+static const std::locale LOC_CHS("zh_CN.UTF-8"); //简体中文本地化设置
+#elif defined(BUTTER_ANDROID) || defined(BUTTER_IOS)
+static const std::locale LOC_CHS("");
+#else
+static const std::locale LOC_CHS("chs"); //简体中文本地化设置
+#endifd
+```
 -----
 Copyright 2020 - 2022 @ [cheldon](https://github.com/cheldon-cn/).
