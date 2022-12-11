@@ -6103,5 +6103,291 @@ And the following internal features:
 
 
 ```
+
+# 76 . localtime
+
+```
+long GetFileVersion(std::string strCfgPath,char *szVersion,long len)
+{
+	if (_access(strCfgPath.c_str(), 0) != 0)
+		return 0;
+
+	if (NULL == szVersion || len < 1)
+		return 0;
+#ifdef _WIN32
+	struct _stat64i32 statbuf;
+	struct tm *temptm;
+	_stat64i32(strCfgPath.c_str(), &statbuf);
+	temptm = _localtime64(&statbuf.st_mtime);
+	snprintf(szVersion,len, "%ld%02ld%02ld%02ld%02ld%02ld", (long)(1900 + temptm->tm_year), (long)(1 + temptm->tm_mon), (long)(temptm->tm_mday), (long)(temptm->tm_hour), (long)(temptm->tm_min), (long)(temptm->tm_sec));
+#else
+	struct _stat     sta;
+	int    result = _stat(strCfgPath.c_str(),&sta);
+	struct tm *p;
+	p = localtime(&sta.st_mtime); //获取当前时间
+	if (p != NULL)
+	{//格式化时间和随机数字字符串
+		int iYear = 1900 + p->tm_year;
+		iYear = iYear - (iYear / 100) * 100;
+		snprintf(szVersion, len, "%ld%02ld%02ld%02ld%02ld%02ld", (__int64)(iYear), (__int64)(1 + p->tm_mon), (__int64)(p->tm_mday), (__int64)(p->tm_hour), (__int64)(p->tm_min), (__int64)(p->tm_sec));
+	}
+#endif
+	return 1;
+}
+
+///// get current time
+time_t second;
+time(&second);
+struct tm *p = localtime(&second); 
+if (p != NULL)
+{
+	int iYear = 1900 + p->tm_year;
+	iYear = iYear - (iYear / 100) * 100;
+	snprintf(szName, len, "%ld%02ld%02ld%02ld%02ld%02ld", (__int64)(iYear), (__int64)(1 + p->tm_mon), (__int64)(p->tm_mday), (__int64)(p->tm_hour), (__int64)(p->tm_min), (__int64)(p->tm_sec));
+}
+```
+
+# 77. GetCpuInfo
+
+```
+void GetCpuInfo(CString &chProcessorName,CString &chProcessorType,DWORD &dwNum,DWORD &dwMaxClockSpeed)
+{
+#ifdef _WIN32
+	CString strPath=_T("HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0");//注册表子键路径
+	CRegKey regkey;//定义注册表类对象
+	LONG lResult;//LONG型变量－反应结果
+	lResult=regkey.Open(HKEY_LOCAL_MACHINE,LPCTSTR(strPath),KEY_ALL_ACCESS); //打开注册表键
+	if (lResult!=ERROR_SUCCESS)
+	{
+		return;
+	}
+	char chCPUName[50] = {0};
+	DWORD dwSize=50; 
+
+	//获取ProcessorNameString字段值
+	if (ERROR_SUCCESS == regkey.QueryStringValue(_T("ProcessorNameString"),chCPUName,&dwSize))
+	{
+		chProcessorName = chCPUName;
+	}
+
+	//查询CPU主频
+	DWORD dwValue;
+	if (ERROR_SUCCESS == regkey.QueryDWORDValue(_T("~MHz"),dwValue))
+	{
+		dwMaxClockSpeed = dwValue;
+	}
+	regkey.Close();//关闭注册表
+	//UpdateData(FALSE);
+#else
+
+#endif
+	//获取CPU核心数目
+	SYSTEM_INFO si;
+	memset(&si,0,sizeof(SYSTEM_INFO));
+	GetSystemInfo(&si);
+	dwNum = si.dwNumberOfProcessors;
+
+	switch (si.dwProcessorType)
+	{
+	case PROCESSOR_INTEL_386:
+		{
+			chProcessorType.Format(_T("Intel 386 processor"));
+		}
+		break;
+	case PROCESSOR_INTEL_486:
+		{
+			chProcessorType.Format(_T("Intel 486 Processor"));
+		}
+		break;
+	case PROCESSOR_INTEL_PENTIUM:
+		{
+			chProcessorType.Format(_T("Intel Pentium Processor"));
+		}
+		break;
+	case PROCESSOR_INTEL_IA64:
+		{
+			chProcessorType.Format(_T("Intel IA64 Processor"));
+		}
+		break;
+	case PROCESSOR_AMD_X8664:
+		{
+			chProcessorType.Format(_T("AMD X8664 Processor"));
+		}
+		break;
+	default:
+		chProcessorType.Format(_T("未知"));
+		break;
+	}
+
+	//GetDisplayName()
+}
+
+
+	__int64 rFuid = 0;
+#ifdef _WIN32
+	rFuid = _abs64(fuid);
+#else
+	rFuid = abs(fuid);
+#endif
+```
+# 78  search FileDirPath
+
+```
+//==================================API_FileDirPath()===========================
+/// @brief 在文件夹下查找文件所在文件夹路径
+///
+/// @param [in] strDir         查找的文件夹
+/// @param [in] strFile        文件名  
+///
+/// @return 文件夹路径列表（多个只返回第一个）
+//================================================================================
+MFCOMMONEXPORT gisLONG API_FileDirPath(CString strDir, CString strFile, CString& strDirPath)
+{
+	if (strDir.GetLength() <= 0 || strFile.GetLength() <= 0)
+		return 0;
+
+	if (strDir[strDir.GetLength() - 1] != '\\' && strDir[strDir.GetLength() - 1] != '/')
+	{
+#ifdef _WIN32
+		strDir += "\\";
+#else
+		strDir += "/";
+#endif
+	}
+	string strPath = "";
+	//查找文件，返回是否找到
+
+#ifdef _WIN32
+
+	//文件句柄  
+	long   hFile = 0;
+	//文件信息  
+	struct _finddata_t fileinfo;  //很少用的文件信息读取结构
+	string p;  //string类很有意思的一个赋值函数:assign()，有很多重载版本
+	if ((hFile = _findfirst((strDir + "*").GetBuffer(), &fileinfo)) != -1)
+	{
+		do
+		{
+			if ((fileinfo.attrib &  _A_SUBDIR))  //判断是否为文件夹
+			{
+				if (strcmp(fileinfo.name, ".") != 0 && strcmp(fileinfo.name, "..") != 0)
+				{
+					CString tempDir = strDir + fileinfo.name;
+					if (API_FileDirPath(tempDir, strFile, strDirPath) > 0) 
+					{
+						_findclose(hFile);
+						return 1;
+					}
+				}
+			}
+			else    //文件处理
+			{
+				if (stricmp(strFile.GetBuffer(), fileinfo.name) == 0) 
+				{
+				
+					//获取结果路径
+					strPath = strDir.GetBuffer();
+					size_t last_slash_idx = strPath.rfind('\\');
+					if (std::string::npos != last_slash_idx)
+					{
+						strDirPath = strPath.substr(0, last_slash_idx).c_str();
+					}
+					else
+					{
+						last_slash_idx = strPath.rfind('/');
+						if (std::string::npos != last_slash_idx)
+						{
+							strDirPath = strPath.substr(0, last_slash_idx).c_str();
+						}
+					}
+					_findclose(hFile);
+					return 1;
+				}
+			}
+		} while (_findnext(hFile, &fileinfo) == 0);  //寻找下一个，成功返回0，否则-1
+	}
+	_findclose(hFile);
+	return 0;
+#else
+	DIR *dir;
+	struct dirent *ptr;
+	gisLONG nIndex = 0;
+
+	if ((dir = opendir(strDir.GetBuffer())) == NULL)
+	{
+		return 0;
+	}
+	string strFileTmp = strFile.GetBuffer();
+	/*nIndex = strFileTmp.find("*");
+	if (nIndex != string::npos)
+	{
+		strFileTmp.erase(nIndex, 1);
+	}*/
+	while ((ptr = readdir(dir)) != NULL)
+	{
+		if (strcmp(ptr->d_name, ".") == 0 || strcmp(ptr->d_name, "..") == 0) ///current dir OR parrent dir
+			continue;//跳过.和..目录
+		else if (ptr->d_type == 8)    ///d_type=8对应file
+		{
+			string strTmp = ptr->d_name;
+			if (stricmp(strTmp.c_str(), strFileTmp.c_str()) == 0)
+			{
+				strPath = strDir.GetBuffer();
+				size_t last_slash_idx = strPath.rfind('\\');
+				if (std::string::npos != last_slash_idx)
+				{
+					strDirPath = strPath.substr(0, last_slash_idx).c_str();
+				}
+				else
+				{
+					last_slash_idx = strPath.rfind('/');
+					if (std::string::npos != last_slash_idx)
+					{
+						strDirPath = strPath.substr(0, last_slash_idx).c_str();
+					}
+				}
+				closedir(dir);
+				return 1;
+			}
+		}
+		else if (ptr->d_type == 4)    ///d_type=8对应file
+		{
+			string strTmp = strDir.GetBuffer() + ptr->d_name;
+			if (API_FileDirPath(strTmp.c_str(), strFile, strDirPath) > 0) 
+			{
+				closedir(dir);
+				return 1;
+			}
+		}
+	}
+	closedir(dir);
+	return 0;
+#endif
+```
+```
+	//获取系统可用内存大小
+	MEMORYSTATUSEX statex;
+	DWORDLONG      dwMaxAvailPhys = MAX_CACHE_SIZE;
+
+	statex.dwLength = sizeof(MEMORYSTATUSEX);
+#ifdef _WIN32
+	GlobalMemoryStatusEx(&statex);
+#else
+#endif
+
+
+static size_t GetProcessMemory()
+{
+#ifdef _WIN32
+	HANDLE handle = GetCurrentProcess();
+	PROCESS_MEMORY_COUNTERS pmc;
+	GetProcessMemoryInfo(handle,&pmc,sizeof(pmc));
+	return pmc.WorkingSetSize;
+#else
+	return 1024;
+#endif
+}
+
+```
 -----
 Copyright 2020 - 2022 @ [cheldon](https://github.com/cheldon-cn/).
