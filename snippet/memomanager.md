@@ -5662,7 +5662,7 @@ int main(void)
 
 # 74. compile pixman on windows
 
-## 1.STEPS
+## 1.STEPS in cygwin
 ```
 1. get pixman tar file 'pixman-0.40.0.tar.gz',open the folder in which contain target file;
 2. uncompress the tar file above, 
@@ -5675,7 +5675,7 @@ int main(void)
 6.search the builded header file and library file in the target folder which depend on the flag '--prefix' 
 7.enjoy it;
 ```
-## 2. INSTANCE
+## 2. INSTANCE in cygwin
 ```
 Administrator@0812-P /cygdrive/f/cario/pixman-0.40.0/build
 $ ../configure --prefix=/cygdrive/f/cario/cygwin/pixman --host=x86_64-w64-mingw32  PNG_CFLAGS='-I/cygdrive/f/cario/install/png/include' PNG_LIBS='-L/cygdrive/f/cario/install/png/lib -lpng16'
@@ -5824,9 +5824,359 @@ config.status: executing depfiles commands
 config.status: executing libtool commands
 ```
 
+
+## 1.STEPS on X64 MSVC
+
+```
+1. get pixman tar file 'pixman-0.42.2.tar.gz',open the folder in which contain target file;
+2. uncompress the tar file above, 
+   tar -zxvf  pixman-0.42.2.tar.gz
+3. NOTE: if u compile pixman with the instruction 'end to end build for win32' for cario,
+   u will get the x86 static and dynamic library; 
+   in order to get the  X64 library,we should use the correct environment;
+  
+   open visual studio tools 'VS2015 x64 command prompts';
+   
+4. in vs2015 x64 command prompts window, 
+   cd $(DIR)\pixman-0.42.2\pixman
+   
+   sed s/-MD/-MT/ Makefile.win32 > Makefile.fixed
+   move /Y Makefile.fixed Makefile.win32
+   
+   make -f Makefile.win32 "CFG=release" clean
+   rm -f release/*.exe release/*.ilk release/*.lib release/*.obj release/*.pdb
+
+   make -f Makefile.win32 "CFG=release"
+   
+5. then in folder $(DIR)\pixman-0.42.2\pixman\release , we can get the target lib 'pixman-1.lib';
+   
+6. check the library with dumpbin command;
+   dumpbin -headers $(DIR)\pixman-0.42.2\pixman\release\pixman-1.lib
+
+7. if counter following question:
+   pixman-mmx.c(276): error C2440: “return”: 无法从“int”转换为“__m64”
+   
+   mmx do not work on X64 MSVC,so we should remove macro USE_X86_MMX;
+   
+   in file 'pixman-0.42.2\pixman\Makefile.win32', change 
+   from 'MMX_CFLAGS = -DUSE_X86_MMX -w14710 -w14714'
+   to 'MMX_CFLAGS =  -w14710 -w14714'
+   
+
+```
+
+## 2. INSTANCE in  X64 MSVC
+```
+D:\Program Files\Microsoft Visual Studio 14.0\VC>set PATH=%PATH%;D:\program\msys64\usr\bin
+
+D:\Program Files\Microsoft Visual Studio 14.0\VC>set INCLUDE=%INCLUDE%;E:\3rd\zlib\include;E:\3rd\libpng\include;E:\3rd\pixman\include;
+
+D:\Program Files\Microsoft Visual Studio 14.0\VC>set INCLUDE=%INCLUDE%;E:\cairo\cairo-1.17.2\boilerplate;E:\cairo\cairo-1.17.2\src;
+
+D:\Program Files\Microsoft Visual Studio 14.0\VC>set LIB=%LIB%;E:\3rd\zlib\lib\zlib.lib;E:\3rd\libpng\lib\libpng16.lib;E:\3rd\pixman\lib\pixman-1.lib;
+
+D:\Program Files\Microsoft Visual Studio 14.0\VC>E:
+
+E:\>cd E:\cairo\pixman-0.42.2\pixman
+
+E:\cairo\pixman-0.42.2\pixman>sed s/-MD/-MT/ Makefile.win32 > Makefile.fixed
+
+E:\cairo\pixman-0.42.2\pixman>move /Y Makefile.fixed Makefile.win32
+移动了         1 个文件。
+
+E:\cairo\pixman-0.42.2\pixman>make -f Makefile.win32 "CFG=release" clean
+rm -f release/*.exe release/*.ilk release/*.lib release/*.obj release/*.pdb
+
+E:\cairo\pixman-0.42.2\pixman>make -f Makefile.win32 "CFG=release"
+Setting MMX flag to default value 'on'... (use MMX=on or MMX=off)
+Setting SSE2 flag to default value 'on'... (use SSE2=on or SSE2=off)
+Setting SSSE3 flag to default value 'on'... (use SSSE3=on or SSSE3=off)
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -DUSE_X86_MMX -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman.obj" pixman.c
+pixman.c
+e:\cairo\pixman-0.42.2\pixman\pixman.c(218) : warning C4710: “clip_general_image”: 函数未内联
+e:\cairo\pixman-0.42.2\pixman\pixman.c(266) : warning C4710: “clip_general_image”: 函数未内联
+e:\cairo\pixman-0.42.2\pixman\pixman.c(284) : warning C4710: “clip_general_image”: 函数未内联
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -DUSE_X86_MMX -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-access.obj" pixman-access.c
+pixman-access.c
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -DUSE_X86_MMX -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-access-accessors.obj" pixman-access-accessors.c
+pixman-access-accessors.c
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -DUSE_X86_MMX -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-bits-image.obj" pixman-bits-image.c
+pixman-bits-image.c
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -DUSE_X86_MMX -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-combine32.obj" pixman-combine32.c
+pixman-combine32.c
+pixman-combine32.c: warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据 丢失
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -DUSE_X86_MMX -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-combine-float.obj" pixman-combine-float.c
+pixman-combine-float.c
+pixman-combine-float.c: warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止 数据丢失
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -DUSE_X86_MMX -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-conical-gradient.obj" pixman-conical-gradient.c
+pixman-conical-gradient.c
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -DUSE_X86_MMX -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-filter.obj" pixman-filter.c
+pixman-filter.c
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -DUSE_X86_MMX -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-x86.obj" pixman-x86.c
+pixman-x86.c
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -DUSE_X86_MMX -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-mips.obj" pixman-mips.c
+pixman-mips.c
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -DUSE_X86_MMX -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-arm.obj" pixman-arm.c
+pixman-arm.c
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -DUSE_X86_MMX -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-ppc.obj" pixman-ppc.c
+pixman-ppc.c
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -DUSE_X86_MMX -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-edge.obj" pixman-edge.c
+pixman-edge.c
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -DUSE_X86_MMX -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-edge-accessors.obj" pixman-edge-accessors.c
+pixman-edge-accessors.c
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -DUSE_X86_MMX -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-fast-path.obj" pixman-fast-path.c
+pixman-fast-path.c
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -DUSE_X86_MMX -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-glyph.obj" pixman-glyph.c
+pixman-glyph.c
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -DUSE_X86_MMX -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-general.obj" pixman-general.c
+pixman-general.c
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -DUSE_X86_MMX -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-gradient-walker.obj" pixman-gradient-walker.c
+pixman-gradient-walker.c
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -DUSE_X86_MMX -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-image.obj" pixman-image.c
+pixman-image.c
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -DUSE_X86_MMX -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-implementation.obj" pixman-implementation.c
+pixman-implementation.c
+pixman-implementation.c(418): warning C4710: “int printf(const char *const ,...)”: 函数未内联
+C:\Program Files (x86)\Windows Kits\10\include\10.0.10240.0\ucrt\stdio.h(944): note: 参见“printf”的声明
+c:\program files (x86)\windows kits\10\include\10.0.10240.0\ucrt\stdio.h(639) : warning C4710: “__local_stdio_printf_options”: 函数未内联
+E:\cairo\pixman-0.42.2\pixman\pixman-implementation.c : warning C4710: “__local_stdio_printf_options”: 函数未内联
+e:\cairo\pixman-0.42.2\pixman\pixman-implementation.c(371) : warning C4710: “printf”: 函数未内 联
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -DUSE_X86_MMX -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-linear-gradient.obj" pixman-linear-gradient.c
+pixman-linear-gradient.c
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -DUSE_X86_MMX -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-matrix.obj" pixman-matrix.c
+pixman-matrix.c
+e:\cairo\pixman-0.42.2\pixman\pixman-matrix.c(279) : warning C4710: “rounded_sdiv_128_by_49”:  函数未内联
+e:\cairo\pixman-0.42.2\pixman\pixman-matrix.c(283) : warning C4710: “rounded_sdiv_128_by_49”:  函数未内联
+e:\cairo\pixman-0.42.2\pixman\pixman-matrix.c(294) : warning C4710: “rounded_sdiv_128_by_49”:  函数未内联
+e:\cairo\pixman-0.42.2\pixman\pixman-matrix.c(298) : warning C4710: “rounded_sdiv_128_by_49”:  函数未内联
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -DUSE_X86_MMX -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-noop.obj" pixman-noop.c
+pixman-noop.c
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -DUSE_X86_MMX -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-radial-gradient.obj" pixman-radial-gradient.c
+pixman-radial-gradient.c
+pixman-radial-gradient.c: warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防 止数据丢失
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -DUSE_X86_MMX -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-region16.obj" pixman-region16.c
+pixman-region16.c
+pixman-region16.c(68): warning C4710: “int fprintf(FILE *const ,const char *const ,...)”: 函数未内联
+C:\Program Files (x86)\Windows Kits\10\include\10.0.10240.0\ucrt\stdio.h(824): note: 参见“fprintf”的声明
+c:\program files (x86)\windows kits\10\include\10.0.10240.0\ucrt\stdio.h(639) : warning C4710: “__local_stdio_printf_options”: 函数未内联
+E:\cairo\pixman-0.42.2\pixman\pixman-region16.c : warning C4710: “__local_stdio_printf_options”: 函数未内联
+e:\cairo\pixman-0.42.2\pixman\pixman-region.c(348) : warning C4710: “fprintf”: 函数未内联
+e:\cairo\pixman-0.42.2\pixman\pixman-region.c(349) : warning C4710: “fprintf”: 函数未内联
+e:\cairo\pixman-0.42.2\pixman\pixman-region.c(2681) : warning C4710: “bitmap_addrect”: 函数未内联
+e:\cairo\pixman-0.42.2\pixman\pixman-region.c(2715) : warning C4710: “bitmap_addrect”: 函数未内联
+e:\cairo\pixman-0.42.2\pixman\pixman-region.c(894) : warning C4710: “pixman_region_append_non_o ”: 函数未内联
+e:\cairo\pixman-0.42.2\pixman\pixman-region.c(896) : warning C4710: “pixman_coalesce”: 函数未内联
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -DUSE_X86_MMX -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-region32.obj" pixman-region32.c
+pixman-region32.c
+pixman-region32.c(48): warning C4710: “int fprintf(FILE *const ,const char *const ,...)”: 函数未内联
+C:\Program Files (x86)\Windows Kits\10\include\10.0.10240.0\ucrt\stdio.h(824): note: 参见“fprintf”的声明
+c:\program files (x86)\windows kits\10\include\10.0.10240.0\ucrt\stdio.h(639) : warning C4710: “__local_stdio_printf_options”: 函数未内联
+E:\cairo\pixman-0.42.2\pixman\pixman-region32.c : warning C4710: “__local_stdio_printf_options”: 函数未内联
+e:\cairo\pixman-0.42.2\pixman\pixman-region.c(348) : warning C4710: “fprintf”: 函数未内联
+e:\cairo\pixman-0.42.2\pixman\pixman-region.c(349) : warning C4710: “fprintf”: 函数未内联
+e:\cairo\pixman-0.42.2\pixman\pixman-region.c(357) : warning C4710: “fprintf”: 函数未内联
+e:\cairo\pixman-0.42.2\pixman\pixman-region.c(361) : warning C4710: “fprintf”: 函数未内联
+e:\cairo\pixman-0.42.2\pixman\pixman-region.c(894) : warning C4710: “pixman_region_append_non_o ”: 函数未内联
+e:\cairo\pixman-0.42.2\pixman\pixman-region.c(896) : warning C4710: “pixman_coalesce”: 函数未内联
+e:\cairo\pixman-0.42.2\pixman\pixman-region.c(912) : warning C4710: “pixman_region_append_non_o ”: 函数未内联
+e:\cairo\pixman-0.42.2\pixman\pixman-region.c(915) : warning C4710: “pixman_coalesce”: 函数未内联
+e:\cairo\pixman-0.42.2\pixman\pixman-region.c(942) : warning C4710: “pixman_coalesce”: 函数未内联
+e:\cairo\pixman-0.42.2\pixman\pixman-region.c(973) : warning C4710: “pixman_region_append_non_o ”: 函数未内联
+e:\cairo\pixman-0.42.2\pixman\pixman-region.c(980) : warning C4710: “pixman_coalesce”: 函数未内联
+e:\cairo\pixman-0.42.2\pixman\pixman-region.c(992) : warning C4710: “pixman_region_append_non_o ”: 函数未内联
+e:\cairo\pixman-0.42.2\pixman\pixman-region.c(999) : warning C4710: “pixman_coalesce”: 函数未内联
+e:\cairo\pixman-0.42.2\pixman\pixman-region.c(1687) : warning C4710: “pixman_coalesce”: 函数未 内联
+e:\cairo\pixman-0.42.2\pixman\pixman-region.c(1751) : warning C4710: “pixman_coalesce”: 函数未 内联
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -DUSE_X86_MMX -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-solid-fill.obj" pixman-solid-fill.c
+pixman-solid-fill.c
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -DUSE_X86_MMX -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-timer.obj" pixman-timer.c
+pixman-timer.c
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -DUSE_X86_MMX -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-trap.obj" pixman-trap.c
+pixman-trap.c
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -DUSE_X86_MMX -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-utils.obj" pixman-utils.c
+pixman-utils.c
+pixman-utils.c(331): warning C4710: “int fprintf(FILE *const ,const char *const ,...)”: 函数未内联
+C:\Program Files (x86)\Windows Kits\10\include\10.0.10240.0\ucrt\stdio.h(824): note: 参见“fprintf”的声明
+c:\program files (x86)\windows kits\10\include\10.0.10240.0\ucrt\stdio.h(639) : warning C4710: “__local_stdio_printf_options”: 函数未内联
+E:\cairo\pixman-0.42.2\pixman\pixman-utils.c : warning C4710: “__local_stdio_printf_options”:  函数未内联
+e:\cairo\pixman-0.42.2\pixman\pixman-utils.c(322) : warning C4710: “fprintf”: 函数未内联
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -DUSE_X86_MMX -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-mmx.obj" pixman-mmx.c
+pixman-mmx.c
+pixman-mmx.c(276): error C2440: “return”: 无法从“int”转换为“__m64”
+pixman-mmx.c(278): error C2440: “return”: 无法从“int”转换为“__m64”
+pixman-mmx.c(286): error C2440: “return”: 无法从“int”转换为“__m64”
+pixman-mmx.c(317): error C2440: “=”: 无法从“int”转换为“__m64”
+pixman-mmx.c(318): error C2440: “=”: 无法从“int”转换为“__m64”
+pixman-mmx.c(319): error C2440: “=”: 无法从“int”转换为“__m64”
+pixman-mmx.c(353): error C2440: “return”: 无法从“int”转换为“__m64”
+pixman-mmx.c(360): error C2440: “初始化”: 无法从“int”转换为“__m64”
+pixman-mmx.c(433): error C2440: “return”: 无法从“int”转换为“__m64”
+pixman-mmx.c(443): error C2440: “return”: 无法从“int”转换为“__m64”
+pixman-mmx.c(457): error C2440: “return”: 无法从“int”转换为“__m64”
+pixman-mmx.c(720): error C2440: “=”: 无法从“int”转换为“__m64”
+pixman-mmx.c(729): error C2440: “函数”: 无法从“int”转换为“__m64”
+pixman-mmx.c(729): warning C4024: “over”: 形参和实参 3 的类型不同
+pixman-mmx.c(732): error C2440: “return”: 无法从“int”转换为“__m64”
+pixman-mmx.c(2419): error C2440: “函数”: 无法从“int”转换为“__m64”
+pixman-mmx.c(2419): warning C4024: “pack_565”: 形参和实参 2 的类型不同
+pixman-mmx.c(3970): error C2440: “初始化”: 无法从“int”转换为“__m64”
+make: *** [../Makefile.win32.common:68: release/pixman-mmx.obj] Error 2
+
+E:\cairo\pixman-0.42.2\pixman>make -f Makefile.win32 "CFG=release" clean
+rm -f release/*.exe release/*.ilk release/*.lib release/*.obj release/*.pdb
+
+E:\cairo\pixman-0.42.2\pixman>make -f Makefile.win32 "CFG=release"
+Setting MMX flag to default value 'on'... (use MMX=on or MMX=off)
+Setting SSE2 flag to default value 'on'... (use SSE2=on or SSE2=off)
+Setting SSSE3 flag to default value 'on'... (use SSSE3=on or SSSE3=off)
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman.obj" pixman.c
+pixman.c
+e:\cairo\pixman-0.42.2\pixman\pixman.c(218) : warning C4710: “clip_general_image”: 函数未内联
+e:\cairo\pixman-0.42.2\pixman\pixman.c(266) : warning C4710: “clip_general_image”: 函数未内联
+e:\cairo\pixman-0.42.2\pixman\pixman.c(284) : warning C4710: “clip_general_image”: 函数未内联
+E:\cairo\pixman-0.42.2\pixman\pixman.c : warning C4710: “clip_general_image”: 函数未内联
+E:\cairo\pixman-0.42.2\pixman\pixman.c : warning C4710: “clip_general_image”: 函数未内联
+E:\cairo\pixman-0.42.2\pixman\pixman.c : warning C4710: “clip_general_image”: 函数未内联
+E:\cairo\pixman-0.42.2\pixman\pixman.c : warning C4710: “clip_general_image”: 函数未内联
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-access.obj" pixman-access.c
+pixman-access.c
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-access-accessors.obj" pixman-access-accessors.c
+pixman-access-accessors.c
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-bits-image.obj" pixman-bits-image.c
+pixman-bits-image.c
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-combine32.obj" pixman-combine32.c
+pixman-combine32.c
+pixman-combine32.c: warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据 丢失
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-combine-float.obj" pixman-combine-float.c
+pixman-combine-float.c
+pixman-combine-float.c: warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止 数据丢失
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-conical-gradient.obj" pixman-conical-gradient.c
+pixman-conical-gradient.c
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-filter.obj" pixman-filter.c
+pixman-filter.c
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-x86.obj" pixman-x86.c
+pixman-x86.c
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-mips.obj" pixman-mips.c
+pixman-mips.c
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-arm.obj" pixman-arm.c
+pixman-arm.c
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-ppc.obj" pixman-ppc.c
+pixman-ppc.c
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-edge.obj" pixman-edge.c
+pixman-edge.c
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-edge-accessors.obj" pixman-edge-accessors.c
+pixman-edge-accessors.c
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-fast-path.obj" pixman-fast-path.c
+pixman-fast-path.c
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-glyph.obj" pixman-glyph.c
+pixman-glyph.c
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-general.obj" pixman-general.c
+pixman-general.c
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-gradient-walker.obj" pixman-gradient-walker.c
+pixman-gradient-walker.c
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-image.obj" pixman-image.c
+pixman-image.c
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-implementation.obj" pixman-implementation.c
+pixman-implementation.c
+pixman-implementation.c(418): warning C4710: “int printf(const char *const ,...)”: 函数未内联
+C:\Program Files (x86)\Windows Kits\10\include\10.0.10240.0\ucrt\stdio.h(944): note: 参见“printf”的声明
+c:\program files (x86)\windows kits\10\include\10.0.10240.0\ucrt\stdio.h(639) : warning C4710: “__local_stdio_printf_options”: 函数未内联
+E:\cairo\pixman-0.42.2\pixman\pixman-implementation.c : warning C4710: “__local_stdio_printf_options”: 函数未内联
+e:\cairo\pixman-0.42.2\pixman\pixman-implementation.c(371) : warning C4710: “printf”: 函数未内 联
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-linear-gradient.obj" pixman-linear-gradient.c
+pixman-linear-gradient.c
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-matrix.obj" pixman-matrix.c
+pixman-matrix.c
+e:\cairo\pixman-0.42.2\pixman\pixman-matrix.c(279) : warning C4710: “rounded_sdiv_128_by_49”:  函数未内联
+e:\cairo\pixman-0.42.2\pixman\pixman-matrix.c(283) : warning C4710: “rounded_sdiv_128_by_49”:  函数未内联
+e:\cairo\pixman-0.42.2\pixman\pixman-matrix.c(294) : warning C4710: “rounded_sdiv_128_by_49”:  函数未内联
+e:\cairo\pixman-0.42.2\pixman\pixman-matrix.c(298) : warning C4710: “rounded_sdiv_128_by_49”:  函数未内联
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-noop.obj" pixman-noop.c
+pixman-noop.c
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-radial-gradient.obj" pixman-radial-gradient.c
+pixman-radial-gradient.c
+pixman-radial-gradient.c: warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防 止数据丢失
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-region16.obj" pixman-region16.c
+pixman-region16.c
+pixman-region16.c(68): warning C4710: “int fprintf(FILE *const ,const char *const ,...)”: 函数未内联
+C:\Program Files (x86)\Windows Kits\10\include\10.0.10240.0\ucrt\stdio.h(824): note: 参见“fprintf”的声明
+c:\program files (x86)\windows kits\10\include\10.0.10240.0\ucrt\stdio.h(639) : warning C4710: “__local_stdio_printf_options”: 函数未内联
+E:\cairo\pixman-0.42.2\pixman\pixman-region16.c : warning C4710: “__local_stdio_printf_options”: 函数未内联
+e:\cairo\pixman-0.42.2\pixman\pixman-region.c(348) : warning C4710: “fprintf”: 函数未内联
+e:\cairo\pixman-0.42.2\pixman\pixman-region.c(349) : warning C4710: “fprintf”: 函数未内联
+e:\cairo\pixman-0.42.2\pixman\pixman-region.c(357) : warning C4710: “fprintf”: 函数未内联
+e:\cairo\pixman-0.42.2\pixman\pixman-region.c(361) : warning C4710: “fprintf”: 函数未内联
+e:\cairo\pixman-0.42.2\pixman\pixman-region.c(2681) : warning C4710: “bitmap_addrect”: 函数未内联
+e:\cairo\pixman-0.42.2\pixman\pixman-region.c(2715) : warning C4710: “bitmap_addrect”: 函数未内联
+e:\cairo\pixman-0.42.2\pixman\pixman-region.c(894) : warning C4710: “pixman_region_append_non_o ”: 函数未内联
+e:\cairo\pixman-0.42.2\pixman\pixman-region.c(896) : warning C4710: “pixman_coalesce”: 函数未内联
+e:\cairo\pixman-0.42.2\pixman\pixman-region.c(999) : warning C4710: “pixman_coalesce”: 函数未内联
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-region32.obj" pixman-region32.c
+pixman-region32.c
+pixman-region32.c(48): warning C4710: “int fprintf(FILE *const ,const char *const ,...)”: 函数未内联
+C:\Program Files (x86)\Windows Kits\10\include\10.0.10240.0\ucrt\stdio.h(824): note: 参见“fprintf”的声明
+c:\program files (x86)\windows kits\10\include\10.0.10240.0\ucrt\stdio.h(639) : warning C4710: “__local_stdio_printf_options”: 函数未内联
+E:\cairo\pixman-0.42.2\pixman\pixman-region32.c : warning C4710: “__local_stdio_printf_options”: 函数未内联
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-solid-fill.obj" pixman-solid-fill.c
+pixman-solid-fill.c
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-timer.obj" pixman-timer.c
+pixman-timer.c
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-trap.obj" pixman-trap.c
+pixman-trap.c
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-utils.obj" pixman-utils.c
+pixman-utils.c
+pixman-utils.c(331): warning C4710: “int fprintf(FILE *const ,const char *const ,...)”: 函数未内联
+C:\Program Files (x86)\Windows Kits\10\include\10.0.10240.0\ucrt\stdio.h(824): note: 参见“fprintf”的声明
+c:\program files (x86)\windows kits\10\include\10.0.10240.0\ucrt\stdio.h(639) : warning C4710: “__local_stdio_printf_options”: 函数未内联
+E:\cairo\pixman-0.42.2\pixman\pixman-utils.c : warning C4710: “__local_stdio_printf_options”:  函数未内联
+e:\cairo\pixman-0.42.2\pixman\pixman-utils.c(322) : warning C4710: “fprintf”: 函数未内联
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-mmx.obj" pixman-mmx.c
+pixman-mmx.c
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-sse2.obj" pixman-sse2.c
+pixman-sse2.c
+cl -c -nologo -I. -I.. -I../pixman -DPACKAGE=pixman-1 -DPACKAGE_VERSION="" -DPACKAGE_BUGREPORT="" -MD -O2  -w14710 -w14714 -DUSE_SSE2 -DUSE_SSSE3 -Fo"release/pixman-ssse3.obj" pixman-ssse3.c
+pixman-ssse3.c
+
+E:\cairo\pixman-0.42.2\pixman>dumpbin -headers E:\cairo\pixman-0.42.2\pixman\release\pixman-1.lib
+Microsoft (R) COFF/PE Dumper Version 14.00.24210.0
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+Dump of file E:\cairo\pixman-0.42.2\pixman\release\pixman-1.lib
+
+File Type: LIBRARY
+
+FILE HEADER VALUES
+            8664 machine (x64)
+              14 number of sections
+        63ABB780 time date stamp Wed Dec 28 11:26:56 2022
+             B31 file pointer to symbol table
+              47 number of symbols
+               0 size of optional header
+               0 characteristics
+
+SECTION HEADER #1
+.drectve name
+       0 physical address
+       0 virtual address
+      2F size of raw data
+     334 file pointer to raw data (00000334 to 00000362)
+       0 file pointer to relocation table
+       0 file pointer to line numbers
+       0 number of relocations
+       0 number of line numbers
+  100A00 flags
+         Info
+         Remove
+         1 byte align
+
+E:\cairo\pixman-0.42.2\pixman>cd ../../
+
+```
+
+
 # 75 .build cario on windows
 
-## 1.STEPS
+## 1.STEPS in CYGWIN
 ```
 1. get cario tar file 'cairo-1.16.0.tar.xz',open the folder in which contain target file;
 2. uncompress the tar file above, 
@@ -5841,10 +6191,10 @@ config.status: executing libtool commands
 6.search the builded header file and library file in the target folder which depend on the flag '--prefix' 
 7.enjoy it;
 ```
-## 2. INSTANCE
+## 2. INSTANCE in CYGWIN
 ```
 Administrator@YR170812-LMCY /cygdrive/f/cario/cairo-1.16.0/bd
-$  ../configure --prefix=/cygdrive/f/cario/install/cario --host=x86_64-w64-mingw32  png_CFLAGS='-I/cygdrive/f/cario/install/png/include' png_LIBS='-L/cygdrive/f/cario/install/png/lib  -lpng16' png_REQUIRES="libpng16" pixman_CFLAGS='-I/cygdrive/f/cario/install/pixman/include/pixman-1' pixman_LIBS='-L/cygdrive/f/cario/install/pixman/lib  -lpixman-1'  CFLAGS='-I/cygdrive/f/cario/install/zlib/include' LIBS='-L/cygdrive/f/cario/install/zlib/lib -lz' --enable-ft=no
+$  ../configure --prefix=/cygdrive/f/cario/install/cario --host=x86_64-w64-mingw32  png_CFLAGS='-I/cygdrive/f/cario/install/png/include' png_LIBS='-L/cygdrive/f/cario/install/png/lib  -lpng16' png_REQUIRES='libpng16' pixman_CFLAGS='-I/cygdrive/f/cario/install/pixman/include/pixman-1' pixman_LIBS='-L/cygdrive/f/cario/install/pixman/lib  -lpixman-1'  CFLAGS='-I/cygdrive/f/cario/install/zlib/include' LIBS='-L/cygdrive/f/cario/install/zlib/lib -lz' --enable-ft=no
 
 checking for x86_64-w64-mingw32-gcc... x86_64-w64-mingw32-gcc
 checking whether the C compiler works... yes
@@ -6101,6 +6451,451 @@ And the following internal features:
   win32 printing testing:    no (requires ghostscript)
 
 
+
+```
+
+## compile in msys64
+```
+../configure --prefix=/e/cairo/pixman --host=x86_64-pc-msys  --enable-shared --enable-static   --enable-libpng PNG_CFLAGS='-I/e/xspace/3rd/libpng/include' PNG_LIBS='-L/e/xspace/3rd/libpng/lib  -lpng16'
+
+export LIBPNG_PATH=/e/xspace/3rd/libpng
+export ZLIB_PATH=/e/xspace/3rd/zlib
+export PIXMAN_PATH=/e/xspace/3rd/pixman
+
+cd $(ROOTDIR)/cario
+mkdir build_cario
+cd build_cario
+
+../configure --prefix=/e/cairo/cario --host=x86_64-pc-msys  --enable-shared --enable-static  pixman_CFLAGS='-I/e/xspace/3rd/pixman/include' pixman_LIBS='-L/e/xspace/3rd/pixman/lib -lpixman-1'  png_CFLAGS='-I/e/xspace/3rd/libpng/include' png_LIBS='-L/e/xspace/3rd/libpng/lib  -lpng16' png_REQUIRES='libpng16' CFLAGS='-I/e/xspace/3rd/zlib/include' LIBS='-L/e/xspace/3rd/zlib/lib -lz' --enable-ft=yes  FREETYPE_CFLAGS='-I/e/xspace/3rd/freetype/include' FREETYPE_LIBS='-L/e/xspace/3rd/freetype/lib -lfreetype' --enable-qt=yes  qt_CFLAGS='-I/e/xspace/3rd/Qt5.12.6/include' qt_LIBS='-L/e/xspace/3rd/Qt5.12.6/lib -lQt5Core'
+
+make -j4
+
+
+```
+
+
+## 1.STEPS on X64 MSVC
+
+```
+1. get pixman tar file 'cairo-1.17.2.tar.gz',open the folder in which contain target file;
+2. uncompress the tar file above, 
+   tar -zxvf  cairo-1.17.2.tar.gz
+3. NOTE: if u compile pixman with the instruction 'end to end build for win32' for cario,
+   u will get the x86 static and dynamic library; 
+   in order to get the  X64 library,we should use the correct environment;
+  
+   open visual studio tools 'VS2015 x64 command prompts';
+   
+4. in vs2015 x64 command prompts window, 
+   
+   [4.1] firstly,set the environment
+   
+   [4.1.0]
+   set PATH=%PATH%;E:\msys64\usr\bin
+   
+   [4.1.1]
+   set INCLUDE=%INCLUDE%;E:\3rd\zlib\include;E:\3rd\libpng\include;E:\3rd\pixman\include;
+   set INCLUDE=%INCLUDE%;E:\cairo\cairo-1.17.2\boilerplate;E:\cairo\cairo-1.17.2\src;
+   set LIB=%LIB%;E:\3rd\zlib\lib\zlib.lib;E:\3rd\libpng\lib\libpng16.lib;E:\3rd\pixman\lib\pixman-1.lib;
+
+   [4.1.2]
+   set LIBPNG_PATH=E:\3rd\libpng
+   set ZLIB_PATH=E:\3rd\zlib
+   set PIXMAN_PATH=E:\3rd\pixman
+
+   [4.2]
+   
+   cd $(DIR)\cairo-1.17.2
+   sed s/-MD/-MT/ build\Makefile.win32.common > build\Makefile.fixed
+   move /Y build\Makefile.fixed build\Makefile.win32.common
+   
+   [4.3]
+   make -f Makefile.win32 "CFG=release" clean
+   make -f Makefile.win32 "CFG=release"
+   
+5. then in folder $(DIR)\cairo-1.17.2/src/release/ , we can get the target lib 'cairo.dll';
+   
+6. check the library with dumpbin command;
+   dumpbin -headers $(DIR)\cairo1.17.2\lib\cairo.dll
+
+7. if counter following question:
+   [7.1] $(DIR)\cairo-1.17.2\src\cairoint.h(71): fatal error C1083: 无法打开包括文件: “pixman.h”: No such file or directory
+   firstly set the environment,run steps 4 again;   [4.1.1] is important;
+   
+   
+   [7.2] LINK : fatal error LNK1181: 无法打开输入文件“../../libpng/lib/libpng16.lib”
+   in file '$(DIR)cairo-1.17.2\build\Makefile.win32.common', check the linked libraries；[4.1.2] is importtant；
+   maybe we should modify some library path in order to find the target library;
+   
+   [7.3] if cannot find make, please set make.exe into PATH;   [4.1.0] is important;
+
+```
+
+## 2. INSTANCE in  X64 MSVC
+
+```
+E:\cairo>cd cairo-1.17.2
+
+E:\cairo\cairo-1.17.2>ls
+AUTHORS           ChangeLog           ChangeLog.pre-1.4  Makefile.in     acinclude.m4     config.log    test
+BIBLIOGRAPHY      ChangeLog.pre-1.0   ChangeLog.pre-1.6  Makefile.win32  aclocal.m4       configure     util
+BUGS              ChangeLog.pre-1.10  ChangeLog.pre-1.8  NEWS            autogen.sh       configure.ac
+CODING_STYLE      ChangeLog.pre-1.12  HACKING            PORTING_GUIDE   boilerplate      dir
+COPYING           ChangeLog.pre-1.14  INSTALL            README          build            doc
+COPYING-LGPL-2.1  ChangeLog.pre-1.16  KNOWN_ISSUES       README.win32    cairo-version.h  perf
+COPYING-MPL-1.1   ChangeLog.pre-1.2   Makefile.am        RELEASING       config.h.in      src
+
+E:\cairo\cairo-1.17.2>sed s/-MD/-MT/ build\Makefile.win32.common > build\Makefile.fixed
+
+E:\cairo\cairo-1.17.2>move /Y build\Makefile.fixed build\Makefile.win32.common
+移动了         1 个文件。
+
+E:\cairo\cairo-1.17.2>
+E:\cairo\cairo-1.17.2>make -f Makefile.win32 "CFG=release" clean
+make[1]: Entering directory '/e/cairo/cairo-1.17.2/boilerplate'
+make[1]: Leaving directory '/e/cairo/cairo-1.17.2/boilerplate'
+make[1]: Entering directory '/e/cairo/cairo-1.17.2/perf'
+make[1]: Leaving directory '/e/cairo/cairo-1.17.2/perf'
+make[1]: Entering directory '/e/cairo/cairo-1.17.2/src'
+make[1]: Leaving directory '/e/cairo/cairo-1.17.2/src'
+make[1]: Entering directory '/e/cairo/cairo-1.17.2/test'
+make[1]: Leaving directory '/e/cairo/cairo-1.17.2/test'
+
+E:\cairo\cairo-1.17.2>make -f Makefile.win32 "CFG=release"
+
+make[1]: Entering directory '/e/cairo/cairo-1.17.2/src'
+
+cairo-analysis-surface.c
+cairo-arc.c
+cairo-array.c
+cairo-atomic.c
+cairo-base64-stream.c
+cairo-base85-stream.c
+cairo-bentley-ottmann-rectangular.c
+cairo-bentley-ottmann-rectilinear.c
+cairo-bentley-ottmann.c
+cairo-bentley-ottmann.c: warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+cairo-botor-scan-converter.c
+cairo-botor-scan-converter.c: warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式 以防止数据丢失
+cairo-boxes-intersect.c
+cairo-boxes.c
+cairo-cache.c
+cairo-clip-boxes.c
+cairo-clip-polygon.c
+cairo-clip-region.c
+cairo-clip-surface.c
+cairo-clip-tor-scan-converter.c
+cairo-clip.c
+cairo-color.c
+cairo-composite-rectangles.c
+cairo-compositor.c
+cairo-contour.c
+cairo-damage.c
+cairo-debug.c
+cairo-default-context.c
+cairo-device.c
+cairo-error.c
+cairo-fallback-compositor.c
+cairo-fixed.c
+cairo-font-face-twin-data.c
+cairo-font-face-twin.c
+cairo-font-face.c
+cairo-font-options.c
+cairo-freed-pool.c
+cairo-freelist.c
+cairo-gstate.c
+cairo-hash.c
+cairo-hull.c
+cairo-image-compositor.c
+cairo-image-info.c
+cairo-image-source.c
+cairo-image-surface.c
+cairo-line.c
+cairo-line.c: warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+cairo-lzw.c
+cairo-mask-compositor.c
+cairo-matrix.c
+cairo-mempool.c
+cairo-mempool.c(292): warning C4311: “类型转换”: 从“void *”到“unsigned long”的指针截断
+cairo-mempool.c(299): warning C4311: “类型转换”: 从“void *”到“unsigned long”的指针截断
+cairo-mesh-pattern-rasterizer.c
+cairo-misc.c
+cairo-mono-scan-converter.c
+cairo-mutex.c
+cairo-no-compositor.c
+cairo-observer.c
+cairo-output-stream.c
+cairo-paginated-surface.c
+cairo-path-bounds.c
+cairo-path-fill.c
+cairo-path-fixed.c
+cairo-path-in-fill.c
+cairo-path-in-fill.c: warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数 据丢失
+cairo-path-stroke-boxes.c
+cairo-path-stroke-boxes.c: warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+cairo-path-stroke-polygon.c
+cairo-path-stroke-traps.c
+cairo-path-stroke-tristrip.c
+cairo-path-stroke.c
+cairo-path.c
+cairo-pattern.c
+cairo-pen.c
+cairo-pen.c: warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+cairo-polygon-intersect.c
+cairo-polygon-intersect.c: warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+cairo-polygon-reduce.c
+cairo-polygon-reduce.c: warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止 数据丢失
+cairo-polygon.c
+cairo-raster-source-pattern.c
+cairo-recording-surface.c
+cairo-rectangle.c
+cairo-rectangular-scan-converter.c
+cairo-region.c
+cairo-rtree.c
+cairo-scaled-font.c
+cairo-scaled-font.c(639): warning C4311: “类型转换”: 从“cairo_font_face_t *”到“unsigned long”的指针截断
+cairo-scaled-font.c(2882): warning C4311: “类型转换”: 从“cairo_scaled_font_t *”到“unsigned long”的指针截断
+cairo-shape-mask-compositor.c
+cairo-slope.c
+cairo-spans-compositor.c
+cairo-spans.c
+cairo-spline.c
+cairo-spline.c: warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+cairo-stroke-dash.c
+cairo-stroke-style.c
+cairo-surface-clipper.c
+cairo-surface-fallback.c
+cairo-surface-observer.c
+cairo-surface-offset.c
+cairo-surface-snapshot.c
+cairo-surface-subsurface.c
+cairo-surface-wrapper.c
+cairo-surface.c
+cairo-time.c
+cairo-tor-scan-converter.c
+cairo-tor22-scan-converter.c
+cairo-toy-font-face.c
+cairo-traps-compositor.c
+cairo-traps.c
+cairo-tristrip.c
+cairo-unicode.c
+cairo-user-font.c
+cairo-version.c
+cairo-wideint.c
+cairo.c
+cairo-cff-subset.c
+cairo-scaled-font-subsets.c
+cairo-scaled-font-subsets.c(258): warning C4311: “类型转换”: 从“cairo_scaled_font_t *”到“unsigned long”的指针截断
+cairo-scaled-font-subsets.c(263): warning C4311: “类型转换”: 从“cairo_font_face_t *”到“unsigned long”的指针截断
+cairo-truetype-subset.c
+cairo-type1-fallback.c
+cairo-type1-glyph-names.c
+cairo-type1-subset.c
+cairo-type3-glyph-surface.c
+cairo-pdf-operators.c
+cairo-pdf-shading.c
+cairo-tag-attributes.c
+cairo-deflate-stream.c
+cairo-png.c
+cairo-script-surface.c
+cairo-script-surface.c(3050): warning C4312: “类型转换”: 从“unsigned long”转换到更大的“void *”
+cairo-script-surface.c(3098): warning C4312: “类型转换”: 从“unsigned long”转换到更大的“void *”
+cairo-script-surface.c(3398): warning C4311: “类型转换”: 从“void *”到“unsigned long”的指针截断
+cairo-script-surface.c(3469): warning C4311: “类型转换”: 从“void *”到“unsigned long”的指针截断
+cairo-script-surface.c(3478): warning C4311: “类型转换”: 从“void *”到“unsigned long”的指针截断
+cairo-ps-surface.c
+cairo-pdf-surface.c
+cairo-pdf-interchange.c
+cairo-tag-stack.c
+cairo-svg-surface.c
+
+LINK : fatal error LNK1181: 无法打开输入文件“../../libpng/lib/libpng16.lib”
+make[1]: *** [Makefile.win32:16: release/cairo.dll] Error 157
+make[1]: Leaving directory '/e/cairo/cairo-1.17.2/src'
+make: *** [Makefile.win32:12: cairo] Error 2
+
+E:\cairo\cairo-1.17.2>
+E:\cairo\cairo-1.17.2>set LIB=%LIB%;E:\3rd\zlib\lib\zlib.lib;E:\3rd\libpng\lib\libpng16.lib;E:\3rd\pixman\lib\libpixman-1.lib;
+
+E:\cairo\cairo-1.17.2>make -f Makefile.win32 "CFG=release"
+
+make[1]: Entering directory '/e/cairo/cairo-1.17.2/src'
+
+LINK : fatal error LNK1181: 无法打开输入文件“../../libpng/lib/libpng16.lib”
+make[1]: *** [Makefile.win32:16: release/cairo.dll] Error 157
+make[1]: Leaving directory '/e/cairo/cairo-1.17.2/src'
+make: *** [Makefile.win32:12: cairo] Error 2
+
+
+E:\cairo\cairo-1.17.2>echo %LIBPNG_PATH%
+%LIBPNG_PATH%
+
+E:\cairo\cairo-1.17.2>set LIBPNG_PATH=E:\3rd\libpng
+
+E:\cairo\cairo-1.17.2>set ZLIB_PATH=E:\3rd\zlib
+
+E:\cairo\cairo-1.17.2>set PIXMAN_PATH=E:\3rd\pixman
+
+E:\cairo\cairo-1.17.2>echo %LIBPNG_PATH%
+E:\3rd\libpng
+
+E:\cairo\cairo-1.17.2>make -f Makefile.win32 "CFG=release"
+
+make[1]: Entering directory '/e/cairo/cairo-1.17.2/src'
+
+  正在创建库 release/cairo.lib 和对象 release/cairo.exp
+LINK : warning LNK4098: 默认库“MSVCRT”与其他库的使用冲突；请使用 /NODEFAULTLIB:library
+libpixman-1.lib(pixman-access-accessors.obj) : warning LNK4049: 已导入本地定义的符号 free
+libpixman-1.lib(pixman-conical-gradient.obj) : warning LNK4049: 已导入本地定义的符号 free
+libpixman-1.lib(pixman-ssse3.obj) : warning LNK4049: 已导入本地定义的符号 free
+libpixman-1.lib(pixman-access.obj) : warning LNK4049: 已导入本地定义的符号 free
+libpixman-1.lib(pixman-general.obj) : warning LNK4049: 已导入本地定义的符号 free
+libpixman-1.lib(pixman-fast-path.obj) : warning LNK4049: 已导入本地定义的符号 free
+libpixman-1.lib(pixman-region16.obj) : warning LNK4049: 已导入本地定义的符号 free
+libpixman-1.lib(pixman-linear-gradient.obj) : warning LNK4049: 已导入本地定义的符号 free
+libpixman-1.lib(pixman-radial-gradient.obj) : warning LNK4217: 本地定义的符号 free 在函数 radial_write_color 中导入
+libpixman-1.lib(pixman-region32.obj) : warning LNK4049: 已导入本地定义的符号 free
+libpixman-1.lib(pixman-utils.obj) : warning LNK4049: 已导入本地定义的符号 free
+libpixman-1.lib(pixman.obj) : warning LNK4217: 本地定义的符号 free 在函数 pixman_image_fill_rectangles 中导入
+libpixman-1.lib(pixman-bits-image.obj) : warning LNK4049: 已导入本地定义的符号 free
+libpixman-1.lib(pixman-image.obj) : warning LNK4049: 已导入本地定义的符号 free
+libpixman-1.lib(pixman-trap.obj) : warning LNK4049: 已导入本地定义的符号 free
+libpixman-1.lib(pixman-bits-image.obj) : warning LNK4217: 本地定义的符号 calloc 在函数 _pixman_bits_image_init 中导入
+libpixman-1.lib(pixman-utils.obj) : warning LNK4049: 已导入本地定义的符号 malloc
+libpixman-1.lib(pixman-fast-path.obj) : warning LNK4049: 已导入本地定义的符号 malloc
+libpixman-1.lib(pixman-region16.obj) : warning LNK4217: 本地定义的符号 malloc 在函数 pixman_region_intersect 中导入
+libpixman-1.lib(pixman-ssse3.obj) : warning LNK4049: 已导入本地定义的符号 malloc
+libpixman-1.lib(pixman-bits-image.obj) : warning LNK4217: 本地定义的符号 malloc 在函数 _pixman_bits_image_init 中导入
+libpixman-1.lib(pixman-image.obj) : warning LNK4217: 本地定义的符号 malloc 在函数 _pixman_image_fini 中导入
+libpixman-1.lib(pixman-region32.obj) : warning LNK4049: 已导入本地定义的符号 malloc
+libpixman-1.lib(pixman-implementation.obj) : warning LNK4049: 已导入本地定义的符号 malloc
+libpixman-1.lib(pixman-access.obj) : warning LNK4049: 已导入本地定义的符号 _wassert
+libpixman-1.lib(pixman-access-accessors.obj) : warning LNK4049: 已导入本地定义的符号 _wassert
+libpixman-1.lib(pixman-bits-image.obj) : warning LNK4217: 本地定义的符号 _wassert 在函数 __bits_image_fetch_affine_no_alpha 中导入
+libpixman-1.lib(pixman-image.obj) : warning LNK4049: 已导入本地定义的符号 _wassert
+libpixman-1.lib(pixman-matrix.obj) : warning LNK4049: 已导入本地定义的符号 _wassert
+libpixman-1.lib(pixman-implementation.obj) : warning LNK4049: 已导入本地定义的符号 _wassert
+libpixman-1.lib(pixman-region32.obj) : warning LNK4217: 本地定义的符号 __acrt_iob_func 在函数 pixman_region32_print 中导入
+libpixman-1.lib(pixman-implementation.obj) : warning LNK4049: 已导入本地定义的符号 __acrt_iob_func
+libpixman-1.lib(pixman-utils.obj) : warning LNK4049: 已导入本地定义的符号 __acrt_iob_func
+libpixman-1.lib(pixman-region16.obj) : warning LNK4217: 本地定义的符号 __acrt_iob_func 在函数 pixman_region_init_from_image 中导入
+libpixman-1.lib(pixman-region32.obj) : warning LNK4217: 本地定义的符号 __stdio_common_vfprintf 在函数 _vfprintf_l 中导入
+libpixman-1.lib(pixman-implementation.obj) : warning LNK4049: 已导入本地定义的符号 __stdio_common_vfprintf
+libpixman-1.lib(pixman-utils.obj) : warning LNK4049: 已导入本地定义的符号 __stdio_common_vfprintf
+libpixman-1.lib(pixman-region16.obj) : warning LNK4217: 本地定义的符号 __stdio_common_vfprintf 在函数 pixman_region_init_from_image 中导入
+libpixman-1.lib(pixman-region32.obj) : warning LNK4217: 本地定义的符号 memmove 在函数 pixman_op 中导入
+libpixman-1.lib(pixman-region16.obj) : warning LNK4217: 本地定义的符号 memmove 在函数 _vfprintf_l 中导入
+libpixman-1.lib(pixman-sse2.obj) : warning LNK4049: 已导入本地定义的符号 memmove
+libpixman-1.lib(pixman-region32.obj) : warning LNK4217: 本地定义的符号 realloc 在函数 pixman_op 中导入
+libpixman-1.lib(pixman-region16.obj) : warning LNK4217: 本地定义的符号 realloc 在函数 pixman_coalesce 中导入
+libpixman-1.lib(pixman-implementation.obj) : warning LNK4217: 本地定义的符号 getenv 在函数 _pixman_disabled 中导入
+libpixman-1.lib(pixman-implementation.obj) : warning LNK4217: 本地定义的符号 strchr 在函数 _pixman_disabled 中导入
+libpixman-1.lib(pixman-implementation.obj) : warning LNK4217: 本地定义的符号 strncmp 在函数 _pixman_disabled 中导入
+cairo-freed-pool.obj : warning LNK4221: 此对象文件未定义任何之前未定义的公共符号，因此任何耗用此库的链接操作都不会使用此文件
+cairo-fixed.obj : warning LNK4221: 此对象文件未定义任何之前未定义的公共符号，因此任何耗用此库的链接操作都不会使用此文件
+Built successfully!
+You should copy the following files to a proper place now:
+
+        cairo-version.h (NOTE: toplevel, not the src/cairo-version.h one!)
+        src/cairo-features.h
+        src/cairo.h
+        src/cairo-deprecated.h
+        src/cairo-win32.h
+        src/cairo-script.h
+        src/cairo-ps.h
+        src/cairo-pdf.h
+        src/cairo-svg.h
+        src/release/cairo.dll
+        src/release/cairo-static.lib
+make[1]: Leaving directory '/e/poppler/cairo-1.17.2/src'
+
+E:\cairo\cairo-1.17.2>dumpbin -headers E:\3rd\cairo1.17.2\lib\cairo.dll
+Microsoft (R) COFF/PE Dumper Version 14.00.24210.0
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+
+Dump of file E:\3rd\cairo1.17.2\lib\cairo.dll
+
+PE signature found
+
+File Type: DLL
+
+FILE HEADER VALUES
+            8664 machine (x64)
+               7 number of sections
+        63ABBA66 time date stamp Wed Dec 28 11:39:18 2022
+               0 file pointer to symbol table
+               0 number of symbols
+              F0 size of optional header
+            2022 characteristics
+                   Executable
+                   Application can handle large (>2GB) addresses
+                   DLL
+
+
+
+E:\cairo\cairo-1.17.2>dumpbin -headers E:\3rd\cairo1.17.2\lib\cairo.lib
+Microsoft (R) COFF/PE Dumper Version 14.00.24210.0
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+
+Dump of file E:\3rd\cairo1.17.2\lib\cairo.lib
+
+File Type: LIBRARY
+
+FILE HEADER VALUES
+            8664 machine (x64)
+               3 number of sections
+        63ABBA65 time date stamp Wed Dec 28 11:39:17 2022
+             107 file pointer to symbol table
+               8 number of symbols
+               0 size of optional header
+               0 characteristics
+
+SECTION HEADER #1
+.debug$S name
+       0 physical address
+       0 virtual address
+      3F size of raw data
+      8C file pointer to raw data (0000008C to 000000CA)
+       0 file pointer to relocation table
+       0 file pointer to line numbers
+       0 number of relocations
+       0 number of line numbers
+42100040 flags
+         Initialized Data
+         Discardable
+         1 byte align
+         Read Only
+
+E:\cairo\cairo-1.17.2>dumpbin -headers E:\3rd\cairo1.17.2\lib\cairo-static.lib
+Microsoft (R) COFF/PE Dumper Version 14.00.24210.0
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+
+Dump of file E:\3rd\cairo1.17.2\lib\cairo-static.lib
+
+File Type: LIBRARY
+
+FILE HEADER VALUES
+            8664 machine (x64)
+              4D number of sections
+        63ABB774 time date stamp Wed Dec 28 11:26:44 2022
+            3289 file pointer to symbol table
+             10D number of symbols
+               0 size of optional header
+               0 characteristics
+
+SECTION HEADER #1
+.drectve name
+       0 physical address
+       0 virtual address
+      2F size of raw data
+     C1C file pointer to raw data (00000C1C to 00000C4A)
+       0 file pointer to relocation table
+       0 file pointer to line numbers
+       0 number of relocations
+       0 number of line numbers
 
 ```
 
@@ -6548,5 +7343,29 @@ void DeleteDirectoryData(string dir)
 }
 
 ```
+
+# 83 compile poppler with cmake gui
+
+```
+   Unsupported CMAKE_BUILD_TYPE:
+   1. set CMAKE_BUILD_TYPE=Release
+   2. set FREETYPE_LIBRARY=E:/3rd/freetype/include/freetype
+      Set FREETYPE_INCLUDE_DIR_freetype2=E:/3rd/freetype/include/freetype
+	  Set FREETYPE_INCLUDE_DIR_ft2build=E:/3rd/freetype/include
+   3. JPEG_LIBRARY=E:/3rd/jpeg/lib/libjpeg.lib
+      ZLIB_LIBRARY=E:/3rd/zlib/lib/zlib.lib
+      PNG_LIBRARY=E:/3rd/png/lib/libpng16.lib
+      PNG_PNG_INCLUDE_DIR=E:/3rd/png/include
+   
+   4. Qt5Core_DIR = E:\3rd\Qt5.12.6\lib\cmake\Qt5Core
+      Qt5Gui_DIR  = E:\3rd\Qt5.12.6\lib\cmake\Qt5Gui
+	  
+   5. OPENJPEG_DIR=E:\3rd\openjpeg-v2.5.0\lib\openjpeg-2.5
+   6. GLIB2_LIBRARIES=E:/3rd/glib/glib.lib
+      CURL_LIBRARY=E:/3rd/curl/curl.lib
+	  
+```
+
+
 -----
 Copyright 2020 - 2022 @ [cheldon](https://github.com/cheldon-cn/).
