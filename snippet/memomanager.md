@@ -6477,10 +6477,10 @@ make -j4
 ## 1.STEPS on X64 MSVC
 
 ```
-1. get pixman tar file 'cairo-1.17.2.tar.gz',open the folder in which contain target file;
+1. get cairo tar file 'cairo-1.17.2.tar.gz',open the folder in which contain target file;
 2. uncompress the tar file above, 
    tar -zxvf  cairo-1.17.2.tar.gz
-3. NOTE: if u compile pixman with the instruction 'end to end build for win32' for cario,
+3. NOTE: if u compile cairo with the instruction 'end to end build for win32' for cario,
    u will get the x86 static and dynamic library; 
    in order to get the  X64 library,we should use the correct environment;
   
@@ -6506,7 +6506,7 @@ make -j4
    [4.2]
    
    cd $(DIR)\cairo-1.17.2
-   sed s/-MD/-MT/ build\Makefile.win32.common > build\Makefile.fixed
+   sed s/-MD/ build\Makefile.win32.common > build\Makefile.fixed
    move /Y build\Makefile.fixed build\Makefile.win32.common
    
    [4.3]
@@ -6528,7 +6528,36 @@ make -j4
    maybe we should modify some library path in order to find the target library;
    
    [7.3] if cannot find make, please set make.exe into PATH;   [4.1.0] is important;
+   
+8. support for the freetype font backend
+   enable-ft  CAIRO_HAS_FT_FONT
+	
+	[8.1] in order to find some header files in freetype,please set following environment; 
+	
+	set INCLUDE=%INCLUDE%;$(DIR)\freetype\include;
+    set LIB=%LIB%;$(DIR)\freetype\lib\freetype.lib;
+	
+    [8.2] Edit build/Makefile.win32.features to enable features to build
+    change from ‘CAIRO_HAS_FT_FONT=0’ to 'CAIRO_HAS_FT_FONT=1'
+	
+	[8.3] Edit build/Makefile.win32.common for customization
+	open file：$(DIR)/build/Makefile.win32.common, add followings:
+	
+	ifeq ($(FREETYPE_PATH),)
+	FREETYPE_PATH := $(top_builddir)/../freetype
+	endif
+	FREETYPE_CFLAGS := -I$(FREETYPE_PATH)/include/
+	FREETYPE_LIBS := $(FREETYPE_PATH)/lib/libfreetype.lib
+	CAIRO_LIBS += $(FREETYPE_LIBS)
+	
+	DEFAULT_CFLAGS = -nologo $(CFG_CFLAGS)
+	DEFAULT_CFLAGS += -I. -I$(top_srcdir) -I$(top_srcdir)/src
+	DEFAULT_CFLAGS += $(PIXMAN_CFLAGS) $(LIBPNG_CFLAGS) $(ZLIB_CFLAGS) $(FREETYPE_CFLAGS)
+	
+	save the changes; then make again;
 
+9. for error LNK2001:无法解析的外部符号__imp_strstr
+   remove /-MT ,use /-MD only;
 ```
 
 ## 2. INSTANCE in  X64 MSVC
@@ -7365,6 +7394,62 @@ void DeleteDirectoryData(string dir)
       CURL_LIBRARY=E:/3rd/curl/curl.lib
 	  
 ```
+
+# 84. compile libspectre on X64 MSVC
+
+
+## compile in msys64
+```
+
+
+export LIBPNG_PATH=/e/xspace/3rd/libpng
+export ZLIB_PATH=/e/xspace/3rd/zlib
+export PIXMAN_PATH=/e/xspace/3rd/pixman
+
+
+../configure --prefix=/e/cairo/cario --host=x86_64-pc-msys  --enable-shared --enable-static  pixman_CFLAGS='-I/e/xspace/3rd/pixman/include' pixman_LIBS='-L/e/xspace/3rd/pixman/lib -lpixman-1'  png_CFLAGS='-I/e/xspace/3rd/libpng/include' png_LIBS='-L/e/xspace/3rd/libpng/lib  -lpng16' png_REQUIRES='libpng16' CFLAGS='-I/e/xspace/3rd/zlib/include' LIBS='-L/e/xspace/3rd/zlib/lib -lz' --enable-ft=yes  FREETYPE_CFLAGS='-I/e/xspace/3rd/freetype/include' FREETYPE_LIBS='-L/e/xspace/3rd/freetype/lib -lfreetype' --enable-qt=yes  qt_CFLAGS='-I/e/xspace/3rd/Qt5.12.6/include' qt_LIBS='-L/e/xspace/3rd/Qt5.12.6/lib -lQt5Core'
+
+
+
+```
+
+
+## 1.STEPS on X64 MSVC
+
+```
+1. get pixman tar file 'libspectre-0.2.11.tar.gz',open the folder in which contain target file;
+2. uncompress the tar file above, 
+   tar -zxvf  libspectre-0.2.11.tar.gz
+3. NOTE: if u compile pixman with the instruction 'end to end build for win32' for cario,
+   u will get the x86 static and dynamic library; 
+   in order to get the  X64 library,we should use the correct environment;
+  
+   open visual studio tools 'VS2015 x64 command prompts';
+   
+4. in vs2015 x64 command prompts window, 
+   
+   [4.1] firstly,set the environment
+   
+   set PATH=%PATH%;E:\msys64\usr\bin
+   
+   [4.2]
+   cd $(ROOTDIR)/libspectre
+   mkdir build_libspectre
+   cd build_libspectre
+   
+   bash ../configure --prefix=/e/libspectre/ --host=x86_64-pc-msys  --enable-shared --enable-static  CFLAGS='-I/e/xspace/3rd/gs10/include' LIBS='-L/e/xspace/3rd/gs10.00.0/bin  -lgs' CAIRO_CFLAGS='-I/e/xspace/3rd/cairo1.17.2/include' CAIRO_LIBS='-L/e/xspace/3rd/cairo1.17.2/lib  -lcairo' 
+   
+   
+   make -j4
+
+5. then in folder $(DIR)\libspectre-0.2.11/src/release/ , we can get the target lib 'cairo.dll';
+   
+6. check the library with dumpbin command;
+   dumpbin -headers $(DIR)\libspectre-0.2.11\lib\cairo.dll
+   
+
+# 85. compile libspectre on X64 MSVC
+
 
 
 -----
