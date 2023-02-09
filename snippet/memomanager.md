@@ -7413,8 +7413,18 @@ export PIXMAN_PATH=/e/xspace/3rd/pixman
 
 ```
 
+## method 1.STEPS on X64 MSVC
 
-## 1.STEPS on X64 MSVC
+
+```
+1. open msvc,add a new empty project named 'libspectre';
+2. in project '',append the header files and source files which located in folder 'libspectre-0.2.12\libspectre',
+3. maybe we should check the version file 'spectre-version.h',this file based on file 'spectre-version.h.in' can be created by configue in method 2;
+4. set the project target dll
+5. then we can get the file 'libspectre.lib' and 'libspectre.dll'
+```
+
+## method 2.STEPS on X64 MSVC
 
 ```
 1. get pixman tar file 'libspectre-0.2.11.tar.gz',open the folder in which contain target file;
