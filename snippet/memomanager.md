@@ -7458,8 +7458,165 @@ export PIXMAN_PATH=/e/xspace/3rd/pixman
    dumpbin -headers $(DIR)\libspectre-0.2.11\lib\cairo.dll
    
 
-# 85. compile libspectre on X64 MSVC
+```
+# 85. import osm data into postgreSQL with osm2pgsql
 
+
+## STEPS
+
+```
+
+
+1.put the postgresql bin dir into PATH;
+  then we can find createdb command in cmd dialog;
+
+2.create datebase in command dialog
+  createdb -U postgres osm_china
+
+3.create extension
+
+3.1 with Navicat link postgreSQL and load database osm_china,new search command,in command dlg,put the Following string
+   CREATE EXTENSION postgis; 
+   the RUN it；in the information dialog,can see 'ok';
+   
+3.2 with command
+  psql -U postgres -d osm_wh -f E:\postgresql-12.1-3\pgsql\share\contrib\postgis-3.0\postgis.sql
+  psql -U postgres -d osm_wh -f E:\postgresql-12.1-3\pgsql\share\contrib\postgis-3.0\spatial_ref_sys.sql
+	
+4.0 import osm datas; 
+
+osm2pgsql -d osm_china -U postgres -P 5432 -C 12000 -S "F:/osm2pgsql-bin/default.style" F:/osmdata/wh-latest.osm.pbf
+ ```
+
+## NOTE:
+
+  method 3.2 DO NOT create postgis EXtension well;perhaps need other commands besides the two above;
+  method 3.1 DO Create postgis extension well;
+ 
+  Because when import osm data with method 3.2,we crush error:
+  
+  ```
+	F:\osm2pgsql-bin>osm2pgsql -d osm_wh -U postgres -P 5432 -C 12000 -S "F:/osm2pgsql-bin/default.style" F:/osmdata/wh-latest.osm.pbf
+    2023-02-28 15:39:18  osm2pgsql version 1.8.1
+    2023-02-28 15:39:18  ERROR: The postgis extension is not enabled on the database 'osm_wh'. Are you using the correct database? Enable with 'CREATE EXTENSION postgis;'
+ ```
+
+when import osm data with method 3.1,we import well:
+
+osm2pgsql -d osm_china -U postgres -P 5432 -C 12000 -S "F:/osm2pgsql-bin/default.style" F:/osmdata/wh-latest.osm.pbf
+
+```
+F:\osm2pgsql-bin>osm2pgsql -d osm_china -U postgres -P 5432 -C 12000 -S "F:/osm2pgsql-bin/default.style" F:/osmdata/wh-latest.osm.pbf
+2023-02-28 15:40:41  osm2pgsql version 1.8.1
+2023-02-28 15:40:41  Database version: 12.1
+2023-02-28 15:40:41  PostGIS version: 3.0
+2023-02-28 15:40:42  Setting up table 'planet_osm_point'
+2023-02-28 15:40:42  Setting up table 'planet_osm_line'
+2023-02-28 15:40:42  Setting up table 'planet_osm_polygon'
+2023-02-28 15:40:42  Setting up table 'planet_osm_roads'
+
+2023-02-28 15:40:46  Reading input files done in 3s.
+2023-02-28 15:40:46    Processed 1631766 nodes in 0s - 1632k/s
+2023-02-28 15:40:46    Processed 139513 ways in 1s - 140k/s
+2023-02-28 15:40:46    Processed 461 relations in 2s - 230/s
+2023-02-28 15:40:48  Clustering table 'planet_osm_line' by geometry...
+2023-02-28 15:40:48  Clustering table 'planet_osm_polygon' by geometry...
+2023-02-28 15:40:48  Clustering table 'planet_osm_point' by geometry...
+2023-02-28 15:40:48  Clustering table 'planet_osm_roads' by geometry...
+2023-02-28 15:40:49  Creating geometry index on table 'planet_osm_point'...
+2023-02-28 15:40:49  Creating geometry index on table 'planet_osm_roads'...
+2023-02-28 15:40:49  Analyzing table 'planet_osm_roads'...
+2023-02-28 15:40:49  Analyzing table 'planet_osm_point'...
+2023-02-28 15:40:49  All postprocessing on table 'planet_osm_point' done in 1s.
+2023-02-28 15:40:50  Creating geometry index on table 'planet_osm_line'...
+2023-02-28 15:40:50  Analyzing table 'planet_osm_line'...
+2023-02-28 15:40:50  All postprocessing on table 'planet_osm_line' done in 2s.
+2023-02-28 15:40:51  Creating geometry index on table 'planet_osm_polygon'...
+2023-02-28 15:40:52  Analyzing table 'planet_osm_polygon'...
+2023-02-28 15:40:52  All postprocessing on table 'planet_osm_polygon' done in 4s
+.
+2023-02-28 15:40:52  All postprocessing on table 'planet_osm_roads' done in 1s.
+2023-02-28 15:40:52  osm2pgsql took 11s overall.
+```
+
+
+## createdb options and osm2pgsql options
+```
+F:\osm2pgsql-bin>createdb --help
+createdb 创建一个 PostgreSQL 数据库.
+
+使用方法:
+  createdb [选项]... [数据库名称] [描述]
+
+选项:
+  -D, --tablespace=TABLESPACE  数据库默认表空间
+  -e, --echo                   显示发送到服务端的命令
+  -E, --encoding=ENCODING      数据库编码
+  -l, --locale=LOCALE          数据库的本地化设置
+      --lc-collate=LOCALE      数据库的LC_COLLATE设置
+      --lc-ctype=LOCALE        数据库的LC_CTYPE设置
+  -O, --owner=OWNER            新数据库的所属用户
+  -T, --template=TEMPLATE      要拷贝的数据库模板
+  -V, --version                输出版本信息, 然后退出
+  -?, --help                   显示此帮助, 然后退出
+
+联接选项:
+  -h, --host=HOSTNAME          数据库服务器所在机器的主机名或套接字目录
+  -p, --port=PORT              数据库服务器端口号
+  -U, --username=USERNAME      联接的用户名
+  -w, --no-password            永远不提示输入口令
+  -W, --password               强制提示输入口令
+  --maintenance-db=DBNAME      更改维护数据库
+
+默认情况下, 以当前用户的用户名创建数据库.
+
+臭虫报告至 <pgsql-bugs@lists.postgresql.org>.
+
+F:\osm2pgsql-bin>osm2pgsql --help
+2023-02-28 15:51:50  osm2pgsql version 1.8.1
+
+Usage: osm2pgsql [OPTIONS] OSM-FILE...
+
+Import data from the OSM file(s) into a PostgreSQL database.
+
+Full documentation is available at https://osm2pgsql.org/
+
+Common options:
+    -a|--append     Update existing osm2pgsql database with data from file.
+    -c|--create     Import OSM data from file into database. This is the
+                    default if --append is not specified.
+    -O|--output=OUTPUT  Set output. Options are:
+                    pgsql - Output to a PostGIS database (default)
+                    flex - More flexible output to PostGIS database
+                    gazetteer - Output to a PostGIS database for Nominatim
+                                (deprecated)
+                    null - No output. Used for testing.
+    -S|--style=FILE  Location of the style file. Defaults to
+                    'default.style'.
+    -k|--hstore     Add tags without column to an additional hstore column.
+       --tag-transform-script=SCRIPT  Specify a Lua script to handle tag
+                    filtering and normalisation (pgsql output only).
+    -s|--slim       Store temporary data in the database. This switch is
+                    required if you want to update with --append later.
+        --drop      Only with --slim: drop temporary tables after import
+                    (no updates are possible).
+    -C|--cache=SIZE  Use up to SIZE MB for caching nodes (default: 800).
+    -F|--flat-nodes=FILE  Specifies the file to use to persistently store node
+                    information in slim mode instead of in PostgreSQL.
+                    This is a single large file (> 50GB). Only recommended
+                    for full planet imports. Default is disabled.
+
+Database options:
+    -d|--database=DB  The name of the PostgreSQL database to connect to or
+                    a PostgreSQL conninfo string.
+    -U|--username=NAME  PostgreSQL user name.
+    -W|--password   Force password prompt.
+    -H|--host=HOST  Database server host name or socket location.
+    -P|--port=PORT  Database server port.
+
+Run 'osm2pgsql --help --verbose' (-h -v) for a full list of options.
+
+```
 
 
 -----

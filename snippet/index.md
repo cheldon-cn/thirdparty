@@ -126,7 +126,7 @@
 - [81. locale::facet::_S_create_c_locale name not valid](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#81--localefacet_s_create_c_locale-name-not-valid)
 - [82. Delete data in Directory and sub directory](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#82--delete-data-in-directory-and-sub-directory)
 - [83. compile poppler with cmake gui](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#83-compile-poppler-with-cmake-gui)
-- [84. compile libspectre on X64 MSVC](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#)
+- [84. compile libspectre on X64 MSVC](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#84-compile-libspectre-on-x64-msvc)
 - [85. list](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#)
 - [86. list](https://github.com/cheldon-cn/thirdparty/blob/main/snippet/memomanager.md#)
 
