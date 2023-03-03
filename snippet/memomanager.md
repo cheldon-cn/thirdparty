@@ -7466,14 +7466,20 @@ export PIXMAN_PATH=/e/xspace/3rd/pixman
 
 ```
 
-
 1.put the postgresql bin dir into PATH;
   then we can find createdb command in cmd dialog;
 
 2.create datebase in command dialog
   createdb -U postgres osm_china
 
+  or open 'pgAdmin' create database
+
 3.create extension
+
+3.0 with 'pgAdmin'
+    in pgAdmin, select database, right click 'Query Tool', then open query editor ,in editor ,input 
+	CREATE EXTENSION postgis;
+	then run it;
 
 3.1 with Navicat link postgreSQL and load database osm_china,new search command,in command dlg,put the Following string
    CREATE EXTENSION postgis; 
@@ -7492,7 +7498,8 @@ osm2pgsql -d osm_china -U postgres -P 5432 -C 12000 -S "F:/osm2pgsql-bin/default
 
   method 3.2 DO NOT create postgis EXtension well;perhaps need other commands besides the two above;
   method 3.1 DO Create postgis extension well;
- 
+  method 3.0 DO Create postgis extension well;method 3.0 is recommended;
+
   Because when import osm data with method 3.2,we crush error:
   
   ```
@@ -7618,6 +7625,97 @@ Run 'osm2pgsql --help --verbose' (-h -v) for a full list of options.
 
 ```
 
+# 86. Exclude segments
+
+
+```
+
+ /*   orgSeg                   |------------------|
+  *   excludeSeg    |----------------------------------------|   case 1
+  *   excludeSeg    |------|                                     case 2
+  *   excludeSeg                                      |------|   case 2
+  *   excludeSeg    |-----------------|                          case 3
+  *   excludeSeg                           |-----------------|   case 4
+  *   excludeSeg                  |-----------|                  case 5
+  */
+
+struct segment
+{
+	bool operator < (const segment& seg)
+	{
+		return min < seg.max;
+	}
+	int min;
+	int max;
+};
+
+/// @brief 计算从原始区间段中排除指定区间段后的结果
+///
+/// @param [in] orgSegs     original segments
+/// @param [in] excludeSegs some segments which will be excluded
+///
+/// @return the segments after exclude excludeSegs
+
+std::vector<segment> ExcludeSegs( const std::vector<segment>& orgSegs,const std::vector<segment>& excludeSegs )
+{
+	std::vector<segment> org = orgSegs;
+	std::vector<segment> segsRtn;
+	segment         seg;
+	for (int jj = 0; jj < excludeSegs.size(); ++jj)
+	{
+		segsRtn.clear();
+		const segment& excludeSeg = excludeSegs[jj];
+	
+		for (int ii = 0; ii < org.size(); ++ii)
+		{
+			const segment& orgSeg = org[ii];
+
+            /// case 1 , exlude totally
+			if (orgSeg.min >= excludeSeg.min && orgSeg.max <= excludeSeg.max)
+			{
+				continue;
+			}
+            /// case 2 , no crash
+			if (orgSeg.min >= excludeSeg.max || excludeSeg.min >= orgSeg.max)
+			{
+				segsRtn.push_back(orgSeg);
+				continue;
+			}
+            /// case 3 , clip left segment
+			if (orgSeg.min >= excludeSeg.min && orgSeg.max >= excludeSeg.max)
+			{
+				seg.min = excludeSeg.max;
+				seg.max = orgSeg.max;
+				segsRtn.push_back(seg);
+				continue;
+			}
+            /// case 4 , clip right segment
+			if (orgSeg.min <= excludeSeg.min && orgSeg.max <= excludeSeg.max)
+			{
+				seg.min = orgSeg.min;
+				seg.max = excludeSeg.min;
+				segsRtn.push_back(seg);
+				continue;
+			}
+            /// case 5 , clip middle segment
+			if (orgSeg.min <= excludeSeg.min && orgSeg.max >= excludeSeg.max)
+			{
+				seg.min = orgSeg.min;
+				seg.max = excludeSeg.min;
+				segsRtn.push_back(seg);
+
+				seg.min = excludeSeg.max;
+				seg.max = orgSeg.max;
+				segsRtn.push_back(seg);
+				continue;
+			}
+		}
+		org = segsRtn;
+	}
+	return segsRtn;
+}
+
+```
 
 -----
 Copyright 2020 - 2023 @ [cheldon](https://github.com/cheldon-cn/).
