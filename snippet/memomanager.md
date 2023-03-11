@@ -7625,8 +7625,7 @@ Run 'osm2pgsql --help --verbose' (-h -v) for a full list of options.
 
 ```
 
-# 86. Exclude segments
-
+# 86. exclude Seg 
 
 ```
 
@@ -7714,6 +7713,76 @@ std::vector<segment> ExcludeSegs( const std::vector<segment>& orgSegs,const std:
 	}
 	return segsRtn;
 }
+
+```
+
+
+# 87. configure postgreSQL 
+
+```
+STEPS：
+
+1. download zip file "postgresql-13.10-1-windows-x64-binaries.zip“
+   Unzip it;
+  首先把文件夹移动到准备安装的位置，我这里移动到了D:\PostgreSQL 路径
+
+  启动 cmd 进入我们的路径D:\PostgreSQL 切入到 bin 文件夹中
+
+	cmd
+	d:
+	cd D:\PostgreSQL
+	cd bin
+
+2.
+	首先初始化实例
+
+	initdb -D "D:\PostgreSQL\data" -E UTF8 -U postgres --locale="Chinese (Simplified)_China.936" --lc-messages="Chinese_China.936" -A scram-sha-256 -W
+
+	在 windows 环境下我们采用 UTF8 编码Chinese (Simplified)_China.936 排序规则，账户加密方式采用scram-sha-256，
+	数据库的存放位置指定为D:\PostgreSQL\data
+
+
+
+	初始化过程中需要输入两次 超级用户口令，用于设置 postgres 用户的密码
+
+	数据库初始化完成之后，就可以选择安装为 Windows 服务了，
+	
+3. 注册服务命令如下
+
+	pg_ctl.exe register -D "D:\PostgreSQL\data" -PostgreSQL
+
+
+4.
+	接下来我们调整一下 PostgreSQL 的配置信息，默认情况下 PostgreSQL 数据库只能本机连接，
+	我们调整为监听所有 IP 开启外部连接的功能。
+
+	在D:\PostgreSQL\data 文件夹中找到 postgresql.conf
+
+	打开postgresql.conf 文件，找到
+
+	#listen_addresses = 'localhost'
+
+	然后删除掉前面的 # 修改为
+
+	listen_addresses = '*'
+
+	保存后关闭文件。
+
+
+ 5.
+	然后还是在D:\PostgreSQL\data 文件夹中找到pg_hba.conf 打开后直接情况里面原来的内容，用如下内容进行替换
+
+	host all all 0.0.0.0/0 scram-sha-256
+	host all all ::/0 scram-sha-256
+
+	保存后关闭即可，这样就运行了所有的 ipv4 和 ipv6 地址来连接我们的 PostgreSQL 数据库了，
+6.
+	当配置文件调整之后我们就可以启动我们安装好的 PostgreSQL 了，
+	只要在 cmd 输入
+
+	net start PostgreSQL
+
+	也可以通过 Windows 服务来控制启动和停止
 
 ```
 
