@@ -7786,5 +7786,17 @@ STEPS：
 
 ```
 
+# 88. system PATH and User PATH 
+
+## system PATH has higher priority than user PATH
+
+when find some dynamic library,search in system PATH firstly,if find the target,load it;
+if not find,search the user PATH;
+when U has some target library which have different version,maybe load the wrong library;
+
+```
+
+```
+
 -----
 Copyright 2020 - 2023 @ [cheldon](https://github.com/cheldon-cn/).
