@@ -7818,5 +7818,64 @@ export QT_PLUGIN_PATH=/opt/apps/server-task/program/QtPlugins
 
 ```
 
+# 90 how to install font in linux
+
+
+
+更新字体缓存，使用如下命令：
+cd /usr/share/fonts/
+mkfontscale
+mkfontdir
+fc-cache
+
+```
+[root@scm fonts]# cd /usr/share/fonts/
+[root@scm fonts]# mkfontscale
+[root@scm fonts]# mkfontdir
+[root@scm fonts]# fc-cache -fv 
+/usr/share/fonts: caching, new cache contents: 2 fonts, 0 dirs
+/usr/share/X11/fonts/Type1: skipping, no such directory
+/usr/share/X11/fonts/TTF: skipping, no such directory
+/usr/local/share/fonts: skipping, no such directory
+/root/.fonts: skipping, no such directory
+/var/cache/fontconfig: cleaning cache directory
+/root/.fontconfig: not cleaning non-existent cache directory
+fc-cache: succeeded
+
+
+[root@6a906d8c6750 ]# cd /usr/share/fonts/
+[root@6a906d8c6750 fonts]# mkfontscale
+[root@6a906d8c6750 fonts]# mkfontdir
+[root@6a906d8c6750 fonts]# mkfontscale
+[root@6a906d8c6750 fonts]# fc-cache -fv
+Font directories:
+        /usr/share/fonts
+        /usr/share/X11/fonts/Type1
+        /usr/share/X11/fonts/TTF
+        /usr/local/share/fonts
+        /root/.local/share/fonts
+        /root/.fonts
+        /usr/share/fonts/cantarell
+        /usr/share/fonts/chinese
+        /usr/share/fonts/chinese/noto
+/usr/share/fonts: caching, new cache contents: 0 fonts, 2 dirs
+/usr/share/fonts/cantarell: caching, new cache contents: 5 fonts, 0 dirs
+/usr/share/fonts/chinese: caching, new cache contents: 76 fonts, 1 dirs
+/usr/share/fonts/chinese/noto: caching, new cache contents: 73 fonts, 0 dirs
+/usr/share/X11/fonts/Type1: skipping, no such directory
+/usr/share/X11/fonts/TTF: skipping, no such directory
+/usr/local/share/fonts: skipping, no such directory
+/root/.local/share/fonts: skipping, no such directory
+/root/.fonts: skipping, no such directory
+/usr/share/fonts/cantarell: skipping, looped directory detected
+/usr/share/fonts/chinese: skipping, looped directory detected
+/usr/share/fonts/chinese/noto: skipping, looped directory detected
+/usr/lib/fontconfig/cache: cleaning cache directory
+/root/.cache/fontconfig: not cleaning non-existent cache directory
+/root/.fontconfig: not cleaning non-existent cache directory
+
+```
+
+
 -----
 Copyright 2020 - 2023 @ [cheldon](https://github.com/cheldon-cn/).
