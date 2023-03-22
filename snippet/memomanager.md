@@ -7797,6 +7797,26 @@ when U has some target library which have different version,maybe load the wrong
 ```
 
 ```
+#89 QT_PLUGIN_PATH
+
+
+excutable program 'docker_qt_text' depends on QtCore and QtGUI;
+when run it in linux environment, crash the following problem;
+
+```
+./program/docker_qt_text in textindocker_InitInstance
+qt.qpa.plugin: Could not find the Qt platform plugin "offscreen" in ""
+This application failed to start because no Qt platform plugin could be initialized. Reinstalling the application may fix this problem.
+
+已放弃
+
+```
+the solution is :
+
+```
+export QT_PLUGIN_PATH=/opt/apps/server-task/program/QtPlugins
+
+```
 
 -----
 Copyright 2020 - 2023 @ [cheldon](https://github.com/cheldon-cn/).
