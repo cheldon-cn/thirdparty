@@ -7883,7 +7883,29 @@ Font directories:
 [root@6a906d8c6750 program]# ln -s ./libQt5Core.so.5.12.11 ./libQt5Core.so.5
 [root@6a906d8c6750 program]# ln -s ./libQt5Core.so.5.12.11 ./libQt5Core.so
 
+# 92 copy file from or to docker
 
+```
+在宿主机里面执行以下命令：
+
+docker cp 容器名：要拷贝的文件在容器里面的路径       要拷贝到宿主机的相应路径
+
+示例：
+
+假设容器名为testtomcat,要从容器里面拷贝的文件路为：/usr/local/tomcat/webapps/test/js/test.js,
+ 现在要将test.js从容器里面拷到宿主机的/opt路径下面，那么命令应该怎么写呢？
+
+在宿主机上面执行命令：
+docker cp testtomcat：/usr/local/tomcat/webapps/test/js/test.js /opt
+
+docker cp xxxx:/etc/mysql/my.cnf /home/tom/
+注意这个xxxx是docker ps -a 获取的container id
+
+docker cp test:/server-task/program/Config/font113053057.log /home/font/log
+docker cp /opt/apps/Qt5/libQt5Core.so  test:/server-task/program
+docker cp /opt/apps/Qt5/libQt5Core.so.5  test:/server-task/program
+docker cp /opt/apps/Qt5/libQt5Core.so.5.12  test:/server-task/program
+```
 
 -----
 Copyright 2020 - 2023 @ [cheldon](https://github.com/cheldon-cn/).
