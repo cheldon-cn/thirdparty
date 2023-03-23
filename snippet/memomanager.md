@@ -7876,6 +7876,14 @@ Font directories:
 
 ```
 
+# 91 remove or link file
+
+[root@6a906d8c6750 program]# rm -f ./libQt5Gui.so.5
+[root@6a906d8c6750 program]# rm -f ./libQt5Gui.so
+[root@6a906d8c6750 program]# ln -s ./libQt5Core.so.5.12.11 ./libQt5Core.so.5
+[root@6a906d8c6750 program]# ln -s ./libQt5Core.so.5.12.11 ./libQt5Core.so
+
+
 
 -----
 Copyright 2020 - 2023 @ [cheldon](https://github.com/cheldon-cn/).
