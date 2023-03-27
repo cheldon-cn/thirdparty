@@ -7883,6 +7883,7 @@ Font directories:
 [root@6a906d8c6750 program]# ln -s ./libQt5Core.so.5.12.11 ./libQt5Core.so.5
 [root@6a906d8c6750 program]# ln -s ./libQt5Core.so.5.12.11 ./libQt5Core.so
 
+
 # 92 copy file from or to docker
 
 ```
@@ -7906,6 +7907,10 @@ docker cp /opt/apps/Qt5/libQt5Core.so  test:/server-task/program
 docker cp /opt/apps/Qt5/libQt5Core.so.5  test:/server-task/program
 docker cp /opt/apps/Qt5/libQt5Core.so.5.12  test:/server-task/program
 ```
+
+ # 93 将main1.c重命名为main.c
+ 
+ [root@6a906d8c6750 program]# rename main1.c main.c main1.c
 
 -----
 Copyright 2020 - 2023 @ [cheldon](https://github.com/cheldon-cn/).
