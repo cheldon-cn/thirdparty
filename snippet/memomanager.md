@@ -8128,5 +8128,34 @@ QString Cvt2QString(const char* pszText)
 
 ```
 
+# 97  get current time string
+
+```
+std::string  getCurTime(bool bFmt = true)
+{
+	char szTime[MAX_PATH] = { '\0' };
+#ifdef _WIN32
+	// 得到时间
+	SYSTEMTIME	sysTime = { 0 };
+	GetLocalTime(&sysTime);
+	if(bFmt)
+		sprintf_s(szTime, "%02d%02d %02d:%02d:%02d.%03d",sysTime.wMonth,sysTime.wDay, sysTime.wHour, sysTime.wMinute, sysTime.wSecond, sysTime.wMilliseconds);
+	else
+		sprintf_s(szTime, "%02d%02d%02d%02d%02d%03d", sysTime.wMonth, sysTime.wDay, sysTime.wHour, sysTime.wMinute, sysTime.wSecond, sysTime.wMilliseconds);
+#else
+	time_t timep;
+	struct tm *p;
+	time(&timep);
+	p = localtime(&timep);
+	if(bFmt)
+		sprintf(szTime, "%02d%02d %02d:%02d:%02d.%02d",p->tm_mon,p->tm_mday, p->tm_hour, p->tm_min, p->tm_sec, p->tm_sec);
+	else
+		sprintf(szTime, "%02d%02d%02d%02d%02d%02d", p->tm_mon, p->tm_mday, p->tm_hour, p->tm_min, p->tm_sec, p->tm_sec);
+#endif
+	std::string strTime = szTime;
+	return strTime;
+}
+```
+
 -----
 Copyright 2020 - 2023 @ [cheldon](https://github.com/cheldon-cn/).
