@@ -7937,7 +7937,114 @@ SOLUTION:
 remove or delete file 'known_hosts'
 rm -rf ~/.ssh/known_hosts
 
+# 95 logger class
 
+```
+
+class Logger
+{
+public:
+	Logger() {
+		InitLogPath();
+	}
+	~Logger() {
+
+	}
+
+	short Info(const char* szTag, const char* strFormat, ...)
+	{
+		std::string strInfo;
+		if (strFormat)
+		{
+			va_list valist;
+			va_start(valist, strFormat);
+			strInfo.FormatV(strFormat, valist);
+			va_end(valist);
+		}
+		// 得到时间
+		SYSTEMTIME	sysTime = { 0 };
+		GetLocalTime(&sysTime);
+		char szVal[256] = "\0";
+		sprintf(szVal,"%02d:%02d:%02d.%03d | %s | %s", sysTime.wHour, sysTime.wMinute, sysTime.wSecond, sysTime.wMilliseconds, szTag, strInfo.c_str());
+
+		std::string strMsg(szVal);
+		return Flush(strMsg.c_str(), strMsg.GetLength());
+	}
+
+private:
+
+	std::string  m_szLogPath;
+
+protected:
+
+	long Flush(const char* pByte, long long len)
+	{
+		return Save(pByte, len, m_szLogPath.c_str());
+	}
+
+	std::string GetCurrentTimeString()
+	{
+		// 得到时间
+		SYSTEMTIME	sysTime = { 0 };
+		GetLocalTime(&sysTime);
+		char szVal[256] = "\0";
+		sprintf(szVal,"%02d%02d%02d%03d", sysTime.wHour, sysTime.wMinute, sysTime.wSecond, sysTime.wMilliseconds);
+
+		std::string strTime(szVal);
+		return strTime;
+	}
+
+	long Save(const char* pByte, long long len, const char* lpFileName)
+	{
+		if (!lpFileName)
+		{
+			return 0;
+		}
+		FILE* pFile = fopen(lpFileName, "rb+");
+		if (!pFile) {
+			pFile = fopen(lpFileName, "wb+");//create file if not exist
+		}
+		else {
+			fclose(pFile);
+			pFile = fopen(lpFileName, "ab+");
+		}
+
+		if (!pFile) { return 0; }
+
+		fwrite(pByte, len * sizeof(byte), 1, pFile);
+		fclose(pFile);
+		return 1;
+	}
+
+	void ReplaceSubString(string& str, const char* lpszOld, const char* lpszNew)
+	{
+		int index = str.find(lpszOld);
+
+		while (index > -1)
+		{
+			str.replace(index, strlen(lpszOld), lpszNew);
+			index = str.find(lpszOld);
+		}
+	}
+
+	std::string InitLogPath()
+	{
+		std::string szPath = GetConfigDir(CFG_DIR_ROOT);
+		char szVal[256] = "\0";
+		sprintf(szVal,"%s\\font%s.log", szPath.c_str(), GetCurrentTimeString().c_str());
+		szPath = szVal;
+		std::string strPath(szPath.c_str());
+		#ifndef _WIN32
+		ReplaceSubString(strPath, "\\", "/");
+		#endif
+		m_szLogPath = strPath.c_str();
+		g_Log("InitFont", "LogPath: %s", strPath.c_str());
+		return szPath;
+	}
+
+};
+
+```
 
 -----
 Copyright 2020 - 2023 @ [cheldon](https://github.com/cheldon-cn/).
