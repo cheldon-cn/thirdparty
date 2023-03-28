@@ -8046,5 +8046,87 @@ protected:
 
 ```
 
+# 96 convert const char* to QString
+
+```
+#include <memory>
+std::wstring str2wstr(const std::string& str) {
+	if (str.empty()) {
+		return L"";
+	}
+	unsigned len = str.size() + 1;
+	setlocale(LC_CTYPE, "zh_CN.GBK"); //zh_CN.UTF-8
+	std::unique_ptr<wchar_t[]> p(new wchar_t[len]);
+	mbstowcs(p.get(), str.c_str(), len);
+	std::wstring w_str(p.get());
+	return w_str;
+}
+
+short g_Log(const char* szTag, const char* strFormat, ...)
+{
+	return 1;
+}
+
+QString makeQStringLiteral(const wchar_t * _wstring, size_t len)
+{
+	// how to convert const char* to char16_t*;
+	const int nSize = 1024;
+	QStaticStringData<nSize> qstring_literal;
+
+	const char* pszTagw = "Literal";
+
+	if (sizeof(wchar_t) == sizeof(char16_t))
+	{
+		const qunicodechar * pszBuffer = (char16_t *)_wstring;
+		memcpy(qstring_literal.data, pszBuffer, len * sizeof(qunicodechar));
+	}
+	else
+	{
+		for (size_t m = 0; m < len; m++)
+		{
+			wchar_t val = _wstring[m];
+			g_Log(pszTagw, "Z:%d/%d : %d|-> %d \r\n", len, m, _wstring[m], val);
+			qstring_literal.data[m] = val;
+		}
+	}
+
+
+	for (size_t m = 0; m < len; m++)
+	{
+		g_Log(pszTagw, "I:%d/%d : %d \r\n", len, m, _wstring[m]);
+		g_Log(pszTagw, "O:%d/%d : %d \r\n", len, m, qstring_literal.data[m]);
+	}
+
+	qstring_literal.str.ref.atomic = -1;
+	qstring_literal.str.size = len;
+	qstring_literal.str.alloc = 0;
+	qstring_literal.str.capacityReserved = 0;
+	qstring_literal.str.offset = sizeof(QTypedArrayData<ushort>);
+
+	QStringDataPtr holder = { qstring_literal.data_ptr() };
+	const QString qstring_literal_temp(holder);
+	return qstring_literal_temp;
+
+}
+
+
+QString Cvt2QString(const char* pszText)
+{
+	if (!pszText) return "";
+	std::string strText(pszText);
+	std::wstring wstr = str2wstr(strText);
+
+	const char16_t * _wstring16 = (char16_t*)wstr.data();
+	const wchar_t * _wstring = (wchar_t*)wstr.data();
+	size_t len = wstr.size();
+	for (size_t m = 0; m < len; m++)
+	{
+		g_Log("Cvt", "I:%d/%d : %d \r\n", len, m, _wstring[m]);
+	}
+	return makeQStringLiteral(_wstring, len);
+}
+
+```
+
 -----
 Copyright 2020 - 2023 @ [cheldon](https://github.com/cheldon-cn/).
