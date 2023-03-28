@@ -7909,8 +7909,35 @@ docker cp /opt/apps/Qt5/libQt5Core.so.5.12  test:/server-task/program
 ```
 
  # 93 将main1.c重命名为main.c
- 
+
  [root@6a906d8c6750 program]# rename main1.c main.c main1.c
+
+# 94 REMOTE HOST IDENTIFICATION HAS CHANGED
+
+linux 远程连接ssh提示IT IS POSSIBLE THAT SOMEONE IS DOING SOMETHING NASTY解决
+ 
+ 
+MacBook-Air:BurpLoader4burpsuite_pro_v1.5.11 watsy$ ssh root@192.168.2.108
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@    WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!     @
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+IT IS POSSIBLE THAT SOMEONE IS DOING SOMETHING NASTY!
+Someone could be eavesdropping on you right now (man-in-the-middle attack)!
+It is also possible that a host key has just been changed.
+The fingerprint for the RSA key sent by the remote host is
+07:36:8e:d0:12:78:38:f7:21:10:c1:12:d6:31:ad:55.
+Please contact your system administrator.
+Add correct host key in /Users/watsy/.ssh/known_hosts to get rid of this message.
+Offending RSA key in /Users/watsy/.ssh/known_hosts:1
+RSA host key for 192.168.2.108 has changed and you have requested strict checking.
+Host key verification failed.
+ 
+
+SOLUTION:
+remove or delete file 'known_hosts'
+rm -rf ~/.ssh/known_hosts
+
+
 
 -----
 Copyright 2020 - 2023 @ [cheldon](https://github.com/cheldon-cn/).
