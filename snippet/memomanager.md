@@ -8161,6 +8161,7 @@ std::string  getCurTime(bool bFmt = true)
 
 ./configure --prefix=/home/code/libiconv  CC="g++" CFLAGS="-fsigned-char -fdiagnostics-color -std=c++11 -fstack-protector-all -g -O0 -fPIE  -MD    -std=c++11"
 
+```
 
 `configure' configures libiconv 1.16 to adapt to many kinds of systems.
 
@@ -8236,6 +8237,20 @@ Some influential environment variables:
   CPP         C preprocessor
   LT_SYS_LIBRARY_PATH
               User-defined run-time library search path.
+
+```
+
+# 99 find and locate
+
+//在根目录下查找文件名为mysql的文件夹
+[root@localhost ~]# find / -name mysql　　　　
+
+//目录“/usr/local/mysql”中搜索以.bin结尾的所有文件
+[root@localhost ~]# find /user/local/mysql -name \*.bin　　
+
+[root@localhost /]# locate \*.log　　　　//查找后缀为.log的文件
+
+[root@localhost /]# locate /etc/my　　// 搜索etc目录下所有以my开头的文件
 
 
 
