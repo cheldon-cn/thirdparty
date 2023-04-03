@@ -8254,6 +8254,205 @@ Some influential environment variables:
 
 
 
+# 100 where the third library 'libiconv.so' Go?
+
+in linux,the execute file 'dockertext' depends on the third party 'libiconv.so';
+for make file like bellow;
+
+```
+#user  makefile
+#define user develop env; eg: include dir, output dir, link dir;
+CurDir := $(shell pwd)
+ICONV_INC :=$(CurDir)/iconv/include
+#define user project information;
+EXECUTABLE := $(LIBPATH)/dockertext
+LIBS := iconv  
+CC:= g++
+Z_DEBUG := -g -O0
+CFLAGS :=  -I$(CurDir) -I$(ICONV_INC) $(Z_DEBUG)
+
+IS_SO := $(findstring .so,$(EXECUTABLE))
+ifneq ($(IS_SO),)
+    CFLAGS += $(SO_CFLAGS)
+    LDFLAGS += $(SO_LDFLAGS)
+else
+    CFLAGS += $(EXE_CFLAGS)
+    LDFLAGS += $(EXE_LDFLAGS)
+endif
+CXXFLAGS := $(CFLAGS) 
+CPPFLAGS += -MD    -std=c++11
+
+RM-F := rm -f 
+RM := rm
+
+SOURCE := $(wildcard *.c) $(wildcard *.cpp) $(foreach n, $(SubDir), $(wildcard $(CurDir)/$(n)/*.cpp)) $(foreach n, $(SubDir), $(wildcard $(CurDir)/$(n)/*.c))
+OBJS := $(patsubst %.c,%.o,$(patsubst %.cpp,%.o,$(SOURCE))) 
+DEPS := $(patsubst %.o,%.d,$(OBJS)) 
+MISSING_DEPS := $(filter-out $(wildcard $(DEPS)),$(DEPS)) 
+MISSING_DEPS_SOURCES := $(wildcard $(patsubst %.d,%.cpp,$(MISSING_DEPS)) $(patsubst %.d,%.cpp,$(MISSING_DEPS))) 
+
+..PHONY : build  deps objs clean allclean rebuild 
+build: $(EXECUTABLE) 
+deps : $(DEPS) 
+objs : $(OBJS) 
+test :
+	echo $(SOURCE)
+clean :  
+	$(foreach n, $(OBJS), $(shell $(RM) $(n)))
+	$(foreach n, $(DEPS), $(shell $(RM) $(n)))
+allclean: clean 
+	$(RM-F) $(EXECUTABLE) 
+rebuild: allclean build
+prepare:
+
+header:
+
+ifneq ($(MISSING_DEPS),) 
+$(MISSING_DEPS): 
+	$(RM-F) $(patsubst %.d,%.o,$@) 
+endif 
+-include $(DEPS) 
+$(EXECUTABLE) : $(OBJS) 
+	$(CC) -o $(EXECUTABLE) $(OBJS)  -L$(LIBPATH) $(addprefix -l,$(LIBS)) $(LDFLAGS)
+	ld $(EXECUTABLE) -rpath $(LIBPATH)
+
+```
+
+in file dockertext.cpp,we have following logic
+
+```
+#include "iconv.h"
+#include <string.h>
+void textindocker::Run()
+{
+	const char* out_encode = "UTF-8"; const char* in_encode = "GB18030";
+	iconv_t h = iconv_open(out_encode, in_encode);
+	if (h == (iconv_t)(-1))
+	{
+		printf("\r\n Error:GB18030 iconv open fail\r\n");
+		return;
+	}
+	char* psIn = "中"; size_t mm = strlen(psIn);
+	size_t n = 0; char* psOut = new char;
+	iconv(h, &psIn, &mm, &psOut, &n);
+	iconv_close(h);
+	delete psOut;
+}
+
+```
+we compile the third party libiconv and target exec file with debug mode;
+after we compile ,we get the target file  dockertext; when debug execute file dockertext,
+we cannot debug  the third party library libiconv.so;
+HERE is the QUESTION.
+in execute file dockertext,we actually use the interface function such as 'iconv_open' 'iconv'
+ 'iconv_close' which is in library libiconv.so,but why cannot debug it even if we have the debug information?
+
+
+ 1. ok, let me see the depend library files for target execute 'dockertext'
+
+```
+root@zone:/opt/apps/zone/program# ldd ./dockertext
+    linux-vdso.so.1 (0x0000002023068000)
+    libstdc++.so.6 => /lib/aarch64-linux-gnu/libstdc++.so.6 (0x00000020230c1000)
+    libgcc_s.so.1 => /lib/aarch64-linux-gnu/libgcc_s.so.1 (0x00000020232a6000)
+    libc.so.6 => /lib/aarch64-linux-gnu/libc.so.6 (0x00000020232ca000)
+    /lib/ld-linux-aarch64.so.1 (0x0000002023046000)
+    libm.so.6 => /lib/aarch64-linux-gnu/libm.so.6 (0x000000202343d000)
+```
+ from above information,we cannot find the library 'libiconv.so' or related library.
+ but we actually use the interface function such as 'iconv_open' 'iconv' 'iconv_close' 
+ which is in library libiconv.so, how can it happen?
+
+or the interface function can e found in dependent libarary other than 'libiconv.so';
+
+2. NEXT search the iconv-related funntions in execte dockertext;
+
+```
+root@zone:/opt/apps/zone/program# readelf -a ./dockertext | grep iconv
+000000014e08  000500000402 R_AARCH64_JUMP_SL 0000000000000000 iconv_close@GLIBC_2.17 + 0
+000000014e48  000e00000402 R_AARCH64_JUMP_SL 0000000000000000 iconv_open@GLIBC_2.17 + 0
+000000014ec8  001e00000402 R_AARCH64_JUMP_SL 0000000000000000 iconv@GLIBC_2.17 + 0
+     5: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND iconv_close@GLIBC_2.17 (4)
+    14: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND iconv_open@GLIBC_2.17 (4)
+    30: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND iconv@GLIBC_2.17 (4)
+   145: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND iconv_close@@GLIBC_2.17
+   183: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND iconv_open@@GLIBC_2.17
+   230: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND iconv@@GLIBC_2.17
+```
+here we found iconv subfix '@GLIBC_2.17' which mean use the iconv-related function in 'glibc' library;
+this is the important key information;
+from the dependcy above ,we find this line 
+```
+libc.so.6 => /lib/aarch64-linux-gnu/libc.so.6 (0x00000020232ca000)
+```
+3. check if the library libc.so offer the interface related with 'iconv'
+
+```
+root@zone:/opt/apps/zone/program# readelf -a /lib/aarch64-linux-gnu/libc.so.6 | grep iconv
+  1636: 0000000000024a58    60 FUNC    GLOBAL DEFAULT   13 iconv_close@@GLIBC_2.17
+  1833: 0000000000024830   548 FUNC    GLOBAL DEFAULT   13 iconv@@GLIBC_2.17
+  1852: 0000000000024548   740 FUNC    GLOBAL DEFAULT   13 iconv_open@@GLIBC_2.17
+```
+ok,Bingo.
+so the execute file docker use the iconv interface in libc.so,Not in libiconv.so;
+
+```
+root@zone:/opt/apps/zone/program# readelf -a ./libiconv.so | grep iconv
+ 0x000000000000000e (SONAME)             Library soname: [libiconv.so.2]
+    26: 000000000002decc    92 FUNC    GLOBAL DEFAULT   11 libiconv_set_relocation_p
+    27: 000000000002c3d0  1916 FUNC    GLOBAL DEFAULT   11 libiconv_open
+    28: 000000000002da08   704 FUNC    GLOBAL DEFAULT   11 iconv_canonicalize
+    29: 000000000002d378   684 FUNC    GLOBAL DEFAULT   11 libiconvctl
+    30: 000000000002cb4c   196 FUNC    GLOBAL DEFAULT   11 libiconv
+    31: 000000000002d7b8   592 FUNC    GLOBAL DEFAULT   11 libiconvlist
+    32: 000000000002cc74  1796 FUNC    GLOBAL DEFAULT   11 libiconv_open_into
+    33: 000000000010b0a8     4 OBJECT  GLOBAL DEFAULT   22 _libiconv_version
+    34: 000000000002cc10   100 FUNC    GLOBAL DEFAULT   11 libiconv_close
+    53: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS iconv.c
+  1038: 000000000002df28   452 FUNC    LOCAL  DEFAULT   11 libiconv_relocate
+  1043: 000000000002e0ec   136 FUNC    LOCAL  DEFAULT   11 libiconv_relocate2
+  1054: 000000000002decc    92 FUNC    GLOBAL DEFAULT   11 libiconv_set_relocation_p
+  1061: 000000000002cb4c   196 FUNC    GLOBAL DEFAULT   11 libiconv
+  1066: 000000000002d7b8   592 FUNC    GLOBAL DEFAULT   11 libiconvlist
+  1070: 000000000002c3d0  1916 FUNC    GLOBAL DEFAULT   11 libiconv_open
+  1071: 000000000002da08   704 FUNC    GLOBAL DEFAULT   11 iconv_canonicalize
+  1074: 000000000002cc10   100 FUNC    GLOBAL DEFAULT   11 libiconv_close
+  1076: 000000000002cc74  1796 FUNC    GLOBAL DEFAULT   11 libiconv_open_into
+  1077: 000000000002d378   684 FUNC    GLOBAL DEFAULT   11 libiconvctl
+  1078: 000000000010b0a8     4 OBJECT  GLOBAL DEFAULT   22 _libiconv_version
+```
+4. Why?
+in makefile ,we have add iconv include dir and lib dir ,why link the wrong target not the configured target;
+
+ehhhhhh..
+
+for -I$(ICONV_INC), the target dir is empty or removed,so cannot locate the header file 'icon.h' in folder 
+$(ICONV_INC) ; 
+the project compile ok ,because the makefile locate the iconv.h in systerm path '/user/include', the file in systerm path
+is different from the configure path $(ICONV_INC);
+
+5. here is the solution:
+check the configure path $(ICONV_INC) in makefile,make the path valid;
+the compile again,then check the depency with 'ldd' ,we get the following information:
+```
+root@zone:/opt/apps/zone# ldd ./program/dockertext
+        linux-vdso.so.1 (0x0000007f8e5e5000)
+        libiconv.so.2 => /opt/apps/zone/program/libiconv.so.2 (0x0000007f8e493000)
+        libstdc++.so.6 => /lib/aarch64-linux-gnu/libstdc++.so.6 (0x0000007f8e28f000)
+        libgcc_s.so.1 => /lib/aarch64-linux-gnu/libgcc_s.so.1 (0x0000007f8e26b000)
+        libc.so.6 => /lib/aarch64-linux-gnu/libc.so.6 (0x0000007f8e0f8000)
+        /lib/ld-linux-aarch64.so.1 (0x0000007f8e5b5000)
+        libm.so.6 => /opt/apps/zone/program/libm.so.6 (0x0000007f8e04d000)
+
+```
+
+ok, we find the dependcy libiconv.so;next we can debug it well;
+
+
+# 101 
+
+
+
 
 -----
 Copyright 2020 - 2023 @ [cheldon](https://github.com/cheldon-cn/).
