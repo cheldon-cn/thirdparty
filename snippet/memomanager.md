@@ -7916,7 +7916,7 @@ docker cp /opt/apps/Qt5/libQt5Core.so.5.12  test:/server-task/program
 
 linux 远程连接ssh提示IT IS POSSIBLE THAT SOMEONE IS DOING SOMETHING NASTY解决
  
- 
+ ```
 MacBook-Air:BurpLoader4burpsuite_pro_v1.5.11 watsy$ ssh root@192.168.2.108
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @    WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!     @
@@ -7936,7 +7936,7 @@ Host key verification failed.
 SOLUTION:
 remove or delete file 'known_hosts'
 rm -rf ~/.ssh/known_hosts
-
+```
 # 95 logger class
 
 ```
@@ -8241,7 +8241,7 @@ Some influential environment variables:
 ```
 
 # 99 find and locate
-
+```
 //在根目录下查找文件名为mysql的文件夹
 [root@localhost ~]# find / -name mysql　　　　
 
@@ -8251,7 +8251,7 @@ Some influential environment variables:
 [root@localhost /]# locate \*.log　　　　//查找后缀为.log的文件
 
 [root@localhost /]# locate /etc/my　　// 搜索etc目录下所有以my开头的文件
-
+```
 
 
 # 100 where the third library 'libiconv.so' Go?
@@ -8449,8 +8449,105 @@ root@zone:/opt/apps/zone# ldd ./program/dockertext
 ok, we find the dependcy libiconv.so;next we can debug it well;
 
 
-# 101 
+# 101 iconv library wrapper
 
+```
+std::string str = "中文";
+IConvt convt("UTF-8", "GB18030");
+convt.Convert(str, str);
+
+IConvt cvt("GB18030", "UTF-8");
+cvt.Convert(str, str);
+
+//// iconv library wrapper
+
+class IConvt
+{
+private:
+	iconv_t m_handle;
+	const size_t m_buffsize;
+public:
+	IConvt(const char* out_encode, const char* in_encode, size_t buf_size = 1024) :
+		m_buffsize(buf_size)
+	{
+		m_handle = ::iconv_open(out_encode, in_encode);
+	}
+
+	~IConvt()
+	{
+		if (m_handle != (iconv_t)(-1))
+			iconv_close(m_handle);
+	}
+
+	//解决特殊字符0x80（€）字符编码转换失败的问题。
+	//参考Gdal代码的逻辑，实现字符编码的转换，当iconv的返回值不等于0时，表示源字符串转换到目的字符串的过程中，遇到
+	//某一个字符转换失败（目前只知道0x80这个字符会转换失败），现在逻辑修改为跳过转换失败的字符，保证其余字符转换成功。
+
+	//针对0x80（€）这个特殊的字符，是可以对应为相应的中文字符，当它为中文字符的时候，它由两个字节组成（0xA2E3），这是
+	//它在GB18030下的编码，当它转换为Unicode编码时，它由三个字节组成，0xe282ac。所以这里特殊处理该字符。
+
+	//0x80字符与（0xA2E3）表示的中文字符，本质上都表示欧元符号，但是显示并不是完全一样。在符号显示较小时，
+	//0x80字符还是可以清晰地看到中间有两个横线，但是（0xA2E3）中间只有一根横线。当符号显示放大时，两个符号的
+	//的显示又完全一样，中间都有两个横线。
+
+	void Convert(const std::string& input, std::string& output) const
+	{
+		if (m_handle == (iconv_t)(-1))
+			return;
+
+		std::vector<char> in_buf(input.begin(), input.end());
+		char* src_ptr = &in_buf[0];
+		size_t src_size = input.size();
+
+		std::vector<char> buf(m_buffsize);
+		std::string dst;
+		while (0 < src_size)
+		{
+			char* dst_ptr = &buf[0];
+			size_t dst_size = buf.size();
+			size_t res = ::iconv(m_handle, &src_ptr, &src_size, &dst_ptr, &dst_size);
+			if (res == (size_t)-1)
+			{
+				if (errno == EILSEQ)
+				{
+					if (src_ptr[0] == '€') /// for case 0x80（€）
+					{
+						dst_ptr[0] = 0xe2;
+						dst_ptr[1] = 0x82;
+						dst_ptr[2] = 0xac;
+						dst_ptr += 3;
+						dst_size -= 3;
+					}
+					++src_ptr;
+					--src_size;
+				}
+				else if (errno == E2BIG)
+				{
+					// 一批一批的转换
+				/*	size_t nTmp = dst_size;
+					dst_size *= 2;
+					if (outbuf)
+					{
+						delete[] outbuf;
+						outbuf = NULL;
+					}
+					outbuf = new char[dst_size + 1];
+					memset(outbuf, 0, dst_size + 1);
+					pszDstBuf = outbuf + nTmp - outlen;
+					outlen += nTmp; */
+				}
+				else
+				{
+					break;
+				}
+			}
+			dst.append(&buf[0], buf.size() - dst_size);
+		}
+		dst.swap(output);
+	}
+};
+
+```
 
 
 
