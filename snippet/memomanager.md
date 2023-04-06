@@ -8549,6 +8549,176 @@ public:
 
 ```
 
+# 102 MultiByte2WideChar and WideChar2MultiByte
+
+```
+int  MultiByte2WideChar(const string &strSrc, wstring &strWdst)
+{
+	if (strSrc.empty())
+	{
+		strWdst = L"";
+		return 1;
+	}
+
+	int inLen = strSrc.length();
+	int outLen = sizeof(wchar_t) * (inLen + 1);
+	wchar_t* pszTemp = new wchar_t[inLen + 1];
+	memset(pszTemp, 0, outLen);
+	std::string output;
+
+#ifndef _WIN32
+	IConvt convt("UTF-32LE", "GB18030");
+#else
+	IConvt convt("UTF-16LE", "GB18030");
+#endif
+	convt.Convert(strSrc, output);
+	memcpy(pszTemp,output.c_str(),output.size());
+	strWdst = pszTemp;
+	if (pszTemp)
+	{
+		delete[] pszTemp;
+		pszTemp = NULL;
+	}
+	return 1;
+}
+
+//==========================WideChar2MultiByte()==========================
+// 宽字节转多字节
+//
+// @param [in] strWsrc 传入的宽字节
+// @param [out] strDst 返出的多字节
+//
+// @return 成功返回1，失败返回0
+//
+// @remark 为避免不同操作系统下可能无法找到正确的字符集的问题，现在统一使用以下接口进行多字节转宽字节
+// setlocale()耗时较多，依照GBKToUTF8()使用iconv重新实现此函数，
+//			   可减少大约75%耗时。
+//================================================================================
+int  WideChar2MultiByte(const wstring &strWsrc, string &strDst) 
+{
+	if (strWsrc.empty())
+	{
+		strDst = "";
+		return 1;
+	}
+	int inLen = strWsrc.length();
+	int outLen = (inLen + 1) * 4 ;
+	inLen = inLen * sizeof(wchar_t);
+
+ #ifndef _WIN32
+	IConvt convt("GB18030"，"UTF-32LE");
+ #else
+	IConvt convt("GB18030"，"UTF-16LE");
+#endif
+	std::string output;
+	convt.Convert(strSrc, strDst);
+	return 1;
+}
+
+```
+
+
+```
+//=================================code_convert()=================================
+// 封装iconv第三方库实现的用于字符编码转换的接口
+//
+// @param [in] from_charset 源字符串编码方式，可传入GBK，UTF-8
+// @param [in] to_charset   目的字符串编码方式，可传入GBK，UTF-8
+// @param [in] inbuf		源字符指针
+// @param [in] inlen		源字符串长度，最多读取源字符串的inbuf个字符进行转换
+// @param [out] outbuf		目的字符串指针
+// @param [in] outlen		目的字符串长度，最多转换outlen个字符到目的字符串
+//
+// @return 成功返回1，失败返回0
+//================================================================================
+int code_convert(char *from_charset, char *to_charset, char *inbuf, size_t inlen, char *outbuf, size_t outlen)
+{
+
+}
+int  MultiByte2WideChar(const string &strSrc, wstring &strWdst)
+{
+	if (strSrc.empty())
+	{
+		strWdst = L"";
+		return 1;
+	}
+
+	int inLen = strSrc.length();
+	int outLen = sizeof(wchar_t) * (inLen + 1);
+	wchar_t* pszTemp = new wchar_t[inLen + 1];
+	memset(pszTemp, 0, outLen);
+#ifndef _WIN32
+
+	if (1 != code_convert("GB18030", "UTF-32LE", (char *)strSrc.c_str(), inLen, (char *)pszTemp, outLen))
+#else
+	if (1 != code_convert("GB18030", "UTF-16LE", (char *)strSrc.c_str(), inLen, (char *)pszTemp, outLen))
+#endif
+	{
+		strWdst = L"";
+		if (pszTemp)
+		{
+			delete[] pszTemp;
+			pszTemp = NULL;
+		}
+		return 0;
+	}
+	strWdst = pszTemp;
+	if (pszTemp)
+	{
+		delete[] pszTemp;
+		pszTemp = NULL;
+	}
+	return 1;
+}
+
+//==========================WideChar2MultiByte()==========================
+// 宽字节转多字节
+//
+// @param [in] strWsrc 传入的宽字节
+// @param [out] strDst 返出的多字节
+//
+// @return 成功返回1，失败返回0
+//
+// @remark 为避免不同操作系统下可能无法找到正确的字符集的问题，现在统一使用以下接口进行多字节转宽字节
+// setlocale()耗时较多，依照GBKToUTF8()使用iconv重新实现此函数，
+//			   可减少大约75%耗时。
+//================================================================================
+int  WideChar2MultiByte(const wstring &strWsrc, string &strDst) 
+{
+	if (strWsrc.empty())
+	{
+		strDst = "";
+		return 1;
+	}
+	int inLen = strWsrc.length();
+	int outLen = (inLen + 1) * 4 ;
+	inLen = inLen * sizeof(wchar_t);
+
+	char* pszTemp = new char[outLen];
+	memset(pszTemp, 0, outLen);
+ #ifndef _WIN32
+	if (1 != code_convert("UTF-32LE", "GB18030", (char *)strWsrc.c_str(), inLen, pszTemp, outLen))
+ #else
+	if (1 != code_convert("UTF-16LE", "GB18030", (char *)strWsrc.c_str(), inLen, pszTemp, outLen))
+#endif
+	{
+		strDst = "";
+		if (pszTemp)
+		{
+			delete[] pszTemp;
+			pszTemp = NULL;
+		}
+		return 0;
+	}
+	strDst = pszTemp;
+	if (pszTemp)
+	{
+		delete[] pszTemp;
+		pszTemp = NULL;
+	}
+	return 1;
+}
+```
 
 
 -----
