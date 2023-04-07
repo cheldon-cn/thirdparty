@@ -9117,6 +9117,62 @@ int  WideChar2MultiByte(const wstring &strWsrc, string &strDst)
 </fontconfig>
 ```
 
+# 105 compile Qt which support ttf
+
+1.编译QT库时需要支持TTF字体
+```
+./configure -qt-freetype -fontconfig ...
+
+./configure -static -release -prefix ~/qt-static/install -opensource -confirm-license -no-compile-examples -nomake examples -no-openssl -no-libpng -qt-freetype  -fontconfig
+
+```
+```
+Qt源码中包含了一些第三方库，如果想使用Qt自带的第三方库，可用通过-qt配置；
+如果想使用系统中的第三方库，可用通过-system配置。下表中列出一些第三方库及其配置选项。
+
+Library Name             Bundled in Qt                         Installed in System
+zlib                    -qt-zlib​​                               -system-zlib​​
+libjpeg                 -qt-libjpeg​​                            -system-libjpeg​​
+libpng                  ​-qt-libpng​​                   ​​          -system-libpng​​
+xcb                  ​​   -qt-xcb​​                                ​​-system-xcb​​
+xkbcommon               ​​-qt-xkbcommon​​                          ​​-system-xkbcommon​​
+freetype                ​​-qt-freetype​​                           ​​-system-freetype​​
+PCRE                    ​​-qt-pcre​​                      ​​         -system-pcre​​
+HarfBuzz-NG             ​​-qt-harfbuzz​​                    ​​       -system-harfbuzz​​
+
+当然，也可以禁用这些第三方库，用-no替换-qt就行，如下所示。
+```
+
+# 106 copyright
+
+```
+Copyright © 2000,2001,2002,2003,2004,2006,2007 Keith Packard
+Copyright © 2005 Patrick Lam
+Copyright © 2009 Roozbeh Pournader
+Copyright © 2008,2009 Red Hat, Inc.
+Copyright © 2008 Danilo Šegan
+Copyright © 2012 Google, Inc.
+
+
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation, and that the name of the author(s) not be used in
+advertising or publicity pertaining to distribution of the software without
+specific, written prior permission.  The authors make no
+representations about the suitability of this software for any purpose.  It
+is provided "as is" without express or implied warranty.
+
+THE AUTHOR(S) DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
+INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
+EVENT SHALL THE AUTHOR(S) BE LIABLE FOR ANY SPECIAL, INDIRECT OR
+CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE,
+DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+PERFORMANCE OF THIS SOFTWARE.
+
+```
 
 
 
