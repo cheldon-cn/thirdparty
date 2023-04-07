@@ -8722,6 +8722,7 @@ int  WideChar2MultiByte(const wstring &strWsrc, string &strDst)
 
 # 103 fonts.conf
 
+## /etc/fonts/fonts.conf
 ```
 <?xml version="1.0"?>
 <!DOCTYPE fontconfig SYSTEM "fonts.dtd">
@@ -8834,10 +8835,287 @@ int  WideChar2MultiByte(const wstring &strWsrc, string &strDst)
 
 ```
 
+## /etc/fonts/conf.d/30-cjk-aliases.conf
+
+```
+<?xml version="1.0"?>
+<!DOCTYPE fontconfig SYSTEM "fonts.dtd">
+<fontconfig>
+<!-- Aliases for Korean fonts -->
+    <alias>
+        <family>Batang</family>
+        <accept>
+	    <family>Noto Serif CJK KR</family>
+	    <family>NanumMyeongjo</family>
+            <family>UnBatang</family>
+        </accept>
+    </alias>
+    <alias>
+        <family>바탕</family>
+        <accept>
+	    <family>Noto Serif CJK KR</family>
+	    <family>NanumMyeongjo</family>
+            <family>UnBatang</family>
+        </accept>
+    </alias>
+    <alias>
+        <family>궁서</family>
+        <accept>
+	    <family>Noto Serif CJK KR</family>
+            <family>UnGungseo</family> 
+	    <family>NanumMyeongjo</family>
+        </accept>
+    </alias>
+    <alias>
+        <family>GungsuhChe</family>
+        <accept>
+	    <family>Noto Serif CJK KR</family>
+            <family>UnGungseo</family> 
+	    <family>NanumMyeongjo</family>
+        </accept>
+    </alias>
+    <alias>
+        <family>궁서체</family>
+        <accept>
+	    <family>Noto Serif CJK KR</family>
+            <family>UnGungseo</family> 
+	    <family>NanumMyeongjo</family>
+        </accept>
+    </alias>
+<!-- Aliases for Japanese Windows fonts -->
+    <alias>
+        <family>MS Gothic</family>
+        <accept>
+            <family>Noto Sans Mono CJK JP</family>
+            <family>TakaoGothic</family>
+            <family>IPAGothic</family>
+            <family>IPAMonaGothic</family>
+            <family>VL Gothic</family>
+            <family>Sazanami Gothic</family>
+            <family>Kochi Gothic</family>
+        </accept>
+    </alias>
+    <alias>
+        <family>ＭＳ ゴシック</family>
+        <accept>
+            <family>Noto Sans Mono CJK JP</family>
+            <family>TakaoGothic</family>
+            <family>IPAGothic</family>
+            <family>IPAMonaGothic</family>
+            <family>VL Gothic</family>
+            <family>Sazanami Gothic</family>
+            <family>Kochi Gothic</family>
+        </accept>
+    </alias>
+    
+    <alias>
+        <family>メイリオ</family>
+        <accept>
+            <family>IPAexGothic</family>
+        </accept>
+    </alias>
+<!-- Aliases for Simplified Chinese Windows fonts -->
+    <alias>
+        <family>SimSun</family>
+        <accept>
+            <family>Noto Serif CJK SC</family>
+            <family>HYSong</family>
+            <family>AR PL UMing CN</family>
+        </accept>
+    </alias>
+    <alias>
+        <family>NSimSun</family>
+        <accept>
+            <family>Noto Serif CJK SC</family>
+            <family>HYSong</family>
+            <family>AR PL UMing CN</family>
+        </accept>
+    </alias>
+    <alias>
+        <family>宋体</family>
+        <accept>
+            <family>Noto Serif CJK SC</family>
+            <family>HYSong</family>
+            <family>AR PL UMing CN</family>
+        </accept>
+    </alias>
+    <alias>
+        <family>新宋体</family>
+        <accept>
+            <family>Noto Serif CJK SC</family>
+            <family>HYSong</family>
+            <family>AR PL UMing CN</family>
+        </accept>
+    </alias>
+    <alias>
+        <family>KaiTi</family>
+        <accept>
+            <family>Noto Serif CJK SC</family>
+            <family>AR PL UKai CN</family>
+            <family>AR PL ZenKai Uni</family>
+        </accept>
+    </alias>
+    <alias>
+        <family>楷体</family>
+        <accept>
+            <family>Noto Serif CJK SC</family>
+            <family>AR PL UKai CN</family>
+            <family>AR PL ZenKai Uni</family>
+        </accept>
+    </alias>
+    <alias>
+        <family>Microsoft YaHei</family>
+        <accept>
+            <family>Noto Sans CJK SC</family>
+            <family>WenQuanYi Micro Hei</family>
+            <family>WenQuanYi Zen Hei</family>
+        </accept>
+    </alias>
+    <alias>
+        <family>微软雅黑</family>
+        <accept>
+            <family>Noto Sans CJK SC</family>
+            <family>WenQuanYi Micro Hei</family>
+            <family>WenQuanYi Zen Hei</family>
+        </accept>
+    </alias>
+<!-- Aliases for Traditional Chinese Windows fonts -->
+    <alias>
+        <family>MingLiU</family>
+        <accept>
+            <family>Noto Serif CJK TC</family>
+            <family>AR PL UMing TW</family>
+        </accept>
+    </alias>
+    <alias>
+        <family>細明體</family>
+        <accept>
+            <family>Noto Serif CJK TC</family>
+            <family>AR PL UMing TW</family>
+        </accept>
+    </alias>
+    <alias>
+        <family>PMingLiU</family>
+        <accept>
+            <family>Noto Serif CJK TC</family>
+            <family>AR PL UMing TW</family>
+        </accept>
+    </alias>
+    <alias>
+        <family>新細明體</family>
+        <accept>
+            <family>Noto Serif CJK TC</family>
+            <family>AR PL UMing TW</family>
+        </accept>
+    </alias>
+    <alias>
+        <family>微軟正黑體</family>
+        <accept>
+            <family>Noto Sans CJK TC</family>
+            <family>WenQuanYi Micro Hei</family>
+            <family>WenQuanYi Zen Hei</family>
+        </accept>
+    </alias>
+<!-- Alias for HKSCS -->
+    <alias>
+        <family>Ming (for ISO10646)</family>
+        <accept>
+            <family>AR PL UMing HK</family>
+        </accept>
+    </alias>
+    <alias>
+        <family>MingLiU_HKSCS</family>
+        <accept>
+            <family>AR PL UMing HK</family>
+        </accept>
+    </alias>
+    <alias>
+        <family>細明體_HKSCS</family>
+        <accept>
+            <family>AR PL UMing HK</family>
+        </accept>
+    </alias>
+</fontconfig>
+```
 
 
+# 104 font type serif sans-serif monospace
 
 
+[Linux桌面系统字体配置详解](http://www.gimoo.net/t/1504/55322b241ea93.html)
+
+```
+　　1、英文字体分为三类，分别是有衬线字体（serif）、无衬线字体（sans-serif）和等宽字体（monospace）。Serif是有衬线字体，意思是在字的笔画开始、结束的地方有额外的装饰，而且笔画的粗细会有所不同。Sans-serif就没有这些额外的装饰，而且笔画的粗细差不多。在传统的正文印刷中，普遍认为衬线体能带来更佳的可读性（相比无衬线体），尤其是在大段落的文章中，衬线增加了阅读时对字母的视觉参照。而无衬线体往往被用在标题、较短的文字段落或者一些通俗读物中。相比严肃正经的衬线体，无衬线体给人一种休闲轻松的感觉。同时，由于无衬线字体笔画比较饱满，所以比较适合电脑屏幕显示，在印刷和打印中，可以用无衬线字体做标题、加粗字体等表示强调。等宽字体就不用多说啦，主要用于终端字体或编程。
+
+　　2、中文字体可以参照英文字体进行分类，由于中文都是等宽的，所以就只需要区分有衬线（serif）和无衬线（sans-serif）。中文的宋体、仿宋就相当于英文的serif，所以用于传统印刷和打印效果比较好。而中文的黑体、楷体、圆体等字体相当于英文的sans-serif，用于电脑屏幕的显示效果比较好，也可以用在印刷和打印中做标题和粗体字。
+
+　　3、Serif字体的经典代表有Georgia和Times New Roman，sans-serif字体的经典代表有Arial和Verdana，monospace字体的经典代表有Courier New和DejaVu Sans Mono。
+```
+
+## /etc/fonts/conf.d/69-language-selector-zh-cn.conf
+```
+<?xml version="1.0"?>
+<!DOCTYPE fontconfig SYSTEM "fonts.dtd">
+<fontconfig>
+
+	<match target="pattern">
+        <test name="lang">
+            <string>zh-cn</string>
+        </test>
+		<test qual="any" name="family">
+			<string>serif</string>
+		</test>
+		<edit name="family" mode="prepend" binding="strong">
+			<string>Noto Serif CJK SC</string>
+			<string>HYSong</string>
+			<string>AR PL UMing CN</string>
+			<string>AR PL UMing HK</string>
+			<string>AR PL New Sung</string>
+			<string>WenQuanYi Bitmap Song</string>
+			<string>AR PL UKai CN</string>
+			<string>AR PL ZenKai Uni</string>
+		</edit>
+	</match> 
+	<match target="pattern">
+		<test qual="any" name="family">
+			<string>sans-serif</string>
+		</test>
+        <test name="lang">
+            <string>zh-cn</string>
+        </test>
+		<edit name="family" mode="prepend" binding="strong">
+			<string>Noto Sans CJK SC</string>
+			<string>WenQuanYi Zen Hei</string>
+			<string>HYSong</string>
+			<string>AR PL UMing CN</string>
+			<string>AR PL UMing HK</string>
+			<string>AR PL New Sung</string>
+			<string>AR PL UKai CN</string>
+			<string>AR PL ZenKai Uni</string>
+		</edit>
+	</match> 
+	<match target="pattern">
+		<test qual="any" name="family">
+			<string>monospace</string>
+		</test>
+        <test name="lang">
+            <string>zh-cn</string>
+        </test>
+		<edit name="family" mode="prepend" binding="strong">
+			<string>DejaVu Sans Mono</string>
+			<string>Noto Sans Mono CJK SC</string>
+			<string>WenQuanYi Zen Hei Mono</string>
+			<string>HYSong</string>
+			<string>AR PL UMing CN</string>
+			<string>AR PL UMing HK</string>
+			<string>AR PL New Sung</string>
+			<string>AR PL UKai CN</string>
+			<string>AR PL ZenKai Uni</string>
+		</edit>
+	</match> 
+
+</fontconfig>
+```
 
 
 
