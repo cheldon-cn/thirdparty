@@ -8722,6 +8722,36 @@ int  WideChar2MultiByte(const wstring &strWsrc, string &strDst)
 
 # 103 fonts.conf
 
+Fonfconfig的配置文件采用了模块化的结构。配置文件由以下文件组成
+```
+/usr/local/etc/fonts/fonts.conf
+/usr/local/etc/fonts/conf.avail/*.conf
+/usr/local/etc/fonts/conf.d/*.conf
+```
+/usr/local/etc/fonts/conf.d/ 目录下的文件大多数是 conf.avail/ 目录下的连接，大致是如下这些：
+```
+20-fix-globaladvance.conf
+20-lohit-gujarati.conf
+20-unhint-small-vera.conf
+30-amt-aliases.conf
+30-cjk-aliases.conf
+40-generic.conf
+49-sansserif.conf
+50-user.conf
+51-local.conf
+60-latin.conf
+65-fonts-persian.conf
+65-nonlatin.conf
+69-language-selector-zh-cn.conf
+69-unifont.conf
+80-delicious.conf
+90-synthetic.conf
+```
+前面的数字用来控制执行的先后顺序，从名称上就可以看出，每个.conf文件都有针对性的字体特性进行处理。
+
+而实现这种模块化，所借助的就是 /usr/local/etc/fonts/fonts.conf 文件。
+
+
 ## /etc/fonts/fonts.conf
 ```
 <?xml version="1.0"?>
@@ -8835,6 +8865,176 @@ int  WideChar2MultiByte(const wstring &strWsrc, string &strDst)
 
 ```
 
+## /etc/fonts/local.conf
+/// another example
+
+```
+<?xml version="1.0"?>
+<!DOCTYPE fontconfig SYSTEM "fonts.dtd">
+<fontconfig>
+  <its:rules xmlns:its="http://www.w3.org/2005/11/its" version="1.0">
+    <its:translateRule
+      translate="no"
+      selector="/fontconfig/*[not(self::description)]"
+    />
+  </its:rules>
+
+  <description>Android Font Config</description>
+
+  <!-- Font directory list -->
+
+  <dir>/usr/share/fonts</dir>
+  <dir>/usr/local/share/fonts</dir>
+  <dir prefix="xdg">fonts</dir>
+  <!-- the following element will be removed in the future -->
+  <dir>~/.fonts</dir>
+
+  <!-- 关闭内嵌点阵字体 -->
+  <match target="font">
+    <edit name="embeddedbitmap" mode="assign">
+      <bool>false</bool>
+    </edit>
+  </match>
+
+  <!-- 英文默认字体使用 Roboto 和 Noto Serif ,终端使用 DejaVu Sans Mono. -->
+  <match>
+    <test qual="any" name="family">
+      <string>serif</string>
+    </test>
+    <edit name="family" mode="prepend" binding="strong">
+      <string>Noto Serif</string>
+    </edit>
+  </match>
+  <match target="pattern">
+    <test qual="any" name="family">
+      <string>sans-serif</string>
+    </test>
+    <edit name="family" mode="prepend" binding="strong">
+      <string>Roboto</string>
+    </edit>
+  </match>
+  <match target="pattern">
+    <test qual="any" name="family">
+      <string>monospace</string>
+    </test>
+    <edit name="family" mode="prepend" binding="strong">
+      <string>DejaVu Sans Mono</string>
+    </edit>
+  </match>
+
+  <!-- 中文默认字体使用思源黑体和思源宋体,不使用　Noto Sans CJK SC 是因为这个字体会在特定情况下显示片假字. -->
+  <match>
+    <test name="lang" compare="contains">
+      <string>zh</string>
+    </test>
+    <test name="family">
+      <string>serif</string>
+    </test>
+    <edit name="family" mode="prepend">
+      <string>Source Han Serif CN</string>
+    </edit>
+  </match>
+  <match>
+    <test name="lang" compare="contains">
+      <string>zh</string>
+    </test>
+    <test name="family">
+      <string>sans-serif</string>
+    </test>
+    <edit name="family" mode="prepend">
+      <string>Source Han Sans CN</string>
+    </edit>
+  </match>
+  <match>
+    <test name="lang" compare="contains">
+      <string>zh</string>
+    </test>
+    <test name="family">
+      <string>monospace</string>
+    </test>
+    <edit name="family" mode="prepend">
+      <string>Noto Sans Mono CJK SC</string>
+    </edit>
+  </match>
+
+  <!-- Windows & Linux Chinese fonts. -->
+  <!-- 把所有常见的中文字体映射到思源黑体和思源宋体，这样当这些字体未安装时会使用思源黑体和思源宋体.
+解决特定程序指定使用某字体，并且在字体不存在情况下不会使用fallback字体导致中文显示不正常的情况. -->
+  <match target="pattern">
+    <test qual="any" name="family">
+      <string>WenQuanYi Zen Hei</string>
+    </test>
+    <edit name="family" mode="assign" binding="same">
+      <string>Source Han Sans CN</string>
+    </edit>
+  </match>
+  <match target="pattern">
+    <test qual="any" name="family">
+      <string>WenQuanYi Micro Hei</string>
+    </test>
+    <edit name="family" mode="assign" binding="same">
+      <string>Source Han Sans CN</string>
+    </edit>
+  </match>
+  <match target="pattern">
+    <test qual="any" name="family">
+      <string>WenQuanYi Micro Hei Light</string>
+    </test>
+    <edit name="family" mode="assign" binding="same">
+      <string>Source Han Sans CN</string>
+    </edit>
+  </match>
+  <match target="pattern">
+    <test qual="any" name="family">
+      <string>Microsoft YaHei</string>
+    </test>
+    <edit name="family" mode="assign" binding="same">
+      <string>Source Han Sans CN</string>
+    </edit>
+  </match>
+  <match target="pattern">
+    <test qual="any" name="family">
+      <string>SimHei</string>
+    </test>
+    <edit name="family" mode="assign" binding="same">
+      <string>Source Han Sans CN</string>
+    </edit>
+  </match>
+  <match target="pattern">
+    <test qual="any" name="family">
+      <string>SimSun</string>
+    </test>
+    <edit name="family" mode="assign" binding="same">
+      <string>Source Han Serif CN</string>
+    </edit>
+  </match>
+  <match target="pattern">
+    <test qual="any" name="family">
+      <string>SimSun-18030</string>
+    </test>
+    <edit name="family" mode="assign" binding="same">
+      <string>Source Han Serif CN</string>
+    </edit>
+  </match>
+
+  <!-- Load local system customization file -->
+  <include ignore_missing="yes">conf.d</include>
+
+  <!-- Font cache directory list -->
+
+  <cachedir>/var/cache/fontconfig</cachedir>
+  <cachedir prefix="xdg">fontconfig</cachedir>
+  <!-- the following element will be removed in the future -->
+  <cachedir>~/.fontconfig</cachedir>
+
+  <config>
+    <!-- Rescan configuration every 30 seconds when FcFontSetList is called -->
+    <rescan>
+      <int>30</int>
+    </rescan>
+  </config>
+</fontconfig>
+```
 ## /etc/fonts/conf.d/30-cjk-aliases.conf
 
 ```
@@ -9173,9 +9373,51 @@ TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
 
 ```
+# 107 SceneBuilder auto generate Controller Skeleton
+
+1. Open SceneBuilder, create the fxml file;
+2. name the actions and the control items;link the fxml file with controller file;
+3. In SceneBuilder, in view menu, click 'view–>Show Sample Controller Skeleton';
+   we will get the Controller Skeleton,such as
+
+  
+``` 
+import javafx.fxml.FXML;
+import javafx.scene.control.Hyperlink;
+import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
+
+public class AboutController {
+
+    @FXML
+    private Label version;
+
+    @FXML
+    private HBox newVersionBox;
+
+    @FXML
+    private Hyperlink archivesLink;
+
+    @FXML
+    private Hyperlink sourceCodeLink;
+
+    @FXML
+    private Hyperlink licenseLink;
 
 
+    @FXML
+    void browseArchives(ActionEvent event) {
 
+    }
+
+    @FXML
+    void browseChangeLog(ActionEvent event) {
+
+    }
+
+}
+
+```
 
 -----
 Copyright 2020 - 2023 @ [cheldon](https://github.com/cheldon-cn/).
