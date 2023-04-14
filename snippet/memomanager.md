@@ -9419,5 +9419,61 @@ public class AboutController {
 
 ```
 
+# 108 configure user in linux
+
+```
+1. 从系统中添加组
+ groupadd group2
+2.  从系统中删除组
+ groupdel group2  
+ 
+3.# groupmod -g 102 group2
+此命令将组group2的组标识号改动为102。
+# groupmod –g 10000 -n group3 group2
+此命令将组group2的标识号改为10000，组名改动为group3。
+
+4.useradd 选项 username
+当中各选项含义例如以下：
+
+代码:
+-c comment 指定一段凝视性描写叙述。
+-d 文件夹 指定用户主文件夹，假设此文件夹不存在，则同一时候使用-m选项，能够创建主文件夹。
+-g 用户组 指定用户所属的用户组。
+-G 用户组，用户组 指定用户所属的附加组。
+-s Shell文件 指定用户的登录Shell。
+-u 用户号 指定用户的用户号，假设同一时候有-o选项，则能够反复使用其它用户的标识号。
+
+username 指定新账号的登录名
+
+useradd  -d /home/data/ -m data -g group2
+
+# useradd –d /usr/sam -m sam
+ 
+此命令创建了一个用户sam，
+当中-d和-m选项用来为登录名sam产生一个主文件夹/usr/sam（/usr为默认的用户主文件夹所在的父文件夹）
+
+useradd -s /bin/sh -g group –G adm,root gem
+此命令新建了一个用户gem，该用户的登录Shell是/bin/sh，它属于group用户组，同一时候又属于adm和root用户组，当中group用户组是其主组。
+这里可能新建组：#groupadd group及groupadd adm　
+增加用户账号就是在/etc/passwd文件里为新用户增加一条记录，同一时候更新其它系统文件如/etc/shadow, /etc/group等
+
+5. # userdel sam
+此命令删除用户sam在系统文件里（主要是/etc/passwd, /etc/shadow, /etc/group等）的记录，同一时候删除用户的主文件夹。
+# usermod -s /bin/ksh -d /home/z –g developer sam
+此命令将用户sam的登录Shell改动为ksh，主文件夹改为/home/z，用户组改为developer。
+
+6. 比如，假设当前用户是sam，则以下的命令改动该用户自己的口令：
+$ passwd
+Old password:******
+New password:*******
+Re-enter new password:*******
+
+假设是超级用户，能够用下列形式指定不论什么用户的口令：
+# passwd sam
+New password:*******
+Re-enter new password:*******
+
+
+```
 -----
 Copyright 2020 - 2023 @ [cheldon](https://github.com/cheldon-cn/).
