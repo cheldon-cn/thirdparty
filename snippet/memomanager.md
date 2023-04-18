@@ -9623,5 +9623,130 @@ void flate::FailEncodeDecode()
 
 ```
 
+
+# 110 draw pdf With TilingPattern
+	
+```
+void drawWithTilingPattern(PdfDocument* pParent, PdfXObject* pXObj, PdfPainter* pPainter)
+{
+	///pPainter->Save();
+	double strokeR = 0.1, strokeG = 0.0, strokeB = 1.0;
+	bool doFill = false; double fillR = 0.7, fillG = 0.7, fillB = 0.7;
+	double offsetX = NUMPAT, offsetY = NUMPAT;
+	if (0)
+	{
+		if (!pParent)  return;
+		PdfImage pdfImage(pParent);
+		EPdfTilingPatternType eTilingType = ePdfTilingPatternType_Image;
+		pdfImage.LoadFromFile("F:/User/Pictures/icon-29-2x.png");
+		double h = pdfImage.GetHeight();
+		double w = pdfImage.GetWidth();
+		offsetX = w*3, offsetY = h*3;
+		PdfTilingPattern rPattern(eTilingType, strokeR, strokeG, strokeB, doFill, fillR, fillG, fillB,
+			offsetX, offsetY, &pdfImage, pParent);
+		pPainter->SetTilingPattern(rPattern);
+	}
+	else
+	{
+		
+		PdfObject* pContent2 = pXObj->GetContents();
+		PdfObject* pContent = pXObj->GetObject();
+		PdfVecObjects* objs = pContent->GetOwner();
+
+		PdfStream* pstream = pContent->GetStream();
+		char* pBuffer = nullptr; pdf_long  lLen = 0;
+		pstream->GetCopy(&pBuffer, &lLen);
+		podofo_free(pBuffer);
+		pstream->GetFilteredCopy(&pBuffer, &lLen);
+
+		
+		//parsePDFObject(pContent);
+		PdfRect rct = pXObj->GetPageSize();
+		EPdfTilingPatternType eTilingType = ePdfTilingPatternType_Cross;
+		offsetX = 0; 
+		offsetY = 0; 
+		double dmi = 72 / 25.4;
+		double xstep = rct.GetWidth()/ dmi;
+		double ystep = rct.GetHeight()/ dmi;
+		PdfTilingPattern rPattern(eTilingType, strokeR, strokeG, strokeB, doFill, fillR, fillG, fillB,
+			offsetX, offsetY, nullptr, pContent->GetOwner());
+
+		double scale = (xstep / 8)/(dmi);
+		PdfArray array;
+		array.push_back(static_cast<pdf_int64>(3));
+		array.push_back(static_cast<pdf_int64>(0));
+		array.push_back(static_cast<pdf_int64>(0));
+		array.push_back(static_cast<pdf_int64>(3));
+		array.push_back(offsetX);
+		array.push_back(offsetY);
+		rPattern.GetObject()->GetDictionary().AddKey(PdfName("Matrix"), array);
+		//rPattern.GetObject()->GetDictionary().AddKey(PdfName("XStep"), static_cast<int64_t>(10));
+		//rPattern.GetObject()->GetDictionary().AddKey(PdfName("YStep"), static_cast<int64_t>(10));
+
+
+		TVecFilters vecFlate;
+
+		if (0) {
+			vecFlate.push_back(ePdfFilter_FlateDecode);
+			std::ostringstream out; fillB = 1.0;
+			out << fillR << " " << fillG << " " << fillB << " rg" << " ";
+			out << 0 << " " << 0 << " " << 30 << " " << 20 << " re" << " ";
+			out << "f" << " ";
+
+			std::string str = out.str();
+			PdfMemoryInputStream stream(str.c_str(), str.length());
+			rPattern.GetObject()->GetStream()->Set(&stream, vecFlate);
+		}
+		else {
+			vecFlate.push_back(ePdfFilter_FlateDecode);
+			PdfMemoryInputStream stream(pBuffer, lLen);
+			rPattern.GetObject()->GetStream()->Set(&stream, vecFlate);
+		    podofo_free(pBuffer);
+		}
+
+		pPainter->SetTilingPattern(rPattern);
+	//	initPattern(rct.GetWidth(), rct.GetHeight(), pXObj);
+
+
+	}
+
+	/// fill the tiling pattern
+	{
+		const double     x = 10000 * CONVERSION_CONSTANT;
+		const double     y = 260000 * CONVERSION_CONSTANT; // 27cm
+		const double   dWidth = 180000 * CONVERSION_CONSTANT; // 18cm
+		size_t size = floor(dWidth / NUMPAT);
+		double ybase = y - NUMPAT*(size - 2) / 2;
+		double xmid = (x + NUMPAT*(size - 2) / 2 + x)*0.5;
+		int ncount = 4;
+		POINT dots[4] = { x,ybase,NUMPAT*(size - 1) + x,ybase,xmid,y - dWidth*0.8,x + (x + xmid)*0.1,(ybase + y - dWidth)*0.5 };
+		i_AddPath(pPainter, dots, ncount);
+
+		pPainter->ClosePath();
+		pPainter->Fill();
+
+	//	pPainter->Clip(true);
+	}
+	//pPainter->Restore();
+}
+	
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 -----
 Copyright 2020 - 2023 @ [cheldon](https://github.com/cheldon-cn/).
