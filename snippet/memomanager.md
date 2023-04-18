@@ -9376,8 +9376,10 @@ PERFORMANCE OF THIS SOFTWARE.
 # 107 SceneBuilder auto generate Controller Skeleton
 
 1. Open SceneBuilder, create the fxml file;
-2. name the actions and the control items;link the fxml file with controller file;
-3. In SceneBuilder, in view menu, click 'view–>Show Sample Controller Skeleton';
+2. name the actions and the control items;
+3. link the fxml file with controller file;such as
+   fx:controller="com.javafx.fxml.LoginController"
+4. In SceneBuilder, in view menu, click 'view–>Show Sample Controller Skeleton';
    we will get the Controller Skeleton,such as
 
   
@@ -9475,5 +9477,151 @@ Re-enter new password:*******
 
 
 ```
+
+# 109 inflate buffer
+
+```
+
+#include "zlib.h" 
+#define INTERNAL_BUFFER_SIZE 4096
+class flate
+{
+public:
+	flate();
+	~flate();
+protected:
+	z_stream m_stream;
+	unsigned char m_buffer[INTERNAL_BUFFER_SIZE];
+
+public:
+	/// decode
+	void    BeginDecode();
+	__int64 DecodeBlock(const char* pInBuffer, __int64 lInLen);
+	void    EndDecode();
+
+	/// encode
+	void    BeginEncode();
+	void    EncodeBlock(const char* pBuffer, __int64 lLen);
+	void    EndEncode();
+
+private:
+	void    EncodeBlockInternal(const char* pBuffer, __int64 lLen, int nMode);
+	void    FailEncodeDecode();
+
+};
+
+////////////////////////////////
+
+flate::flate()
+{
+
+}
+
+flate::~flate()
+{
+
+}
+
+void flate::BeginDecode()
+{
+	m_stream.zalloc = Z_NULL;
+	m_stream.zfree = Z_NULL;
+	m_stream.opaque = Z_NULL;
+
+	if (inflateInit(&m_stream) != Z_OK)
+	{
+		//RAISE_ERROR(eError_Flate);
+	}
+}
+
+__int64 flate::DecodeBlock(const char* pInBuffer, __int64 lInLen)
+{
+	int flateErr;
+	int nWrittenData;
+
+	m_stream.avail_in = static_cast<long>(lInLen);
+	m_stream.next_in = reinterpret_cast<Bytef*>(const_cast<char*>(pInBuffer));
+
+	m_stream.avail_out = INTERNAL_BUFFER_SIZE;
+	m_stream.next_out = m_buffer;
+
+	switch ((flateErr = inflate(&m_stream, Z_NO_FLUSH))) {
+	case Z_NEED_DICT:
+	case Z_DATA_ERROR:
+	case Z_MEM_ERROR:
+	{
+		//PdfError::LogMessage(eLogSeverity_Error, "Flate Decoding Error from ZLib: %i\n", flateErr);
+		(void)inflateEnd(&m_stream);
+
+		FailEncodeDecode();
+		//RAISE_ERROR(ePdfError_Flate);
+	}
+	default:
+		break;
+	}
+	nWrittenData = INTERNAL_BUFFER_SIZE - m_stream.avail_out;
+
+	return nWrittenData;
+}
+
+void flate::EndDecode()
+{
+	(void)inflateEnd(&m_stream);
+}
+
+void flate::BeginEncode()
+{
+	m_stream.zalloc = Z_NULL;
+	m_stream.zfree = Z_NULL;
+	m_stream.opaque = Z_NULL;
+
+	if (deflateInit(&m_stream, Z_DEFAULT_COMPRESSION))
+	{
+		//PODOFO_RAISE_ERROR(ePdfError_Flate);
+	}
+}
+
+void flate::EncodeBlock(const char* pBuffer, __int64 lLen)
+{
+	this->EncodeBlockInternal(pBuffer, lLen, Z_NO_FLUSH);
+}
+
+void flate::EndEncode()
+{
+	this->EncodeBlockInternal(NULL, 0, Z_FINISH);
+	deflateEnd(&m_stream);
+}
+
+void flate::EncodeBlockInternal(const char* pBuffer, __int64 lLen, int nMode)
+{
+	int nWrittenData = 0;
+
+	m_stream.avail_in = static_cast<long>(lLen);
+	m_stream.next_in = reinterpret_cast<Bytef*>(const_cast<char*>(pBuffer));
+
+	do {
+		m_stream.avail_out = INTERNAL_BUFFER_SIZE;
+		m_stream.next_out = m_buffer;
+
+		if (deflate(&m_stream, nMode) == Z_STREAM_ERROR)
+		{
+			FailEncodeDecode();
+			///PODOFO_RAISE_ERROR(ePdfError_Flate);
+		}
+
+
+		nWrittenData = INTERNAL_BUFFER_SIZE - m_stream.avail_out;
+
+	} while (m_stream.avail_out == 0);
+}
+
+void flate::FailEncodeDecode()
+{
+
+}
+
+
+```
+
 -----
 Copyright 2020 - 2023 @ [cheldon](https://github.com/cheldon-cn/).
