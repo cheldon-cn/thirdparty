@@ -9732,6 +9732,379 @@ void drawWithTilingPattern(PdfDocument* pParent, PdfXObject* pXObj, PdfPainter* 
 	
 ```
 
+# 111 draw pdf With TilingPattern
+
+
+```
+#include <cstdlib>
+#include <cstdio>
+#include <iostream>
+#include <podofo.h>
+
+typedef struct tagD_Point
+{
+	double x;
+	double y;
+} 	D_Point;
+
+class TilePattern
+{
+public:
+	TilePattern();
+	~TilePattern();
+
+public:
+	void TestTilePattern();
+
+	void drawWithTilingPattern(PdfDocument* pParent, PdfXObject* pXObj, PdfPainter* pPainter);
+
+	void Save(const char* pszFile);
+protected:
+
+	void initPattern(int patWid, int patHei, PdfXObject* pXObj, PdfDocument* pParent);
+
+	PdfXObject* createPattern(int patWid, int patHei, PdfDocument* pParent, PdfPainter* pPainter);
+	
+	void SetMatrix(PdfTilingPattern& rPattern, double xscale, double yscale, double xoffset, double yoffset);
+
+	int i_AddPath(PdfPainter* painter, D_Point* dots, int count);
+
+	void drawWithXobject(PdfXObject* pXObj, PdfPainter* pPainter);
+	/// draw polyline with different style 
+	void drawPolyline();
+	/// fill back color
+	void FillBkGround();
+private:
+	PdfPainter* m_pPainter;
+	PdfMemDocument doc;
+	PdfPage*pPage;
+	PdfXObject* m_pXObj;
+
+};
+
+```
+
+```
+////////////////s
+using namespace PoDoFo;
+//#define CONVERSION_CONSTANT 0.002834645669291339 
+///Conversation constant to convert 1/1000th mm to 1/72 inchs
+
+#define  NUMPAT     64
+
+TilePattern::TilePattern() :
+	pPage(nullptr),
+	m_pPainter(nullptr)
+{
+	pPage = doc.CreatePage(PdfPage::CreateStandardPageSize(ePdfPageSize_A4));
+	m_pPainter = new PdfPainter;
+}
+
+TilePattern::~TilePattern()
+{
+
+}
+
+void TilePattern::TestTilePattern()
+{
+	////////////////////////////////////////
+	PdfPainter* pPainter = m_pPainter;
+	if (pPainter == nullptr) return;
+	pPainter->SetPage(pPage);
+
+	/// fill back color
+	FillBkGround();
+	/// draw polyline with different style 
+	drawPolyline();
+
+	/////////////////////////////
+	/// draw pattern
+	if (1) {
+		int patWid, patHei;
+		patWid = patHei = NUMPAT;
+		m_pXObj = createPattern(patWid, patHei, &doc, nullptr);
+
+		bool bUseTilingPattern = true;
+		if (bUseTilingPattern) {
+			pPainter->Save();
+			drawWithTilingPattern(&doc, m_pXObj, pPainter);
+			pPainter->Restore();
+		}
+		else
+		{
+			drawWithXobject(m_pXObj, pPainter);
+		}
+
+		if (m_pXObj) { delete m_pXObj; }
+	}///
+	pPainter->FinishPage(); /// match with setPage
+
+							/////////////////////////////
+							//// save pdf document
+	char szFile[64] = { "\0" };
+	sprintf(szFile, "F:/cache/%d_tilePattern.pdf", GetTickCount());
+	Save(szFile);
+}
+
+
+void TilePattern::initPattern(int patWid, int patHei, PdfXObject* pXObj, PdfDocument* pParent)
+{
+	PdfPainter patPainter;
+
+	/// construct pattern
+
+	patPainter.SetPage(pXObj); /// set XObject as the render target
+
+								/// fill back color
+	{
+		double r = 0.6;
+		double g = 0.6;
+		double b = 0.0;
+		patPainter.SetColor(r, g, b);
+		patPainter.Rectangle(0, 0, patWid, patHei);
+		patPainter.Fill();
+	}
+
+	/// draw line
+	const double dsize = 7.99; ///pattern base size is 8.0;
+	if (1) {
+		patPainter.SetStrokeWidth(50 * CONVERSION_CONSTANT);
+		patPainter.SetLineCapStyle(ePdfLineCapStyle_Round);
+		patPainter.SetLineJoinStyle(ePdfLineJoinStyle_Miter);
+		patPainter.SetStrokingColor(1.0, 0.0, 0.0);
+
+		patPainter.MoveTo(0.0, 0.0);
+		patPainter.LineTo(dsize, dsize);
+		patPainter.MoveTo(0.0, dsize);
+		patPainter.LineTo(dsize, 0.0);
+		patPainter.Stroke();
+	}
+	/// draw polyline
+	{
+		double xbase = 0;
+		double ybase = 0;
+		double offset = dsize;
+		int ncount = 5;
+		D_Point dots[5] = { xbase ,ybase,xbase + offset,ybase,xbase + offset,ybase + offset,xbase,ybase + offset,xbase + offset*0.99,ybase + offset*0.01 };
+
+		patPainter.SetStrokingColor(0.0, 0.0, 1.0);
+		i_AddPath(&patPainter, dots, ncount);
+		patPainter.SetStrokeWidth(10 * CONVERSION_CONSTANT);
+		patPainter.SetLineCapStyle(ePdfLineCapStyle_Round);
+		patPainter.SetLineJoinStyle(ePdfLineJoinStyle_Miter);
+		patPainter.Stroke();
+	}
+	/// draw text
+	{
+		PdfFont* pFont = pParent->CreateFont("Comic Sans MS");
+		pFont->SetFontSize(1.0);
+		patPainter.SetFont(pFont);
+		patPainter.SetColor(0.0, 0.0, 1.0);
+		patPainter.DrawText(1, 1000 * CONVERSION_CONSTANT, "Tile Pattern");
+	}
+
+	patPainter.FinishPage(); /// match with setPage
+}
+
+PdfXObject* TilePattern::createPattern(int patWid, int patHei, PdfDocument* pParent, PdfPainter* pPainter)
+{
+	PdfXObject* pXObj = new PdfXObject(PdfRect(0, 0, patWid, patHei), pParent);
+	if (pPainter) {
+		pPainter->SetPage(pXObj);
+		double r = 1.0, g = 0.5, b = 0.0;
+		pPainter->SetColor(r, g, b);
+		pPainter->Rectangle(0, 0, patWid, patHei);
+		pPainter->Fill();
+		pPainter->FinishPage();
+	}
+	else
+		initPattern(patWid, patHei, pXObj, pParent);
+	return pXObj;
+}
+
+void TilePattern::SetMatrix(PdfTilingPattern& rPattern, double xscale, double yscale, double xoffset, double yoffset)
+{
+	PdfArray array;
+	array.push_back(/*static_cast<pdf_int64>*/(xscale));
+	array.push_back(static_cast<pdf_int64>(0));
+	array.push_back(static_cast<pdf_int64>(0));
+	array.push_back(/*static_cast<pdf_int64>*/(yscale));
+	array.push_back(xoffset);
+	array.push_back(yoffset);
+	rPattern.GetObject()->GetDictionary().AddKey(PdfName("Matrix"), array);
+	//rPattern.GetObject()->GetDictionary().AddKey(PdfName("XStep"), static_cast<int64_t>(10));
+	//rPattern.GetObject()->GetDictionary().AddKey(PdfName("YStep"), static_cast<int64_t>(10));
+}
+
+void TilePattern::drawWithTilingPattern(PdfDocument* pParent, PdfXObject* pXObj, PdfPainter* pPainter)
+{
+	///pPainter->Save();
+	double strokeR = 0.1, strokeG = 0.0, strokeB = 1.0;
+	bool doFill = false; double fillR = 0.7, fillG = 0.7, fillB = 0.7;
+	double offsetX = NUMPAT, offsetY = NUMPAT;
+	if (0)
+	{
+		if (!pParent)  return;
+		PdfImage pdfImage(pParent);
+		EPdfTilingPatternType eTilingType = ePdfTilingPatternType_Image;
+		pdfImage.LoadFromFile("F:/User/Pictures/icon-29-2x.png");
+		double h = pdfImage.GetHeight();
+		double w = pdfImage.GetWidth();
+		offsetX = w * 3, offsetY = h * 3;
+		PdfTilingPattern rPattern(eTilingType, strokeR, strokeG, strokeB, doFill, fillR, fillG, fillB,
+			offsetX, offsetY, &pdfImage, pParent);
+		pPainter->SetTilingPattern(rPattern);
+	}
+	else
+	{
+		PdfObject* pContent = pXObj->GetObject();
+		PdfVecObjects* objs = pContent->GetOwner();
+
+		PdfStream* pstream = pContent->GetStream();
+		char* pBuffer = nullptr; pdf_long  lLen = 0;
+		pstream->GetCopy(&pBuffer, &lLen);
+		pstream->GetFilteredCopy(&pBuffer, &lLen);
+
+		PdfRect rct = pXObj->GetPageSize();
+		EPdfTilingPatternType eTilingType = ePdfTilingPatternType_DiagCross;
+		offsetX = 0;
+		offsetY = 0;
+		double dmi = 72 / 25.4;
+		PdfTilingPattern rPattern(eTilingType, strokeR, strokeG, strokeB, doFill, fillR, fillG, fillB,
+			offsetX, offsetY, nullptr, pContent->GetOwner());
+
+		double basesize = 8.0;
+		double xscale = rct.GetWidth() / basesize;
+		double yscale = rct.GetHeight() / basesize;
+		double scale = 3.9;
+
+		SetMatrix(rPattern, xscale, yscale, offsetX, offsetY);
+
+		TVecFilters vecFlate;
+		vecFlate.push_back(ePdfFilter_FlateDecode);
+
+		if (0) {
+			std::ostringstream out; fillB = 1.0;
+			out << fillR << " " << fillG << " " << fillB << " rg" << " ";
+			out << 0 << " " << 0 << " " << 30 << " " << 20 << " re" << " ";
+			out << "f" << " ";
+			std::string str = out.str();
+			PdfMemoryInputStream stream(str.c_str(), str.length());
+			rPattern.GetObject()->GetStream()->Set(&stream, vecFlate);
+		}
+		else {
+			PdfMemoryInputStream stream(pBuffer, lLen);
+			rPattern.GetObject()->GetStream()->Set(&stream, vecFlate);
+		}
+
+		pPainter->SetTilingPattern(rPattern);
+	}
+
+	/// fill the tiling pattern
+	{
+		const double     x = 10000 * CONVERSION_CONSTANT;
+		const double     y = 260000 * CONVERSION_CONSTANT; // 27cm
+		const double   dWidth = 180000 * CONVERSION_CONSTANT; // 18cm
+		size_t size = floor(dWidth / NUMPAT);
+		double ybase = y - NUMPAT*(size - 2) / 2;
+		double xmid = (x + NUMPAT*(size - 2) / 2 + x)*0.5;
+		int ncount = 4;
+		D_Point dots[4] = { x,ybase,NUMPAT*(size - 1) + x,ybase,xmid,y - dWidth*0.8,x + (x + xmid)*0.1,(ybase + y - dWidth)*0.5 };
+		i_AddPath(pPainter, dots, ncount);
+
+		pPainter->ClosePath();
+		pPainter->Fill();
+
+		//	pPainter->Clip(true);
+	}
+	//pPainter->Restore();
+}
+
+void TilePattern::drawPolyline()
+{
+	PdfPainter* pPainter = m_pPainter;
+	if (pPainter == nullptr) return;
+	double xbase = NUMPAT;
+	double ybase = NUMPAT;
+	double xmid = 0.5*NUMPAT;
+	int ncount = 4;
+	D_Point dots[4] = { xbase ,ybase,xbase + xmid,ybase,xbase + xmid,ybase + xmid,xbase,ybase + xmid };
+
+	pPainter->SetStrokingColor(0.0, 0.0, 1.0);
+	i_AddPath(pPainter, dots, ncount);
+	pPainter->SetStrokeWidth(1000 * CONVERSION_CONSTANT);
+	pPainter->SetLineCapStyle(ePdfLineCapStyle_Round);
+	pPainter->SetLineJoinStyle(ePdfLineJoinStyle_Miter);
+	pPainter->Stroke();
+
+	pPainter->SetStrokingColor(1.0, 0.0, 0.0);
+	i_AddPath(pPainter, dots, ncount);
+	pPainter->SetStrokeWidth(500 * CONVERSION_CONSTANT);
+	pPainter->SetLineCapStyle(ePdfLineCapStyle_Square);
+	pPainter->SetLineJoinStyle(ePdfLineJoinStyle_Bevel);
+	pPainter->Stroke();
+}
+
+void TilePattern::FillBkGround()
+{
+	double     x = 10000 * CONVERSION_CONSTANT;
+	double     y = pPage->GetPageSize().GetHeight() - 10000 * CONVERSION_CONSTANT;
+	const double dWidth = 180000 * CONVERSION_CONSTANT; // 18cm
+	const double dHeight = 270000 * CONVERSION_CONSTANT; // 27cm
+	size_t size = floor(dWidth / NUMPAT);
+
+	PdfPainter* pPainter = m_pPainter;
+	if (pPainter == nullptr) return;
+	pPainter->SetColor(0.6, 0.6, 0.6);
+	pPainter->Rectangle(x, y - dHeight, dWidth, dHeight);
+	pPainter->Fill();
+}
+
+int TilePattern::i_AddPath(PdfPainter* painter, D_Point* dots, int count)
+{
+	if (!painter || dots == NULL || count < 2)
+	{
+		return 0;
+	}
+	painter->MoveTo(dots[0].x, dots[0].y);
+	for (int i = 1; i < count; ++i)
+	{
+		painter->LineTo(dots[i].x, dots[i].y);
+	}
+	return 1;
+}
+
+void TilePattern::drawWithXobject(PdfXObject* pXObj, PdfPainter* pPainter)
+{
+	const double     x = 10000 * CONVERSION_CONSTANT;
+	const double     y = 260000 * CONVERSION_CONSTANT; // 27cm
+	const double   dWidth = 180000 * CONVERSION_CONSTANT; // 18cm
+	size_t size = floor(dWidth / NUMPAT);
+	double ybase = y - NUMPAT*(size - 2) / 2;
+	double xmid = (x + NUMPAT*(size - 2) / 2 + x)*0.5;
+	int ncount = 4;
+	D_Point dots[4] = { x,ybase,NUMPAT*(size - 1) + x,ybase,xmid,y - dWidth*0.8,x + (x + xmid)*0.1,(ybase + y - dWidth)*0.5 };
+	i_AddPath(pPainter, dots, ncount);
+
+	pPainter->ClosePath();
+	//pPainter->Save();
+	pPainter->SetGray(0.6);
+	pPainter->Fill();
+	//pPainter->Restore();
+	//pPainter->Clip(true);
+	for (size_t index = 1; index < size - 1; index++)
+	{
+		pPainter->DrawXObject(NUMPAT*index + x, y - NUMPAT*index, pXObj);
+	}
+}
+
+void TilePattern::Save(const char* pszFile)
+{
+	doc.Write(pszFile);
+}
+
+```
+
 
 
 
