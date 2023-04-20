@@ -10105,7 +10105,48 @@ void TilePattern::Save(const char* pszFile)
 
 ```
 
+# 112 encrypt and decrypt in java
 
+```
+  /**
+	* 加密原始密码
+	*
+	* @param password 原密码
+	* @param key   密钥  /使用DES  密钥必须是8个字节  //使用AES  密钥必须是16个字节s
+	* @return 加密后的密码
+	*/
+public static String encrypt(String password, String key) {
+	try {
+		SecretKey secretKey = SecretKeyFactory.getInstance("des").generateSecret(new DESKeySpec(key.getBytes()));
+		Cipher cipher = Cipher.getInstance("des");
+		cipher.init(Cipher.ENCRYPT_MODE, secretKey, new SecureRandom());
+		byte[] cipherData = cipher.doFinal(password.getBytes());
+		return DatatypeConverter.printBase64Binary(cipherData);
+	} catch (Exception ex) {
+		return password;
+	}
+}
+
+  /**
+	* 解密密码
+	*
+	* @param encryptedPassword 加密后的密码
+	* @param key            密钥
+	* @return 原密码
+	*/
+public static String decrypt(String encryptedPassword, String key) {
+	try {
+		SecretKey secretKey = SecretKeyFactory.getInstance("des").generateSecret(new DESKeySpec(key.getBytes()));
+		Cipher cipher = Cipher.getInstance("des");
+		cipher.init(Cipher.DECRYPT_MODE, secretKey, new SecureRandom());
+		byte[] plainData = cipher.doFinal(DatatypeConverter.parseBase64Binary(encryptedPassword));
+		return new String(plainData);
+	} catch (Exception ex) {
+		return encryptedPassword;
+	}
+}
+
+```
 
 
 
