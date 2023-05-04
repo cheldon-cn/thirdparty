@@ -10148,11 +10148,107 @@ public static String decrypt(String encryptedPassword, String key) {
 
 ```
 
+# 113  create guid
+
+```
+namespace cycle
+{
+int sprintf_s(char *_Dest, size_t maxlen, const char * _Format, ...)
+{
+	int n = 0;
+	va_list ap;
+	va_start(ap, _Format);
+	n = vsnprintf(_Dest, maxlen, _Format, ap);  
+	//vsnprintf才是接收va_list参数的版本，原逻辑误用成snprintf导致传入的值有问题
+	va_end(ap);
+	return n;
+}
 
 
+int swprintf_w(LPWSTR pszOut, LPCWSTR format, ...)
+{
+	int n = 0;
+	va_list ap;
+	va_start(ap, (const wchar_t *)format);
+	n = vswprintf((wchar_t *)pszOut, 1024, (const wchar_t *)format, ap);
+	va_end(ap);
+	return(n);
+}
+
+#ifdef _use_uuid_qt
+#include <QtCore/QUuid>
+#else
+#include <uuid/uuid.h>
+#endif
+
+HRESULT  CreateGuid(GUID  * pguid)
+{
+#ifdef _use_uuid_qt
+    QUuid uuid = QUuid::createUuid();
+	if(pguid)
+	{
+		pguid->Data1 = uuid.data1;
+		pguid->Data2 = uuid.data2;
+		pguid->Data3 = uuid.data3;
+		for (int i = 0; i < 8; ++i)
+			pguid->Data4[i] = uuid.data4[i];
+	}
+#else
+	uuid_t uu;
+	uuid_generate(uu);
+	if (pguid)
+		memcpy(pguid, &uu, sizeof(uuid_t));
+#endif	
+	return 1;
+}
 
 
+}
 
+#ifdef CYCLE_UNICODE
+
+typedef WCHAR TCHAR__;
+#define CLESTR(str) L##str
+
+#else  /* CYCLE_UNICODE */
+
+typedef char TCHAR__;
+#define CLESTR(str) str
+
+#endif /* CYCLE_UNICODE */
+
+typedef TCHAR__ CLECHAR, *LPCLECHAR, *LPCLESTR;
+
+int StringFromGUID2(const GUID& rguid, LPCLESTR lpsz, int cchMax)
+{
+	char buffer[64] = { 0 };
+	GUID guid = rguid;
+	cycle::sprintf_s(buffer,cchMax,
+		"%08X-%04X-%04x-%02X%02X-%02X%02X%02X%02X%02X%02X",
+		guid.Data1, guid.Data2, guid.Data3,
+		guid.Data4[0], guid.Data4[1], guid.Data4[2],
+		guid.Data4[3], guid.Data4[4], guid.Data4[5],
+		guid.Data4[6], guid.Data4[7]);
+	
+	if(lpsz)
+		memcpy(lpsz, buffer, strlen(buffer));
+	return 1;
+}
+
+void runGUID()
+{
+		GUID            g_guid;
+		CLECHAR         str1[50];
+		 
+		cycle::CreateGuid(&g_guid);
+
+		USES_CONVERSION;
+		memset(str1,0,sizeof(CLECHAR) * 50);
+		StringFromGUID2(g_guid,str1,50);
+}
+
+
+```
 
 
 
