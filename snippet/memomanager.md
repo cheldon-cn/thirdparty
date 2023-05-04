@@ -10251,6 +10251,44 @@ void runGUID()
 ```
 
 
+# 114  a2wconverter and  w2aconverter
+
+```
+class converter_Content_
+{
+public:
+	CLECHAR *a2wconverter(const char *pszSrc)
+	{
+		stringx str(pszSrc);
+		m_wstring = str.ToStdU16String();
+		return (CLECHAR *)m_wstring.c_str();
+	}
+	char *w2aconverter(const CLECHAR *wcharStr)
+	{
+		std::u16string srcStr = (char16_t*)wcharStr;
+		stringx str = stringx::FromStdU16String(srcStr,stringx::GB18030);
+		m_string = str.StdString();
+		return (char*)m_string.c_str();
+	}
+public:
+	converter_Content_()
+	{}
+	~converter_Content_(){}
+private:
+	std::u16string  m_wstring;
+	std::string   m_string;
+};
+
+
+#define USES_CONVERSION	converter_Content_  global_convert;
+
+#define W2A(a)	        global_convert.w2aconverter((const CLECHAR *)a)
+#define A2W(w)	        global_convert.a2wconverter(w)
+
+
+```
+
+
 
 
 
