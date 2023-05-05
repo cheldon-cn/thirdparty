@@ -10289,6 +10289,51 @@ private:
 ```
 
 
+# 115  GetSymmetryDot
+
+```
+ /// 求一点的中心对称点
+///
+/// @param [in] dot 点
+/// @param [in] centerDot 中心点
+/// @param [out] MiirrorDot 中心对称后的点
+///
+/// @return 1 成功；0 失败
+long  GetSymmetryDot(DOT dot,DOT centerDot,DOT* MiirrorDot)
+{
+	if(MiirrorDot)
+	{
+		MiirrorDot->x = 2*centerDot.x - dot.x;
+		MiirrorDot->y = 2*centerDot.y - dot.y;
+	}
+	return 1;
+}
+/// 计算两点之间的弧度(0~2*PI)之间 
+///
+/// @param [in] x1 点1x坐标
+/// @param [in] y1 点1y坐标
+/// @param [in] x2 点2x坐标
+/// @param [in] y2 点2y坐标
+/// @param [out] ang2 弧度
+void ComputeAngle(double x1,double y1, double x2,double y2,double *ang2)
+{
+    if(fabs(x2-x1) <= EPS)
+	{
+		*ang2=PI/2.0;
+		if(y2-y1<0.)
+			*ang2+=PI;
+	}
+    else
+	{
+		*ang2 = atan((y2-y1)/(x2-x1));
+		if(x2-x1<0.)
+			*ang2+=PI;
+	}
+    if(*ang2<0.)
+		*ang2+=2.0*PI;
+    return;
+}
+```
 
 
 
