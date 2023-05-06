@@ -10308,6 +10308,7 @@ long  GetSymmetryDot(DOT dot,DOT centerDot,DOT* MiirrorDot)
 	}
 	return 1;
 }
+
 /// 计算两点之间的弧度(0~2*PI)之间 
 ///
 /// @param [in] x1 点1x坐标
@@ -10333,6 +10334,52 @@ void ComputeAngle(double x1,double y1, double x2,double y2,double *ang2)
 		*ang2+=2.0*PI;
     return;
 }
+
+//================================RotateDot()===============================
+/// 求点旋转后的位置
+///
+/// @param [in, out] dotX 需要旋转的点坐标：x
+/// @param [in, out] dotY 需要旋转的点坐标：y
+/// @param [in] centerX 旋转中心坐标：x
+/// @param [in] centerY 旋转中心坐标：y
+/// @param [in] dAngle 逆时针旋转角度（弧度单位）
+///
+/// @return true
+//================================================================================
+template<class _T> inline
+bool RotateDot(_T &dotX,_T &dotY,_T centerX,_T centerY,double dAngle)
+{
+	_T		x,y;
+	x = dotX - centerX;
+	y = dotY - centerY;
+	dotX = centerX + x*cos(dAngle) - y*sin(dAngle);
+	dotY = centerY + x*sin(dAngle) + y*cos(dAngle);
+	return true;
+}
+
+//==================================ZoomDot()=================================
+/// 求点缩放后的位置
+///
+/// @param [in] dotX 点x坐标
+/// @param [in] dotY 点y坐标
+/// @param [in] centerX 缩放中心x坐标
+/// @param [in] centerY 缩放中心y坐标
+/// @param [in] dScaleX x方向缩放系数
+/// @param [in] dScaleY y方向缩放系数
+///
+/// @return true
+//================================================================================
+template<class _T> inline
+bool ZoomDot(_T &dotX,_T &dotY,_T centerX,_T centerY,double dScaleX,double dScaleY)
+{
+	_T		x,y;
+	x = dotX - centerX;
+	y = dotY - centerY;
+	dotX = centerX + x*dScaleX;
+	dotY = centerY + y*dScaleY;
+	return true;
+}
+
 ```
 
 
