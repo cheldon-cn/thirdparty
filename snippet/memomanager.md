@@ -10383,9 +10383,31 @@ bool ZoomDot(_T &dotX,_T &dotY,_T centerX,_T centerY,double dScaleX,double dScal
 ```
 
 
+# 116  DISPLAY=localhost
 
+```
 
+Exception in thread "main" java.lang.reflect.InvocationTargetException
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at sun.launcher.LauncherHelper$FXHelper.main(LauncherHelper.java:767)
+Caused by: java.lang.UnsupportedOperationException: Unable to open DISPLAY
+	at com.sun.glass.ui.gtk.GtkApplication.<init>(GtkApplication.java:68)
+	at com.sun.glass.ui.gtk.GtkPlatformFactory.createApplication(GtkPlatformFactory.java:41)
+	at com.sun.glass.ui.Application.run(Application.java:146)
+	at com.sun.javafx.tk.quantum.QuantumToolkit.startup(QuantumToolkit.java:257)
+	at com.sun.javafx.application.PlatformImpl.startup(PlatformImpl.java:211)
+	at com.sun.javafx.application.LauncherImpl.startToolkit(LauncherImpl.java:675)
+	at com.sun.javafx.application.LauncherImpl.launchApplicationWithArgs(LauncherImpl.java:337)
+	at com.sun.javafx.application.LauncherImpl.launchApplication(LauncherImpl.java:328)
+	... 5 more
+root@user100:/opt/apps/program# echo $DISPLAY
+:10.0
+root@user100:/opt/apps/program# export DISPLAY=localhost:10.0
 
+```
 
 
 -----
