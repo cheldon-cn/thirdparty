@@ -10410,5 +10410,50 @@ root@user100:/opt/apps/program# export DISPLAY=localhost:10.0
 ```
 
 
+# 117 set solib-search-path in GDB Session
+
+
+##  case
+when attached the target linux host via visualGDB tool,
+we need set the library path in order to debug the target library, 
+usually we send  this command  "set solib-search-path %LIB_path" in GDB Session;
+eg: set solib-search-path /opt/apps/program
+
+but sometimes the next error message crash us;
+
+```
+VisualGDB is licensed to Company (site license)
+gdb --interpreter mi
+All created breakpoints are pending. Setting a breakpoint at main()...
+Cannot execute command. GDB is not ready.
+Please halt the debugged program by selecting Debug->Break All.
+```
+
+##  solution
+Base on the message above : we need selecting Debug->Break All in Visual studio;
+
+1. after selecting Debug->Break All  (CTRL+ATL+BREAK),
+2. send the command again in GDB Session;
+then we get the following configure information;
+
+```
+
+set solib-search-path /opt/apps/program
+&"set solib-search-path /opt/apps/program\n"
+Reading symbols from /opt/apps/program/libz.so...
+(No debugging symbols found in /opt/apps/program/libz.so)
+Reading symbols from /opt/apps/program/libpng16.so.16...
+(No debugging symbols found in /opt/apps/program/libpng16.so.16)
+Reading symbols from /opt/apps/program/libpcre.so.3...
+(No debugging symbols found in /opt/apps/program/libpcre.so.3)
+Reading symbols from /opt/apps/program/libvtkCommonSystem-8.2.so.1...
+Reading symbols from /opt/apps/program/libvtkCommonTransforms-8.2.so.1...
+Reading symbols from /opt/apps/program/libvtkDICOMParser-8.2.so.1...
+Reading symbols from /opt/apps/program/libvtkmetaio-8.2.so.1...
+OK
+```
+
+then we can debug the target library;
+
 -----
 Copyright 2020 - 2023 @ [cheldon](https://github.com/cheldon-cn/).
