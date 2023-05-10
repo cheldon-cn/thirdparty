@@ -10455,5 +10455,55 @@ OK
 
 then we can debug the target library;
 
+
+
+# 118  remote debug in IDEA
+
+
+how to  debug remote program which run in linux environment with  IDEA?
+
+## solution
+
+1.prepare and install IDEA ,and configure jdk ;
+
+2.in IDEA, open jar module,compile and package it into  target jar file "target.jar"; 
+ copy the atrget jar file into target host which u wanna debug;
+
+3.in IDEA Run/Debug Configurations,add new Configuration by selecting 'Romote'  ;
+  then configure 'Remote' ;
+  ```
+  Debugger mode: Attach to remote JVM
+  Transport : Socket
+  Host: 192.168.23.112
+  Port: 50505
+  Commmand line arguments for remote JVM：
+  -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=50505
+  use module classpath: target.module
+  ```
+  then apply this configuration;
+  Port  is any free number;
+
+4. next is the key;
+   open target linux host which has ip list above (eg:192.168.23.112 );
+   in this host ,append the original start script with  the command line arguments which list in step 3:
+
+   eg:
+   ```
+   原来远程启动脚本
+   java -jar xxx.jar
+   调整后的调试启动脚本
+   java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005  -jar xxx.jar
+
+    -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005
+    根据idea配置里远程jvm的命令行参数生成。
+   ```
+   then run the adjusted start script ; process the target fucntions;
+5. in IDEA, click the Remote debug;
+
+6. ok,next we can debug the remote program
+
+
+
+
 -----
 Copyright 2020 - 2023 @ [cheldon](https://github.com/cheldon-cn/).
