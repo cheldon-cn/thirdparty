@@ -7065,7 +7065,7 @@ void GetCpuInfo(CString &chProcessorName,CString &chProcessorType,DWORD &dwNum,D
 ///
 /// @return 文件夹路径列表（多个只返回第一个）
 //================================================================================
-MFCOMMONEXPORT gisLONG API_FileDirPath(CString strDir, CString strFile, CString& strDirPath)
+MFCOMMONEXPORT long API_FileDirPath(CString strDir, CString strFile, CString& strDirPath)
 {
 	if (strDir.GetLength() <= 0 || strFile.GetLength() <= 0)
 		return 0;
@@ -7135,7 +7135,7 @@ MFCOMMONEXPORT gisLONG API_FileDirPath(CString strDir, CString strFile, CString&
 #else
 	DIR *dir;
 	struct dirent *ptr;
-	gisLONG nIndex = 0;
+	long nIndex = 0;
 
 	if ((dir = opendir(strDir.GetBuffer())) == NULL)
 	{
@@ -10464,13 +10464,12 @@ how to  debug remote program which run in linux environment with  IDEA?
 
 ## solution
 
-1.prepare and install IDEA ,and configure jdk ;
+1. prepare and install IDEA ,and configure jdk ;
 
-2.in IDEA, open jar module,compile and package it into  target jar file "target.jar"; 
+2. in IDEA, open jar module,compile and package it into  target jar file "target.jar"; 
  copy the atrget jar file into target host which u wanna debug;
 
-3.in IDEA Run/Debug Configurations,add new Configuration by selecting 'Romote'  ;
-  then configure 'Remote' ;
+3. in IDEA Run/Debug Configurations,add new Configuration by selecting 'Romote'  ;then configure 'Remote' ;
   ```
   Debugger mode: Attach to remote JVM
   Transport : Socket
@@ -10480,8 +10479,7 @@ how to  debug remote program which run in linux environment with  IDEA?
   -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=50505
   use module classpath: target.module
   ```
-  then apply this configuration;
-  Port  is any free number;
+  then apply this configuration; NOTE: Port  is any free number;
 
 4. next is the key;
    open target linux host which has ip list above (eg:192.168.23.112 );
@@ -10502,8 +10500,99 @@ how to  debug remote program which run in linux environment with  IDEA?
 
 6. ok,next we can debug the remote program
 
+# 119  caculate math
+
+ ```
+//计算直线角度（-PI到+PI）
+double   Caculate_PIAngle(double x0,double y0,double x1,double y1)
+{
+	double ang;
+	double  dx,dy;
+	//       ^y
+	dy=y1-y0;                   //       |
+	dx=x1-x0;                   //      PI/2
+	if(dy||dx)                  //       |
+		ang=atan2(dy,dx);  //----//-(+PI)-|---0--->x
+	else			//  -PI  |
+		ang=0;                   //       |
+	return(ang);                //       -PI/2
+}
+
+//计算直线角度（0到2PI）
+
+double   Caculate_2PIAngle(double x0,double y0,double x1,double y1)
+{
+	double ang;
+	ang=Caculate_PIAngle(x0,y0,x1,y1);
+	if(ang<0)ang+=2*PI;
+	return(ang);
+}
 
 
+//计算向量角度
+double WINAPI Caculate_PIAngleOfArr1(double dx,double dy)
+{
+	double ang;
+								//       ^y
+								//       |
+								//      PI/2
+	if(dy||dx)                   //       |
+		ang=atan2(dy,dx);    //- //-(+PI)-|---0--->x
+	else			             // -PI   |
+		ang=0;                   //       |
+	return(ang);                //       -PI/2
+}
+
+
+
+//计算线段长度
+
+double   _SegmentLength1(double x0,double y0,double x1,double y1)
+{
+	double dx,dy;
+	dx=x1-x0;
+	dy=y1-y0;
+	return(sqrt((double)dx*dx+(double)dy*dy));
+}
+
+double   CalculateLength(void *xyz,long len,short dim)
+{
+
+	long  i;
+	double ds=0;
+	if(dim==3)
+	{
+		D_3DOT  *p0;
+		D_3DOT  *p1;
+
+		p0=(D_3DOT  *)xyz;
+		p1=p0+1;
+		for(i=1;i<len;i++)
+		{
+			ds+=sqrt((p1->x-p0->x)*(p1->x-p0->x)+(p1->y-p0->y)*(p1->y-p0->y)+(p1->z-p0->z)*(p1->z-p0->z));
+			p0++;
+			p1++;
+		}
+
+	}
+	else
+	{
+		D_DOT  *p0;
+		D_DOT  *p1;
+
+		p0=(D_DOT *)xyz;
+		p1=p0+1;
+		for(i=1;i<len;i++)
+		{
+			ds+=sqrt((p1->x-p0->x)*(p1->x-p0->x)+(p1->y-p0->y)*(p1->y-p0->y));
+			p0++;
+			p1++;
+		}
+	}
+	return(ds);
+}
+
+ ```
 
 -----
 Copyright 2020 - 2023 @ [cheldon](https://github.com/cheldon-cn/).
