@@ -10613,9 +10613,29 @@ double   CalculateLength(void *xyz,long len,short dim)
     </mirrors>
  ```
  
+# 121  report the undefined symbol in dynamic library
+
+ ```
+[root@bg01 program]# ldd -r libdisplay.so
+        linux-vdso.so.1 (0x0000fffd7bda0000)
+        libXext.so.6 => /lib64/libXext.so.6 (0x0000fffd644a0000)
+        libXrender.so.1 => /lib64/libXrender.so.1 (0x0000fffd64470000)
+        libGLX.so.0 => /lib64/libGLX.so.0 (0x0000fffd64410000)
+        libGLdispatch.so.0 => /lib64/libGLdispatch.so.0 (0x0000fffd642b0000)
+        libxml2.so.2 => /lib64/libxml2.so.2 (0x0000fffd64120000)
+undefined symbol: PntSymbolToPS      (./libdisplay.so)
+undefined symbol: LinSymbolToPS      (./libdisplay.so)
+undefined symbol: RegSymbolToPS      (./libdisplay.so)
  
+ ```
+--version：打印指令版本号；
+-v：详细信息模式，打印所有相关信息；
+-u：打印未使用的直接依赖；
+-d：执行重定位和报告任何丢失的对象；
+-r：执行数据对象和函数的重定位，并且报告任何丢失的对象和函数；
+--help：显示帮助信息。
  
- 
+ # 122 
  
  
  
