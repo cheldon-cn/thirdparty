@@ -10635,11 +10635,89 @@ undefined symbol: RegSymbolToPS      (./libdisplay.so)
 -r：执行数据对象和函数的重定位，并且报告任何丢失的对象和函数；
 --help：显示帮助信息。
  
- # 122 
+ # 122  how to use Log4j and set Log4J properties
  
+ ## how to use Log4j
  
+ ```
+import lombok.extern.log4j.Log4j;
+
+import java.io.File;
+import java.nio.file.Paths;
+import java.util.*;
+
+///Slf4j
+@Log4j
+public class MapPrint {
+
+  
+    private void logi(String str) {
+        curTime = System.currentTimeMillis();
+        long totalsecond = curTime / 1000;
+
+        long millsecond = curTime % 1000;
+        long second = totalsecond % 60;
+
+        long totalminute = totalsecond / 60;
+        long minute = totalminute % 60;
+
+        long totalhour = totalminute / 60;
+        long hour = totalhour % 24;
+        long delta = curTime - preTime; /// cost time
+        String sta = String.format("%2d:%2d:%2d.%d cost:%6d ms |", hour + 8, minute, second, millsecond, delta);
+        String strInfo = sta + str;
+
+        log.info(strInfo);
+        preTime = curTime;
+    }
+	
+	void export(String srcFile,String templateFile,String saveFile)
+	{
+	    logi("1. addlabels: begin");
+        addLabels(labels, "index");
+        logi("1. addlabels: end");
+
+        logi("2. applayTemplate: begin");
+        String strRes = applayTemplate(srcFile, templateFile, saveFile.toPath().toAbsolutePath().toString(), format);
+        logi("2. applayTemplate: end");
+
+        logi("0.export: end");
+        return strRes;
+    }
+	
+}
  
+ ```
  
+  ## set Log4J properties
+    1.save next block into file log4j.properties;
+	2.then move it into folder 'targetJar\src\main\resources\'
+  ```
+	# Root logger option
+	log4j.rootLogger=INFO, stdout, FILE
+	# Direct log messages to stdout
+	log4j.appender.stdout=org.apache.log4j.ConsoleAppender
+	log4j.appender.stdout.Target=System.out
+	log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
+	log4j.appender.stdout.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1} - %m%n
+
+	# Direct log messages to file
+
+	# Define the file appender
+	log4j.appender.FILE=org.apache.log4j.FileAppender
+	# Set the name of the file
+	log4j.appender.FILE.File=/data/soft/log/log2023.log
+	# Set the immediate flush to true (default)
+	log4j.appender.FILE.ImmediateFlush=true
+	# Set the threshold to debug mode
+	log4j.appender.FILE.Threshold=debug
+	# Set the append to false, overwrite
+	log4j.appender.FILE.Append=false
+	# Define the layout for file appender
+	log4j.appender.FILE.layout=org.apache.log4j.PatternLayout
+	log4j.appender.FILE.layout.conversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1} - %m%n
+```
+  
  
  
  
