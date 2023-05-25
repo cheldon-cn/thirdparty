@@ -10718,8 +10718,17 @@ public class MapPrint {
 	log4j.appender.FILE.layout.conversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1} - %m%n
 ```
   
+ # 123 how to upload file to remote machine  from local host with SecureCRT 
  
- 
+ ```
+
+1.快捷键alt+p打开sftp窗口，输入想要下载的文件所在的目录，回车
+lcd E:/download
+2.输入要下载的文件
+get /usr/hello.jar
+回车之后，就能将服务器中指定的文件下载到本地指定的目录下。
+
+```
  
  
  
