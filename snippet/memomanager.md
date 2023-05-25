@@ -10730,8 +10730,41 @@ get /usr/hello.jar
 
 ```
  
+ # 124 install local jar file into maven  repository with 'mvn install-file' 
  
- 
+ ```
+	"D:\Program\JetBrains\IntelliJ_IDEA_2019\plugins\maven\lib\maven3\bin\mvn" install:install-file -DgroupId=com.cycle.zone.igs -DartifactId=cycle-igs-api -Dversion=10.6.2.10 -Dpackaging=jar -Dfile=cycle-igs-api-10.6.2.10.jar
+	 
+	maven添加本地包命令mvn install:install-file各个属性详解
+
+	答：
+
+	1.添加带有别名core的jar包，common-auth-0.0.1-SNAPSHOT-core.jar
+
+	mvn install:install-file -Dfile=F:/common-auth/target/common-auth-0.0.1-SNAPSHOT-core.jar -DgroupId=com.cloud -DartifactId=common-auth -Dversion=0.0.1-SNAPSHOT -Dclassifier=core  -Dpackaging=jar
+
+	2.添加没别名的jar包，common-auth-0.0.1-SNAPSHOT.jar
+
+	mvn install:install-file -Dfile=F:/common-auth/target/common-auth-0.0.1-SNAPSHOT.jar -DgroupId=com.cloud -DartifactId=common-auth -Dversion=0.0.1-SNAPSHOT -Dpackaging=jar
+
+	1比较2多了一个属性Dclassifier，用来申明包的别名，也就是拼接在-Dversion的值0.0.1-SNAPSHOT的后面的名称，例如core。执行上面两条命令行后，在com/cloud/common-auth/0.0.1-SNAPSHOT/目录下添加了两个包，分别为：common-auth-0.0.1-SNAPSHOT-core.jar和common-auth-0.0.1-SNAPSHOT.jar。
+```
+
+```
+	各个属性解释
+
+	<groupId>com.bx.cloud</groupId>
+	<artifactId>bx-common</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+	-Dfile：包的本地真实地址
+	-DgroupId：pom.xml中groupId
+	-DartifactId：pom.xml中artifactId
+	-Dversion：pom.xml中0.0.1-SNAPSHOT
+	-Dpackaging：jar或war，包的后缀名
+	-Dclassifier：兄弟包的别名，也就是-Dversion值后面的字符common-auth-0.0.1-SNAPSHOT-core.jar的-core
+ ```
  
  
  
