@@ -10766,9 +10766,102 @@ get /usr/hello.jar
 	-Dclassifier：兄弟包的别名，也就是-Dversion值后面的字符common-auth-0.0.1-SNAPSHOT-core.jar的-core
  ```
  
+ # 125 leaflet quick-start example
  
+https://leafletjs.cn/examples/quick-start/
+
+ ```
+ <!DOCTYPE html>
+<!--https://leafletjs.cn/examples/quick-start/-->
+<html lang="en">
+<head>
+	<base target="_top">
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	
+	<title>Quick Start - Leaflet</title>
+	<!--link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"/-->
+	<link rel="stylesheet" href="./leaflet.css"/>
+	  <!-- Make sure you put this AFTER Leaflet's CSS -->
+    <!--script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script-->
+    
+    <script src="./leaflet.js"></script>
+
+	<style>
+		<!--html, body {
+			height: 100%;
+			margin: 0;
+		}
+		
+		#map { height: 900px; width:1280px }-->
+		
+		body {
+			padding: 0;
+			margin: 0;
+		}
+		html, body, #map {
+			height: 100%;
+			width: 100vw;
+		}
+
+	</style>
+
+	
+</head>
+<body>
+	<div id="map"></div>
+</body>
+
+
+<script>
+	var map = L.map('map').setView([51.505, -0.09], 13);
+
+	L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+		maxZoom: 19,
+		attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+	}).addTo(map);
+
+	var marker = L.marker([51.5, -0.09]).addTo(map);
+	
+	var circle = L.circle([51.508, -0.11], {
+		color: 'red',
+		fillColor: '#f03',
+		fillOpacity: 0.5,
+		radius: 500
+	}).addTo(map);
+	
+	var polygon = L.polygon([
+		[51.509, -0.08],
+		[51.500, -0.06],
+		[51.51, -0.03],
+		[51.52, -0.056]
+	]).addTo(map);
+	
+	marker.bindPopup("<b>Hello world!</b><br>I am a popup.").openPopup();
+	circle.bindPopup("I am a circle.");
+	polygon.bindPopup("I am a polygon.");
+	
+	var popup = L.popup()
+    .setLatLng([51.513, -0.09])
+    .setContent("I am a standalone popup.")
+    .openOn(map);
+	
+	var popup = L.popup();
+
+	function onMapClick(e) {
+		popup
+			.setLatLng(e.latlng)
+			.setContent("You clicked the map at " + e.latlng.toString())
+			.openOn(map);
+	}
+
+	map.on('click', onMapClick);
+
+</script>
+
+</html> 
  
- 
+ ```
  
  
 -----
