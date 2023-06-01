@@ -10765,6 +10765,33 @@ get /usr/hello.jar
 	-Dpackaging：jar或war，包的后缀名
 	-Dclassifier：兄弟包的别名，也就是-Dversion值后面的字符common-auth-0.0.1-SNAPSHOT-core.jar的-core
  ```
+
+```
+Microsoft Windows [版本 6.1.7601]
+版权所有 (c) 2009 Microsoft Corporation。保留所有权利。
+
+C:\Users\Administrator>"D:/Program Files/JetBrains/IntelliJ IDEA 2019.2.2/plugins/maven/lib/maven3/bin/mvn" install:install-file -Dfile="F:\JXBrowser\lib\jxbrowser-6.23.1.jar" -DgroupId=com.teamdev.jxbrowser -DartifactId=jxbrowser -Dversion=6.23.1 -Dpackaging=jar
+[INFO] Scanning for projects...
+[INFO]
+[INFO] ------------------< org.apache.maven:standalone-pom >-------------------
+[INFO] Building Maven Stub Project (No POM) 1
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO]
+[INFO] --- maven-install-plugin:2.4:install-file (default-cli) @ standalone-pom
+---
+[INFO] Installing F:\JXBrowser\lib\jxbrowser-6.23.1.jar to F:\.m2\repository\com\teamdev\jxbrowser\jxbrowser\6.23.1\jxbrowser-6.23.1.jar
+[INFO] Installing C:\Users\ADMINI~1\AppData\Local\Temp\mvninstall150256564299579
+2242.pom to F:\.m2\repository\com\teamdev\jxbrowser\jxbrowser\6.23.1\jxbrowser-6.23.1.pom
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  0.514 s
+[INFO] Finished at: 2023-06-01T19:36:33+08:00
+[INFO] ------------------------------------------------------------------------
+
+C:\Users\Administrator>
+
+```
  
  # 125 leaflet quick-start example
  
@@ -10813,17 +10840,36 @@ https://leafletjs.cn/examples/quick-start/
 </body>
 
 
+<!-- 
+https://webst01.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}
+http://wprd04.is.autonavi.com/appmaptile?lang=zh_cn&size=1&style=7&x={x}&y={y}&z={z}
+https://wprd01.is.autonavi.com/appmaptile?x={x}&y={y}&z={z}&lang=zh_cn&size=1&scl=2&style=8&ltype=11
+https://tile.openstreetmap.org/{z}/{x}/{y}.png
+https://tile.openstreetmap.bzh/br/{z}/{x}/{y}.png
+http://rt0.map.gtimg.com/realtimerender?z={z}&x={x}&y={-y}&type=vector&style=0
+-->
 <script>
-	var map = L.map('map').setView([51.505, -0.09], 13);
+	var map = L.map('map').setView([30.50, 114.49], 13);
 
-	L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-		maxZoom: 19,
-		attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+	L.tileLayer('https://webst01.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}', {
+		maxZoom: 18,
+		attribution: '&copy; <a href="https://cyclezone.github.io/"> cyclezone</a>'
 	}).addTo(map);
 
-	var marker = L.marker([51.5, -0.09]).addTo(map);
+	var greenIcon = L.icon({
+		iconUrl: 'dist/images/marker-icon.png',
+		shadowUrl: 'dist/images/marker-shadow.png',
+
+		iconSize:     [35, 60], // size of the icon
+		shadowSize:   [32, 64], // size of the shadow
+		iconAnchor:   [2, 56], // point of the icon which will correspond to marker's location
+		shadowAnchor: [4, 62],  // the same for the shadow
+		popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
+	});
+
+	var marker = L.marker([30.478, 114.469], {icon: greenIcon}).addTo(map);
 	
-	var circle = L.circle([51.508, -0.11], {
+	var circle = L.circle([30.487, 114.4801], {
 		color: 'red',
 		fillColor: '#f03',
 		fillOpacity: 0.5,
@@ -10831,10 +10877,10 @@ https://leafletjs.cn/examples/quick-start/
 	}).addTo(map);
 	
 	var polygon = L.polygon([
-		[51.509, -0.08],
-		[51.500, -0.06],
-		[51.51, -0.03],
-		[51.52, -0.056]
+		[30.492, 114.496],
+		[30.493, 114.52],
+		[30.455, 114.518],
+		[30.456, 114.489]
 	]).addTo(map);
 	
 	marker.bindPopup("<b>Hello world!</b><br>I am a popup.").openPopup();
@@ -10842,7 +10888,7 @@ https://leafletjs.cn/examples/quick-start/
 	polygon.bindPopup("I am a polygon.");
 	
 	var popup = L.popup()
-    .setLatLng([51.513, -0.09])
+    .setLatLng([30.513, 114.49])
     .setContent("I am a standalone popup.")
     .openOn(map);
 	
@@ -10863,6 +10909,57 @@ https://leafletjs.cn/examples/quick-start/
  
  ```
  
+
+ # 126 import jar dependency
+
+## from local file
+
+```
+<dependency>
+	<groupId>com.teamdev.jxbrowser</groupId>  <!--自定义-->
+	<artifactId>jxbrowser</artifactId>    <!--自定义-->
+	<version>6.23.1</version> <!--自定义-->
+	<scope>system</scope> <!--system，类似provided，需要显式提供依赖的jar以后，Maven就不会在Repository中查找它-->
+	<systemPath>${basedir}/lib/jxbrowser-6.23.1.jar</systemPath> <!--项目根目录下的lib文件夹下-->
+</dependency>
+```
+
+## from local maven repository 
+
+1. open cmd window; run mvn install
+```
+"D:/Program Files/JetBrains/IntelliJ IDEA 2019.2.2/plugins/maven/lib/maven3/bin/mvn" install:install-file -Dfile="F:\JXBrowser\lib\jxbrowser-6.23.1.jar" -DgroupId=com.teamdev.jxbrowser -DartifactId=jxbrowser -Dversion=6.23.1 -Dpackaging=jar
+```
+we get information:
+
+```
+[INFO] Scanning for projects...
+[INFO]
+[INFO] ------------------< org.apache.maven:standalone-pom >-------------------
+[INFO] Building Maven Stub Project (No POM) 1
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO]
+[INFO] --- maven-install-plugin:2.4:install-file (default-cli) @ standalone-pom
+---
+[INFO] Installing F:\JXBrowser\lib\jxbrowser-6.23.1.jar to F:\.m2\repository\com\teamdev\jxbrowser\jxbrowser\6.23.1\jxbrowser-6.23.1.jar
+[INFO] Installing C:\Users\ADMINI~1\AppData\Local\Temp\mvninstall150256564299579
+2242.pom to F:\.m2\repository\com\teamdev\jxbrowser\jxbrowser\6.23.1\jxbrowser-6.23.1.pom
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  0.514 s
+[INFO] Finished at: 2023-06-01T19:36:33+08:00
+[INFO] ------------------------------------------------------------------------
+```
+
+2. then in pom.xml, append following
+```
+<dependency>
+	<groupId>com.teamdev.jxbrowser</groupId>
+	<artifactId>jxbrowser</artifactId>
+	<version>6.23.1</version>
+</dependency>
+```
  
 -----
 Copyright 2020 - 2023 @ [cheldon](https://github.com/cheldon-cn/).
