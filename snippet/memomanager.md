@@ -10961,5 +10961,128 @@ we get information:
 </dependency>
 ```
  
+ # 127 remote desktop with aspia
+
+for more information, please visit following  url :
+
+```
+ https://aspia.org
+or
+ https://github.com/dchapyshev/aspia
+```
+
+0.  install aspia_router;
+    get aspia help information
+```
+PS D:\Pragram\Aspia\Router> ./aspia_router.exe --help
+aspia_router [switch]
+Available switches:
+        --install       Install service
+        --remove        Remove service
+        --start Start service
+        --stop  Stop service
+        --create-config Creates a configuration
+        --keygen        Generating public and private keys
+        --help  Show help
+PS D:\Pragram\Aspia\Router> ./aspia_router.exe --keygen
+Private key: E017C465E48A5AF5ADE189C8EC5393F0BE68550575889A3209F137E281718B5F
+Public key: DBACEB30E64C6FEBE412BA0BF82F6E29C9A3FA1FD3509F734CB233FCE3D9FE0F
+```
+1.  create default config file
+cd "D:\Program\Aspia\Router"
+aspia_router --create-config
+```
+PS D:\Program\Aspia\Router> ./aspia_router.exe --create-config
+Creation of initial configuration started.
+Settings file path: "C:\\ProgramData\\aspia\\router.json"
+Settings file does not exist yet.
+Public key directory path: "C:\\ProgramData\\aspia"
+Public key directory already exists.
+Public key file: "C:\\ProgramData\\aspia\\router.pub"
+Public key does not exist yet.
+Creating a user...
+User has been created. Adding a user to the database...
+User was successfully added to the database.
+Generating encryption keys...
+Private and public keys have been successfully generated.
+Writing a public key to a file...
+Configuration successfully created. Don't forget to change your password!
+User name: admin
+Password: admin
+Public key file: "C:\\ProgramData\\aspia\\router.pub"
+```
+3.  Service/daemon starting
+Windows:
+net start aspia-router
+Linux:
+sudo systemctl enable aspia-router
+sudo service aspia-router start
+```
+PS D:\Pragram\Aspia\Router> net start aspia-router
+Aspia Router Service 服务正在启动 .
+Aspia Router Service 服务已经启动成功。
+```
+4.  install aspia_host;
+    
+4.1. Enabling the router in the settings
+	1. Go to settings (Aspia -> Settings… -> Router)
+	2. Enable the use of the Router
+	3. Write the address of your Router, eg:192.168.10.50
+	4. Write your Router's public key,eg: A1A903E7B53455FBE09EF72ADB432166BF4951FF862CDE618362C45C35FFE01B
+```
+	Open public key file and copy the public key. It will come in handy for configuring the Relay and Hosts.
+	Windows:
+	C:\ProgramData\aspia\router.pub
+	Linux:
+	/etc/aspia/router.pub
+```
+
+4.2 Add new user
+   1. Go to settings (Aspia -> Settings… -> Users)
+   2. add new user,input the user name and password;
+   3. Enable the user acount and sessions type
+
+4.3 then we get information:
+   connected to a router
+
+5. install aspia client
+   input the address and choose sessions;
+   then connect it, input user and password;
+
+6. here we go, we can connect the remote machine
+
+7.if wanna stop the service,do next;
+Service/daemon stopping
+Windows:
+net stop aspia-router
+Linux:
+sudo service aspia-router stop
+
+```
+PS D:\Pragram\Aspia\Router> net stop aspia-router
+Aspia Router Service 服务正在停止.
+Aspia Router Service 服务已成功停止。
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 -----
 Copyright 2020 - 2023 @ [cheldon](https://github.com/cheldon-cn/).
