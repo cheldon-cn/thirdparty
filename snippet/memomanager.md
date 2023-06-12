@@ -11099,6 +11099,48 @@ docs/examples/Makefile.am: installing './depcomp'
 ```
 
 
+#129 Found package configuration file,but it set CURL_FOUND to FALSE
+
+Question:
+
+ Found package configuration file:E:/CURL/CMake/curl-config.cmake
+  but it set CURL_FOUND to FALSE so package "CURL" is considered to be NOTFOUND. 
+  Reason given by package:
+  Following required components not found: ;curl;libcurl
+
+from file 'curl-config.cmake',we get following fragment:
+
+```
+if(NOT CURL_FIND_COMPONENTS)
+    set(CURL_FIND_COMPONENTS curl libcurl)
+    if(CURL_FIND_REQUIRED)
+        set(CURL_FIND_REQUIRED_curl TRUE)
+        set(CURL_FIND_REQUIRED_libcurl TRUE)
+    endif()
+endif()
+
+set(_curl_missing_components)
+foreach(_comp ${CURL_FIND_COMPONENTS})
+    if(EXISTS "${_DIR}/${_comp}-target.cmake")
+        include("${_DIR}/${_comp}-target.cmake")
+        set(CURL_${_comp}_FOUND TRUE)
+    else()
+        set(CURL_${_comp}_FOUND FALSE)
+        if(CURL_FIND_REQUIRED_${_comp})
+            set(CURL_FOUND FALSE)
+            list(APPEND _curl_missing_components ${_comp})
+        endif()
+    endif()
+endforeach()
+```
+
+CURL_FIND_COMPONENTS has been set 'curl libcurl';
+so 'foreach(_comp ${CURL_FIND_COMPONENTS}) ', _comp should be curl or libcurl;
+if set(CURL_FOUND FALSE), that mean  "${_DIR}/${_comp}-target.cmake" is NOT EXIST;
+so should find and put  'curl-target.cmake' or 'libcurl-target.cmake' into ${_DIR};
+
+
+
 
 
 
