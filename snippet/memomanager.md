@@ -11064,10 +11064,39 @@ Aspia Router Service 服务正在停止.
 Aspia Router Service 服务已成功停止。
 ```
 
+# 128 compile curl in linux
 
+1. copy curl project codes into folder '~/code/curl/'
+2. unzip it if it is a zip file;
+3. locate the project; get auto configure file;
+4. configue it and make install 
 
+```
+cycle@zone23112:~/code/curl$ ls
+curl-tiny-curl-7_79  curl-tiny-curl-7_79.zip
+cycle@zone23112:~/code/curl$ cd curl-tiny-curl-7_79/
+cycle@zone23112:~/code/curl/curl-tiny-curl-7_79$ ls
+acinclude.m4   CHANGES         COPYING         include        MacOSX-Framework  packages  README.md      src                 zuul.d
+appveyor.yml   CMake           curl-config.in  lib            Makefile.am       plan9     RELEASE-NOTES  tests
+buildconf      CMakeLists.txt  docs            libcurl.pc.in  Makefile.dist     projects  scripts        TINY-RELEASE-NOTES
+buildconf.bat  configure.ac    GIT-INFO        m4             maketgz           README    SECURITY.md    winbuild
 
-
+cycle@zone23112:~/code/curl/curl-tiny-curl-7_79$ autoreconf -fi
+libtoolize: putting auxiliary files in '.'.
+libtoolize: copying file './ltmain.sh'
+libtoolize: putting macros in AC_CONFIG_MACRO_DIRS, 'm4'.
+libtoolize: copying file 'm4/libtool.m4'
+libtoolize: copying file 'm4/ltoptions.m4'
+libtoolize: copying file 'm4/ltsugar.m4'
+libtoolize: copying file 'm4/ltversion.m4'
+libtoolize: copying file 'm4/lt~obsolete.m4'
+libtoolize: Remember to add 'LT_INIT' to configure.ac.
+configure.ac:120: installing './compile'
+configure.ac:293: installing './config.guess'
+configure.ac:293: installing './config.sub'
+configure.ac:125: installing './missing'
+docs/examples/Makefile.am: installing './depcomp'
+```
 
 
 
