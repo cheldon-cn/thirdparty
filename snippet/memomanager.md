@@ -11273,8 +11273,14 @@ set(CMAKE_IMPORT_FILE_VERSION)
 cmake_policy(POP)
 ```
 
+# 132  set vscode cache folder
 
+D:\VSCode-win32-x64-1.29.1\Code.exe --user-data-dir "F:\Cache\vscode"
 
+# 133 clear cache
+
+C:\Users\Administrator\AppData\Local\Microsoft\VisualStudio\14.0\Extensions\qj0yglbx.blu\Data\vs14_1\Proj*
+F:\Cache\vscode\User\workspaceStorage\3f96f295c1cfc7b0add796d6f79b3960\ms-vscode.cpptools\*
 
 
 
