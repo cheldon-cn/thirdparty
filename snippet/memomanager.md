@@ -11282,11 +11282,69 @@ D:\VSCode-win32-x64-1.29.1\Code.exe --user-data-dir "F:\Cache\vscode"
 C:\Users\Administrator\AppData\Local\Microsoft\VisualStudio\14.0\Extensions\qj0yglbx.blu\Data\vs14_1\Proj*
 F:\Cache\vscode\User\workspaceStorage\3f96f295c1cfc7b0add796d6f79b3960\ms-vscode.cpptools\*
 
+# 134  OpenMP
 
+在OpenMP中，锁的数据类型为omp_lock_t，其基本功能就是保证线程同步。以下为常见的几个函数：
 
+函数名	                                 描述
+void omp_init_lock(omp_lock_t *);	    初始化线程锁
+void omp_set_lock(omp_lock_t *);	    获得线程锁
+void omp_nuset_lock(omp_lock_t *);	    释放线程锁
+void omp_destroy_lock(omp_lock_t *);	销毁线程锁
 
+```
+#include<stdio.h>
+#include<stdlib.h>
+#include<omp.h>
 
+int main(int argc, char *argv[])
+{
+    int x = 3, y = 4;
+   
+    // 初始化锁
+    omp_lock_t lock;
+    omp_init_lock(&lock);
+    
+    // 伪指令设置并行，使用num_threads()设置线程数，
+    // 并且将x、y设置成shared状态
+    // 花括号必须在下一行，而不能在#pragma后面
+    #pragma omp parallel num_threads(3) shared(x, y)
+    {
+        omp_set_lock(&lock);  // 线程获得锁，保证同步
+        
+        x += omp_get_thread_num();  // 当前的线程id
+        y += omp_get_thread_num();
+        
+        omp_unset_lock(&lock);  // 释放锁
+    }
+    
+    printf("x = %d, y = %d\n", x, y);
+    
+    omp_destroy_lock(&lock);
+    
+    return 0;
+}
+```
 
+```
+#include<iostream>
+#include<omp.h>
+using namespace std;
+
+void test_omp_for() {
+    #pragma omp parallel for num_threads(3)
+    for (int i = 0; i < 3; i++)
+    {
+        cout << "Hello, I am " << omp_get_thread_num() << ", iter " << i << endl;  // 当前的线程id
+    }
+}
+
+int main(int argc, char* argv[])
+{
+    test_omp_for();
+    return 0;
+}
+```
 
 -----
 Copyright 2020 - 2023 @ [cheldon](https://github.com/cheldon-cn/).
