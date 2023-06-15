@@ -11346,5 +11346,62 @@ int main(int argc, char* argv[])
 }
 ```
 
+
+# 135 find_package
+
+find_package的两种模式，一种是Module模式,另一种叫做Config模式，
+
+在Module模式中，cmake需要找到一个叫做Find<LibraryName>.cmake的文件。
+这个文件负责找到库所在的路径，为我们的项目引入头文件路径和库文件路径。
+cmake搜索这个文件的路径有两个，一个是上文提到的cmake安装目录下的share/cmake-<version>/Modules目录，
+另一个使我们指定的CMAKE_MODULE_PATH的所在目录。
+
+如果Module模式搜索失败，没有找到对应的Find<LibraryName>.cmake文件，
+则转入Config模式进行搜索。
+它主要通过<LibraryName>Config.cmake or <lower-case-package-name>-config.cmake这两个文件来引入我们需要的库。
+
+在cmake文件夹下新建一个FindAdd.cmake的文件。我们的目标是找到库的头文件所在目录和共享库文件的所在位置。
+```
+# FindAdd.cmake
+# 在指定目录下寻找头文件和动态库文件的位置，可以指定多个目标路径
+find_path(ADD_INCLUDE_DIR libadd.h /usr/include/ /usr/local/include ${CMAKE_SOURCE_DIR}/ModuleMode)
+find_library(ADD_LIBRARY NAMES add PATHS /usr/lib/add /usr/local/lib/add ${CMAKE_SOURCE_DIR}/ModuleMode)
+
+if (ADD_INCLUDE_DIR AND ADD_LIBRARY)
+    set(ADD_FOUND TRUE)
+endif (ADD_INCLUDE_DIR AND ADD_LIBRARY)
+```
+
+在CMakeLists.txt中添加
+```
+# 将项目目录下的cmake文件夹加入到CMAKE_MODULE_PATH中，让find_pakcage能够找到我们自定义的函数库
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake;${CMAKE_MODULE_PATH}")
+add_executable(addtest addtest.cc)
+find_package(ADD)
+if(ADD_FOUND)
+    target_include_directories(addtest PRIVATE ${ADD_INCLUDE_DIR})
+    target_link_libraries(addtest ${ADD_LIBRARY})
+else(ADD_FOUND)
+    message(FATAL_ERROR "ADD library not found")
+endif(ADD_FOUND)
+```
+
+```
+find_package(Qt5 REQUIRED Core Gui Network PrintSupport Widgets Xml)
+find_package(Qt5LinguistTools)
+find_package(asio CONFIG) #CONFIG REQUIRED
+find_package(CURL CONFIG REQUIRED)
+find_package(GTest CONFIG REQUIRED)
+find_package(libyuv CONFIG REQUIRED)
+find_package(OpenSSL REQUIRED)
+find_package(Opus CONFIG REQUIRED)
+find_package(Protobuf CONFIG REQUIRED)
+find_package(RapidJSON CONFIG REQUIRED)
+find_package(libvpx ) #CONFIG REQUIRED
+find_package(sqlite3 ) #CONFIG REQUIRED
+find_package(zstd ) #CONFIG REQUIRED
+find_package(mimalloc CONFIG) # Optional component
+```
+
 -----
 Copyright 2020 - 2023 @ [cheldon](https://github.com/cheldon-cn/).
