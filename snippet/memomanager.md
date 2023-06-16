@@ -11403,5 +11403,14 @@ find_package(zstd ) #CONFIG REQUIRED
 find_package(mimalloc CONFIG) # Optional component
 ```
 
+# 136 qt official download
+
+https://download.qt.io/official_releases/qt/6.5/
+https://download.qt.io/official_releases/qt/5.15/5.15.10/single/
+https://download.qt.io/official_releases/qt/5.15/5.15.10/submodules/
+
+
+
+
 -----
 Copyright 2020 - 2023 @ [cheldon](https://github.com/cheldon-cn/).
