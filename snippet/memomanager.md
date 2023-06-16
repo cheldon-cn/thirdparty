@@ -11410,6 +11410,58 @@ https://download.qt.io/official_releases/qt/5.15/5.15.10/single/
 https://download.qt.io/official_releases/qt/5.15/5.15.10/submodules/
 
 
+# 137 use std::make_uniques in c++11
+
+尽量使用std::make_unique
+使用std::make_unique来创建std::unique_ptr智能指针有以下优点：
+
+减少代码重复：从代码std::unique_ptr<Foo> upFoo(new Foo);和auto upFoo = std::make_unique<Foo>();
+可以得知使用make_unique只需要写一次Foo就可以，更加符合软件工程中的要求。
+
+提高异常安全性：当在函数调用中构造智能指针时，由于执行顺序的不确定性，有可能会造成资源泄露，比如对于代码：
+
+```
+#include <iostream>
+#include <memory>
+#include <exception>
+
+bool priority() {
+    throw std::exception();
+
+    return true;
+}
+
+void func(std::unique_ptr<int> upNum, bool flag) {
+    if (flag) {
+        std::cout << *upNum << std::endl;
+    }
+}
+
+int main() {
+    func(std::unique_ptr<int>(new int), priority());
+
+    return 0;
+}
+```
+
+这里调用func函数时，会执行三个步骤
+
+1. new int
+2. std::unique_ptr<int>构造函数
+3. priority函数
+这里唯一可以确定的就是步骤1发生在步骤2之前，但步骤3的次序是不一定的，
+如果步骤3在步骤1和步骤2中间执行那么就会造成内存泄漏。
+但是如果使用make_unique就不会出现这个问题。
+
+需要注意的是std::make_unique是C++14标准才引入的，所以使用C++11环境的话需要自己实现这个函数：
+
+```
+template<typename T, typename... Ts>
+std::unique_ptr<T> make_unique(Ts&&... params)
+{
+    return std::unique_ptr<T>(new T(std::forward<Ts>(params)...));
+}
+```
 
 
 -----
