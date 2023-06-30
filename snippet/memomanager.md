@@ -11743,6 +11743,25 @@ int main(void)
 
 ```
 
+# 141  error LNK2001 for c file 
+
+when compiling files like ' triangle.c ' ,
+crush the following error:
+
+ error LNK2001: 无法解析的外部符号 "void __cdecl triangulate(char *,struct triangulateio *,struct triangulateio *,struct triangulateio *)" (?triangulate@@YAXPEADPEAUtriangulateio@@11@Z)
+1>multipolygon.obj : error LNK2001: 无法解析的外部符号 "void __cdecl trifree(int *)" (?trifree@@YAXPEAH@Z)
+
+backkgroud:
+we has the function declaration and defination;
+we has compile the c file;
+
+SOLUTION:
+1. open c file property sheet;
+2. in left tree ,select c/c++  --> advance ,
+3. change the item 'compile as ' 编译为 C++ 代码 (/TP)
+
+DONOT use '默认值' or '编译为 C 代码 (/TC)'
+
 
 
 
