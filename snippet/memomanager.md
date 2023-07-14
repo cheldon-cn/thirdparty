@@ -11762,8 +11762,123 @@ SOLUTION:
 
 DONOT use '默认值' or '编译为 C 代码 (/TC)'
 
+# 142 NamedPipeServerStream and NamedPipeClientStream
+
+```
+
+public class XVersion
+{
+	/// <summary>
+	/// 获取得到当前X文件的版本号，当X文件对应数据结构发生变化，请更新该值。
+	/// </summary>
+	/// <returns></returns>
+	public static string GetVersion()
+	{
+		return "202307";
+	}
+
+	public static string GetNamedPipeClientStreamName()
+	{
+		return "server_NamedPipe" + GetVersion();
+	}
+}
 
 
+try
+{
+	NamedPipeServerStream pipeServer =
+	new NamedPipeServerStream(XVersion.GetNamedPipeClientStreamName(), PipeDirection.InOut, 1);
 
+	pipeServer.WaitForConnection();
+	pipeServer.ReadMode = PipeTransmissionMode.Byte;
+	using (StreamReader render = new StreamReader(pipeServer))
+	{
+		string strStream = render.ReadToEnd();
+		String[] Lines = strStream.Split('|');
+		if (Lines.Length == 4)
+		{
+			//退出当前线程
+			if (Lines[0] == "exit")
+				break;
+			Semaphore ConvertOut = null;
+			try
+			{
+				ConvertOut = Semaphore.OpenExisting(Lines[2].Replace('\\', '/'));
+			}
+			catch (WaitHandleCannotBeOpenedException)
+			{
+				Console.WriteLine("Semaphore does not exist.");
+			}
+			catch (UnauthorizedAccessException ex)
+			{
+				Console.WriteLine("Unauthorized access: {0}", ex.Message);
+			}
+
+			try
+			{
+				if (Lines[0] == "xml")
+				{
+					convertOut.Convert(Lines[1], Lines[2], Lines[3]);
+				}
+				else if (Lines[0] == "style")
+				{
+				}
+			}
+			catch(Exception e)
+			{
+				Console.WriteLine("Unauthorized access: {0}", e.Message);
+			}
+			if (ConvertOut != null)
+			{
+				ConvertOut.Release(1);
+			}
+		}
+	}
+}
+catch
+{
+}
+}
+
+```
+
+```
+
+try
+{
+	Semaphore ConvertOutOkMessage = new Semaphore(0, 1, strDstPath.Replace('\\', '/'));
+
+	using (NamedPipeClientStream pipeClient =
+	new NamedPipeClientStream("localhost", XVersion.GetNamedPipeClientStreamName(), PipeDirection.InOut, PipeOptions.None, TokenImpersonationLevel.None))
+	{
+		pipeClient.Connect();
+		using (StreamWriter swriter = new StreamWriter(pipeClient))
+		{
+			string strStream = strType + "|" + strSrcPath + "|" + strDstPath + ;
+			swriter.Write(strStream);
+			swriter.Flush();
+		}
+	}
+
+	while (true)
+	{
+		if (ConvertOutOkMessage.WaitOne(1000))
+			return true;
+		if (!IsConvertOutOnWorking())
+		{
+			log.AppendLog(ConvertLog.LogLevel.Error, string.Format("插件未运行，或者使用了不匹配的插件，请启动({0}版本)插件!", XVersion.GetVersion()));
+			return false;
+		}
+		else
+		{
+			log.AppendLog(ConvertLog.LogLevel.Log, "解码中...");
+		}
+	}
+}
+catch
+{
+}
+
+```
 -----
 Copyright 2020 - 2023 @ [cheldon](https://github.com/cheldon-cn/).
