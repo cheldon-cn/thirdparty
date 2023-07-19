@@ -11981,6 +11981,81 @@ private void OpenHtml(string str)
 }
 ```
 
+# 145  make table in html 
+
+```
+
+private string MakeColumn(string key, string val, bool bShow = true)
+{
+
+	string strInfo = "<tr>" 
+	+ "<th width=\"100\" height=\"20\" scope=\"col\">" + key + "</th>"
+	+ "<th height=\"20\" colspan=\"3\" align=\"left\" scope=\"col\">" + val + "</th>"
+	+ "</tr>";
+	return strInfo;
+}
+
+private string MakeTablehead(string producer = "cycle", string version = "10060520")
+{
+
+	string strInfo = "<tr>"
+			+ "<th height=\"50\" colspan=\"3\" scope=\"col\" ><strong style=\"font-size: 24px\">数据迁移报告 </strong></th>"
+			+ "</tr>"
+			+"<tr>"
+			+"<th width=\"100\" height=\"20\" scope=\"col\">" + producer + "</th>"
+			+"<th width=\"266\" height=\"20\" scope=\"col\">版本：" + version +"</th>"
+			+"<th width=\"287\" height=\"20\" scope=\"col\">日期：" + System.DateTime.Now.ToString("yyyy.MM.dd.HH:mm:ss") + "</th>"
+			+"</tr>";
+	return strInfo;
+}
+
+private string MakeTableTail(bool bConvertOK = true)
+{
+	string strCvt = bConvertOK ? "<br>已完成迁移。" : "<br>出现迁移问题,请检查。";
+	string strOverview = GetOverview();
+	string strInfo = "<th height=\"30\" scope=\"col\">总结</th>"
+				+ "<th colspan=\"2\" align=\"left\" scope=\"col\">" + strOverview + strCvt + "</th>"
+				+ "</tr>"
+				+ "<tr>"
+				+ "<th height=\"30\" colspan=\"2\" align=\"left\" scope=\"col\">&nbsp;</th>"
+				+ "<th height=\"30\" align=\"center\" scope=\"col\">创建者: cycle 制图转换插件</th>"
+				+ "</tr>";
+	return strInfo;
+}
+
+private string MakeTable()
+{
+	string strinfo = "";
+	string strOverview = GetOverview();
+	strinfo += MakeColumn("概述", strOverview);
+	for (int i = 0; i < mMxd.Maps.Count; i++)
+	{
+		Arc_Map map = mMxd.Maps[i];
+
+		strinfo += MakeColumn("地图", string.Format("地图 {0} 有 {1:d} 个图层，如下：", map.Name, map.Layers.Count));
+		
+		for (int m = 0; m < map.Layers.Count; m++)
+		{
+			ArcLayer layr = map.Layers[m];
+			strinfo += checkLayer(layr); 
+		}
+		
+	}
+	return strinfo;
+}
+
+ string table = "<table width=\"1024\" border=\"1\" style=\"margin:auto\" bordercolor=\"#000000\" class=\"gridtable\">"
+                    + "<tbody>"
+                    + MakeTablehead()
+                    + MakeColumn("数据源", DocumentFilename)
+                    + MakeColumn("迁移结果", str)
+                    + MakeTable()
+                    + MakeTableTail()
+                    +"</tbody>"
+                    +"</table>";
+
+```
+
 
 
 
