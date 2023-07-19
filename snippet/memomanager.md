@@ -11880,5 +11880,71 @@ catch
 }
 
 ```
+
+
+# 143  Geotiff_Information
+
+```
+Geotiff_Information:
+   Version: 1
+   Key_Revision: 1.0
+   Tagged_Information:
+      ModelTiepointTag (2,3):
+         0                 0                 0
+         364150.131765544  3483476.70992806  0
+      ModelPixelScaleTag (1,3):
+         0.433112592500314 0.433112592500408 0
+      End_Of_Tags.
+   Keyed_Information:
+      GTModelTypeGeoKey (Short,1): ModelTypeProjected
+      GTRasterTypeGeoKey (Short,1): RasterPixelIsArea
+      GTCitationGeoKey (Ascii,22): "WGS 84 / UTM zone 48N"
+      GeogCitationGeoKey (Ascii,7): "WGS 84"
+      GeogAngularUnitsGeoKey (Short,1): Angular_Degree
+      ProjectedCSTypeGeoKey (Short,1): PCS_WGS84_UTM_zone_48N
+      ProjLinearUnitsGeoKey (Short,1): Linear_Meter
+      End_Of_Keys.
+   End_Of_Geotiff.
+
+PCS = 32648 (WGS 84 / UTM zone 48N)
+Projection = 16048 (UTM zone 48N)
+Projection Method: CT_TransverseMercator
+   ProjNatOriginLatGeoKey: 0.000000 (  0d 0' 0.00"N)
+   ProjNatOriginLongGeoKey: 105.000000 (105d 0' 0.00"E)
+   ProjScaleAtNatOriginGeoKey: 0.999600
+   ProjFalseEastingGeoKey: 500000.000000 m
+   ProjFalseNorthingGeoKey: 0.000000 m
+GCS: 4326/WGS 84
+Datum: 6326/World Geodetic System 1984
+Ellipsoid: 7030/WGS 84 (6378137.00,6356752.31)
+Prime Meridian: 8901/Greenwich (0.000000/  0d 0' 0.00"E)
+Projection Linear Units: 9001/metre (1.000000m)
+
+PROJ.4 Definition: +proj=utm +zone=48 +ellps=WGS84 +units=m
+
+Corner Coordinates:
+Upper Left    (  364150.132, 3483476.710)proj_create_operation_factory_context:
+Cannot find proj.db
+pj_obj_create: Cannot find proj.db
+  (103d34'11.51"E, 31d28'41.22"N)
+Lower Left    (  364150.132, 3482654.662)proj_create_operation_factory_context:
+Cannot find proj.db
+pj_obj_create: Cannot find proj.db
+  (103d34'11.92"E, 31d28'14.53"N)
+Upper Right   (  365126.368, 3483476.710)proj_create_operation_factory_context:
+Cannot find proj.db
+pj_obj_create: Cannot find proj.db
+  (103d34'48.50"E, 31d28'41.63"N)
+Lower Right   (  365126.368, 3482654.662)proj_create_operation_factory_context:
+Cannot find proj.db
+pj_obj_create: Cannot find proj.db
+  (103d34'48.91"E, 31d28'14.94"N)
+Center        (  364638.250, 3483065.686)proj_create_operation_factory_context:
+Cannot find proj.db
+pj_obj_create: Cannot find proj.db
+  (103d34'30.21"E, 31d28'28.08"N)
+  
+```
+
 -----
 Copyright 2020 - 2023 @ [cheldon](https://github.com/cheldon-cn/).
