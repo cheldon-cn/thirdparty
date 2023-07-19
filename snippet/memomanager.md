@@ -11946,5 +11946,52 @@ pj_obj_create: Cannot find proj.db
   
 ```
 
+# 144  open html with the default explore
+
+```
+private void OpenHtml(string str)
+{
+	try
+	{
+		//通过注册表获取默认浏览器
+		Microsoft.Win32.RegistryKey key = Microsoft.Win32.Registry.ClassesRoot.OpenSubKey(@"http\shell\open\command\");
+		string s = key.GetValue("").ToString();
+		string browserpath = null;
+		if (s.StartsWith("\""))
+		{
+			browserpath = s.Substring(1, s.IndexOf('\"', 1) - 1);
+		}
+		else
+		{
+			browserpath = s.Substring(0, s.IndexOf(" "));
+		}
+		while (str.IndexOf('\\') > 0)
+		{
+			str = str.Replace('\\', '/');
+		}
+		string strTar = "\"" + str + "\""; /// for space in path
+		System.Diagnostics.Process.Start(browserpath, strTar);
+	}
+	catch (System.Exception ex)
+	{
+		MessageBox.Show(ex.Message.ToString());
+	}
+
+
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
 -----
 Copyright 2020 - 2023 @ [cheldon](https://github.com/cheldon-cn/).
