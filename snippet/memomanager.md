@@ -12053,11 +12053,52 @@ private string MakeTable()
                     + MakeTableTail()
                     +"</tbody>"
                     +"</table>";
+					
+   string style = "<style type=\"text/css\">"
+		+ "table.gridtable { font-family: verdana,arial,sans-serif;font-size:15px;color:#333333;border-width: 1px;border-color: #666666;border-collapse: collapse;}"
+		+ "table.gridtable th {border-width: 1px;padding: 8px;border-style: solid;border-color: #666666;background-color: #dedede;}"
+		+ "table.gridtable td {border-width: 1px;padding: 8px;border-style: solid;border-color: #666666;background-color: #ffffff;}"
+		+ "</style>";
 
+	string body = "<body>" +
+				table +
+				"</body>";
+	string head = "<head>" +
+			"<meta charset='UTF-8'>" +
+			"<meta name='viewport' content='width=device-width, initial-scale=1.0'>" +
+			"<title>数据转换日志</title>" +
+			script +
+			"</head>";
+	string html = "<!DOCTYPE html>" +
+			"<html lang='en'>" +
+			head +
+			style+
+			body +
+			"</html>";
 ```
 
 
+# 146  create html 
+```
+  void Create(string strFile)
+  {
+	string strTempFile = strFile.Substring(0, strFile.LastIndexOf('.')) + ".html";
+	string path = strFile.Substring(0, strFile.LastIndexOf('\\'));
+	if (Directory.Exists(path) == false)//如果不存在就创建file文件夹
+	{
+		Directory.CreateDirectory(path);
+	}
 
+	FileStream fs1 = new FileStream(strTempFile, System.IO.FileMode.Create, FileAccess.Write);//创建写入文件 
+	StreamWriter sw = new StreamWriter(fs1);
+
+	sw.WriteLine(html);//开始写入值
+	sw.Close();
+	fs1.Close();
+
+  }
+  
+```
 
 
 
