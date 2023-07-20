@@ -12240,13 +12240,129 @@ Use -fPIC or -fpic to generate code. Whether to use -fPIC or -fpic to generate c
 -fpic： 通常能产生更快更小的代码，但有平台限制。
 ```
 
-# 150 
+# 150 pthread_create and pthread_exit
 
+1. 线程创建
 
+　　在进程被创建时，系统会为其创建一个主线程，而要在进程中创建新的线程，则可以调用pthread_create函数：
+```
+	#include <pthread.h>
+	int pthread_create(pthread_t *thread, pthread_attr_t *attr, void *(*start_routine)(void *), void *arg);
+　　参数说明：
 
+	thread：指向pthread_create类型的指针，用于引用新创建的线程。
+	attr：用于设置线程的属性，一般不需要特殊的属性，所以可以简单地设置为NULL。
+	start_routine：传递新线程所要执行的函数地址。
+	arg：新线程所要执行的函数的参数。
+　　返回值：
+　　调用如果成功，则返回值是0；如果失败则返回错误代码。
+```
+　　每个线程都有自己的线程ID，以便在进程内区分。线程ID在pthread_create调用时回返给创建线程的调用者；一个线程也可以在创建后使用pthread_self()调用获取自己的线程ID： 
 
+pthread_self (void);
 
+2. 线程退出
 
+　　线程的退出方式有三种：
+
+（1）执行完成后隐式退出；
+（2）由线程本身显示调用pthread_exit 函数退出；
+  ```
+   pthread_exit (void * retval);
+   ```
+（3）被其他线程用pthread_cance函数终止：
+  ```
+  pthread_cancel (pthread_t thread);
+  ```
+
+　　如果一个线程要等待另一个线程的终止，可以使用pthread_join函数，该函数的作用是调用pthread_join的线程将被挂起直到线程ID为参数thread的线程终止：
+  ```
+  pthread_join (pthread_t thread, void** threadreturn);
+  ```
+3.  Compare 
+
+    ```
+	事项	       WIN32	                Linux	                     VxWorks
+	线程创建	    CreateThread	        pthread_create	         taskSpawn
+	线程终止(byself)  ExitThread            pthread_exit             exit
+	线程终止(byOther)  TerminateThread      pthread_cance            taskDelete
+	获取线程ID	     GetCurrentThreadId  	pthread_self	         taskIdSelf
+	创建互斥	     CreateMutex	        pthread_mutex_init	     semMCreate
+	获取互斥	     WaitForMultipleObjects	pthread_mutex_lock	     semTake
+	释放互斥	     ReleaseMutex	        phtread_mutex_unlock	 semGive
+	创建信号量	     CreateSemaphore	    sem_init	             semBCreate
+	等待信号量	     WaitForSingleObject	sem_wait	             semTake
+	释放信号量	     ReleaseSemaphore	    sem_post	             semGive
+  ```
+
+4. Demo
+
+  ```
+	#include <stdlib.h>
+	#include <stdio.h>
+	#include <errno.h>
+	#include <pthread.h>
+	static void pthread_func_1 (void);
+	static void pthread_func_2 (void);
+
+	int main (int argc, char** argv)
+	{
+	pthread_t pt_1 = 0;
+	pthread_t pt_2 = 0;
+	pthread_attr_t atrr = {0};
+	int ret = 0;
+
+	/*初始化属性线程属性*/
+	pthread_attr_init (&attr);
+	pthread_attr_setscope (&attr, PTHREAD_SCOPE_SYSTEM);
+	pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED);
+
+	ret = pthread_create (&pt_1, &attr, pthread_func_1, NULL);
+	if (ret != 0)
+	{
+		perror ("pthread_1_create");
+	}
+
+	ret = pthread_create (&pt_2, NULL, pthread_func_2, NULL);
+	if (ret != 0)
+	{
+		perror ("pthread_2_create");
+	}
+
+	pthread_join (pt_2, NULL);
+
+	return 0;
+	}
+
+	static void pthread_func_1 (void)
+	{
+	int i = 0;
+
+	for (; i < 6; i++)
+	{
+		printf ("This is pthread_1.\n");
+
+		if (i == 2)
+		{
+		pthread_exit (0);
+		}
+	}
+
+	return;
+	}
+
+	static void pthread_func_2 (void)
+	{
+	int i = 0;
+
+	for (; i < 3; i ++)
+	{
+		printf ("This is pthread_2.\n");
+	}
+
+	return;
+	}
+  ```
 
 
 
