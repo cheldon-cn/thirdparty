@@ -12224,10 +12224,23 @@ g++在编译时，可用参数-fvisibility指定所有符号的可见性（不�
 
 
 ```
-# 149 
+# 149 recompile with -fPIC
 
+1. fpic 和 fPIC 区别
 
+在64位下编译动态库的时候，经常会遇到下面的错误
+```
+/usr/bin/ld: /tmp/ccQ1dkqh.o: relocation R_X86_64_32 against `a local symbol' can not be used when making a shared object; recompile with -fPIC
+```
 
+```
+Use -fPIC or -fpic to generate code. Whether to use -fPIC or -fpic to generate code is target-dependent. The -fPIC choice always works, but may produce larger code than -fpic (mnenomic to remember this is that PIC is in a larger case, so it may produce larger amounts of code). Using -fpic option usually generates smaller and faster code, but will have platform-dependent limitations, such as the number of globally visible symbols or the size of the code. The linker will tell you whether it fits when you create the shared library. When in doubt, I choose -fPIC, because it always works.
+
+-fPIC： 总是能够工作，但可能产生的代码较大
+-fpic： 通常能产生更快更小的代码，但有平台限制。
+```
+
+# 150 
 
 
 
