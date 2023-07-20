@@ -12079,6 +12079,7 @@ private string MakeTable()
 
 
 # 146  create html 
+
 ```
   void Create(string strFile)
   {
@@ -12097,8 +12098,68 @@ private string MakeTable()
 	fs1.Close();
 
   }
-  
+
 ```
+
+# 147   nm -D  /opt/apps/files/program/libQt5Gui.so | grep QTextEngine
+
+```
+nm -D /home/os/program/libQt5Gui.so
+
+ldd -r /opt/apps/files/program/libQt5Gui.so
+        linux-vdso.so.1 (0x000000200117e000)
+        libQt5Core.so.5 => /lib/aarch64-linux-gnu/libQt5Core.so.5 (0x00000020016fa000)
+        libpthread.so.0 => /lib/aarch64-linux-gnu/libpthread.so.0 (0x0000002001c2a000)
+        libz.so.1 => /lib/aarch64-linux-gnu/libz.so.1 (0x0000002001c5a000)
+        libstdc++.so.6 => /lib/aarch64-linux-gnu/libstdc++.so.6 (0x0000002001c83000)
+        libm.so.6 => /lib/aarch64-linux-gnu/libm.so.6 (0x0000002001e68000)
+        libgcc_s.so.1 => /lib/aarch64-linux-gnu/libgcc_s.so.1 (0x0000002001f13000)
+        libc.so.6 => /lib/aarch64-linux-gnu/libc.so.6 (0x0000002001f37000)
+        /lib/ld-linux-aarch64.so.1 (0x000000200115c000)
+        libicui18n.so.66 => /lib/aarch64-linux-gnu/libicui18n.so.66 (0x00000020020aa000)
+        libicuuc.so.66 => /lib/aarch64-linux-gnu/libicuuc.so.66 (0x0000002002396000)
+        libdl.so.2 => /lib/aarch64-linux-gnu/libdl.so.2 (0x0000002002582000)
+        libpcre2-16.so.0 => /lib/aarch64-linux-gnu/libpcre2-16.so.0 (0x0000002002596000)
+        libdouble-conversion.so.3 => /lib/aarch64-linux-gnu/libdouble-conversion.so.3 (0x0000002002619000)
+        libglib-2.0.so.0 => /lib/aarch64-linux-gnu/libglib-2.0.so.0 (0x000000200263c000)
+        libicudata.so.66 => /lib/aarch64-linux-gnu/libicudata.so.66 (0x0000002002776000)
+        libpcre.so.3 => /lib/aarch64-linux-gnu/libpcre.so.3 (0x0000002004245000)
+
+ nm -D  /opt/apps/files/program/libQt5Gui.so | grep QTextEngine
+0000000000240940 T _ZN11QTextEngine10freeMemoryEv
+0000000000240b30 T _ZN11QTextEngine10invalidateEv
+000000000023b838 T _ZN11QTextEngine10LayoutData10reallocateEi
+000000000023af88 T _ZN11QTextEngine10LayoutDataC1ERK7QStringPPvi
+000000000023ace0 T _ZN11QTextEngine10LayoutDataC1Ev
+000000000023af88 T _ZN11QTextEngine10LayoutDataC2ERK7QStringPPvi
+000000000023ace0 T _ZN11QTextEngine10LayoutDataC2Ev
+000000000023b188 T _ZN11QTextEngine10LayoutDataD1Ev
+000000000023b188 T _ZN11QTextEngine10LayoutDataD2Ev
+0000000000248ac8 T _ZN11QTextEngine10setFormatsERK7QVectorIN11QTextLayout11FormatRangeEE
+0000000000240460 T _ZN11QTextEngine11addOverlineEP8QPainterRK6QLineF
+000000000023a088 T _ZN11QTextEngine11bidiReorderEiPKhPi
+0000000000240420 T _ZN11QTextEngine12addStrikeOutEP8QPainterRK6QLineF
+00000000002403e0 T _ZN11QTextEngine12addUnderlineEP8QPainterRK6QLineF
+00000000002488f0 T _ZN11QTextEngine12indexFormatsEv
+00000000002408e8 T _ZN11QTextEngine13clearLineDataEv
+0000000000240b80 T _ZN11QTextEngine14setPreeditAreaEiRK7QString
+0000000000247b50 T _ZN11QTextEngine15beginningOfLineEi
+00000000002407b8 T _ZN11QTextEngine15drawDecorationsEP8QPainter
+000000000023a920 T _ZN11QTextEngine15FontEngineCacheC1Ev
+000000000023a920 T _ZN11QTextEngine15FontEngineCacheC2Ev
+000000000023da58 T _ZN11QTextEngine16adjustUnderlinesEPNS_14ItemDecorationES1_dd
+0000000000240538 T _ZN11QTextEngine16adjustUnderlinesEv
+00000000002404a0 T _ZN11QTextEngine16clearDecorationsEv
+000000000023d8f0 T _ZN11QTextEngine16getClusterLengthEPtPK15QCharAttributesiiiPi
+000000000023d7e8 T _ZN11QTextEngine16offsetInLigatureEPK11QScriptItemiii
+00000000002402a0 T _ZN11QTextEngine17addItemDecorationEP8QPainterRK6QLineFP7QVectorINS_14ItemDecorationEE
+0000000000245fb8 T _ZN11QTextEngine17leadingSpaceWidthERK11QScriptLine
+
+
+```
+
+
+
 
 
 
