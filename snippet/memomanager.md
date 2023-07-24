@@ -12364,6 +12364,542 @@ pthread_self (void);
 	}
   ```
 
+# 151 PostgreHelper gis function
+  
+  ```
+  "SELECT ST_Distance(ST_Transform(ST_SetSRID(ST_MakePoint({0}),4326), 26986),
+                      ST_Transform(ST_SetSRID(ST_MakePoint({1}),4326), 26986)) AS Distance"
+
+  SELECT {0} AS Index, st_dwithin(ST_Transform(ST_SetSRID(ST_MakePoint({0}),4326), 26986),
+                                  ST_Transform(ST_SetSRID(ST_MakePoint({1}),4326), 26986),{2}) AS Status
+
+   union all SELECT {0} AS Index, st_dwithin(ST_Transform(ST_SetSRID(ST_MakePoint({0}),4326), 26986)
+				                            ,ST_Transform(ST_SetSRID(ST_MakePoint({1}),4326), 26986),{2}) AS Status
+
+   select ST_Contains(St_Astext(ST_Buffer(geography(ST_GeomFromText('LINESTRING({0})')),{1}))
+                     ,st_astext(geography(ST_GeomFromText('POINT({2})')))) AS Status
+	
+	select {0} AS Index, ST_Contains(St_Astext(ST_Buffer(geography(ST_GeomFromText('LINESTRING({1})')),{2}))
+                                    ,st_astext(geography(ST_GeomFromText('POINT({3})')))) AS Status
+
+	SELECT ST_Contains( ST_MakePolygon(ST_GeomFromText('LINESTRING({0}) '))
+                      ,st_point({1})) AS Status
+  ```
+  ```
+   public class MainGISFunction
+    {
+        PostgreHelper dbHelper = new PostgreHelper();
+        /// <summary>
+        /// 判断两个经纬度点之间的距离
+        /// 参数格式：经度,纬度
+        /// </summary>
+        /// <param name="lonlat1">经纬度1</param>
+        /// <param name="lonlat2">经纬度2</param>
+        /// <returns>直线距离（单位m）/null</returns>
+        public DataTable GetPointDistance(string lonlat1, string lonlat2)
+        {
+            try
+            {
+                string strsql = string.Format(@"SELECT ST_Distance(ST_Transform(ST_SetSRID(ST_MakePoint({0}),4326), 26986)
+				,ST_Transform(ST_SetSRID(ST_MakePoint({1}),4326), 26986)) AS Distance", lonlat1, lonlat2);
+                return dbHelper.ExecuteQuery(strsql).Tables[0];
+ 
+            }
+            catch (Exception ex)
+            {
+                Log.Instance.Error("GetPointDistance:" + ex.Message);
+                return null;
+            }
+        }
+        /// <summary>
+        /// 查询点与点之间相距小于某个值的集合
+        /// </summary>
+        /// <param name="lonlat"></param>
+        /// <param name="points"></param>
+        /// <param name="distance"></param>
+        /// <returns></returns>
+        public DataTable GetPointsDwithin(string lonlat, List<string> points, int distance)
+        {
+            try
+            {
+                StringBuilder sbsql = new StringBuilder();
+                for (int i = 0; i < points.Count; i++)
+                {
+                    if (i == 0)
+                    {
+                        sbsql.AppendFormat(@"SELECT {0} AS Index, st_dwithin(ST_Transform(ST_SetSRID(ST_MakePoint({0}),4326), 26986)
+				    ,ST_Transform(ST_SetSRID(ST_MakePoint({1}),4326), 26986),{2}) AS Status", lonlat, points[i], distance);
+                    }
+                    else
+                    {
+                        sbsql.AppendFormat(@" union all SELECT {0} AS Index, st_dwithin(ST_Transform(ST_SetSRID(ST_MakePoint({0}),4326), 26986)
+				    ,ST_Transform(ST_SetSRID(ST_MakePoint({1}),4326), 26986),{2}) AS Status", lonlat, points[i], distance);
+                    }
+                }
+                DataSet ds = dbHelper.ExecuteQuery(sbsql.ToString());
+                DataRow[] rows = ds.Tables[0].Select("Status='true'");
+                if (rows.Length > 0)
+                {
+                    DataTable dtNew = ds.Tables[0].Clone();
+                    for (int i = 0; i < rows.Length; i++)
+                    {
+                        dtNew.Rows.Add(rows[i].ItemArray);
+                    }
+                    return dtNew;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Instance.Error("GetPointOnLines:" + ex.Message);
+                return null;
+            }
+        }
+ 
+        /// <summary>
+        /// 判断某个经纬度点是否在某条路线上
+        /// </summary>
+        /// <param name="lonlat">经纬度点</param>
+        /// <param name="line">路线经纬度集合</param>
+        /// <param name="buffer">缓冲区域，及在这个缓冲区域的点都可以判断为在这条路上，可以称作道路边缘到中心距离的宽度</param>
+        /// <returns>ture/false/null</returns>
+        public DataTable GetPointOnTheLine(string lonlat, List<string> line, int buffer)
+        {
+            try
+            {
+                StringBuilder sbline = new StringBuilder();
+                for (int i = 0; i < line.Count; i++)
+                {
+                    sbline.Append(line[i].Replace(',', ' ') + ",");
+                }
+                string strsql = string.Format(@"select ST_Contains(St_Astext(ST_Buffer(geography(ST_GeomFromText('LINESTRING({0})')),{1}))
+                    ,st_astext(geography(ST_GeomFromText('POINT({2})')))) AS Status", sbline.ToString().Trim(','), buffer, lonlat.Replace(',', ' '));
+                return dbHelper.ExecuteQuery(strsql).Tables[0];
+            }
+            catch (Exception ex)
+            {
+                Log.Instance.Error("GetPointOnTheLine:" + ex.Message);
+                return null;
+            }
+        }
+ 
+        /// <summary>
+        /// 判断某个经纬度点是否在这些路线上的其中一条
+        /// </summary>
+        /// <param name="lonlat">经纬度点</param>
+        /// <param name="lines">多条路线经纬度集合</param>
+        /// <param name="buffer">缓冲区域，及在这个缓冲区域的点都可以判断为在这条路上，可以称作道路边缘到中心距离的宽度</param>
+        /// <returns>ture/false/null</returns>
+        public DataTable GetPointOnOneLine(string lonlat, List<List<string>> lines, int buffer)
+        {
+            try
+            {
+                StringBuilder sblines = new StringBuilder();
+                for (int i = 0; i < lines.Count; i++)
+                {
+                    StringBuilder sbline = new StringBuilder();
+                    for (int j = 0; j < lines[i].Count; j++)
+                    {
+                        sbline.Append(lines[i][j].Replace(',', ' ') + ",");
+                    }
+                    sblines.Append("(" + sbline.ToString().Trim(',') + "),");
+                }
+                string strsql = string.Format(@"select ST_Contains(St_Astext(ST_Buffer(geography(ST_GeomFromText('MULTILINESTRING({0})')),{1}))
+                    ,st_astext(geography(ST_GeomFromText('POINT({2})')))) AS Status", sblines.ToString().Trim(','), buffer, lonlat.Replace(',', ' '));
+                return dbHelper.ExecuteQuery(strsql).Tables[0];
+            }
+            catch (Exception ex)
+            {
+                Log.Instance.Error("GetPointOnOneLine:" + ex.Message);
+                return null;
+            }
+        }
+ 
+ 
+        /// <summary>
+        /// 判断某个经纬度点是否在这些路线上的其中一条
+        /// </summary>
+        /// <param name="lonlat">经纬度点</param>
+        /// <param name="lines">多条路线经纬度集合</param>
+        /// <param name="buffer">缓冲区域，及在这个缓冲区域的点都可以判断为在这条路上，可以称作道路边缘到中心距离的宽度</param>
+        /// <returns>ture/false/null</returns>
+        public DataTable myGetPointOnOneLine(string lonlat, List<string> lines, int buffer)
+        {
+            try
+            {
+                StringBuilder sbline = new StringBuilder();
+                for (int i = 0; i < lines.Count; i++)
+                {
+                    sbline.Append(lines[i].Replace(',', ' ') + ",");
+                }
+                string strsql = string.Format(@"select ST_Contains(St_Astext(ST_Buffer(geography(ST_GeomFromText('LINESTRING({0})')),{1}))
+                    ,st_astext(geography(ST_GeomFromText('POINT({2})')))) AS Status", sbline.ToString().Trim(','), buffer, lonlat.Replace(',', ' '));
+                return dbHelper.ExecuteQuery(strsql).Tables[0];
+            }
+            catch (Exception ex)
+            {
+                Log.Instance.Error("myGetPointOnOneLine:" + ex.Message);
+                return null;
+            }
+        }
+ 
+        /// <summary>
+        /// 判断某个经纬度点所在的路线
+        /// </summary>
+        /// <param name="lonlat"></param>
+        /// <param name="lines"></param>
+        /// <param name="buffer"></param>
+        /// <returns>路线索引集合/null</returns>
+        public DataTable GetPointOnLines(string lonlat, List<List<string>> lines, int buffer)
+        {
+            try
+            {
+                StringBuilder sbsql = new StringBuilder();
+                for (int i = 0; i < lines.Count; i++)
+                {
+                    StringBuilder sbline = new StringBuilder();
+                    for (int j = 0; j < lines[i].Count; j++)
+                    {
+                        sbline.Append(lines[i][j].Replace(',', ' ') + ",");
+                    }
+ 
+                    if (i == 0)
+                    {
+                        sbsql.AppendFormat(@"select {0} AS Index, ST_Contains(St_Astext(ST_Buffer(geography(ST_GeomFromText('LINESTRING({1})')),{2}))
+                    ,st_astext(geography(ST_GeomFromText('POINT({3})')))) AS Status", i, sbline.ToString().Trim(','), buffer, lonlat.Replace(',', ' '));
+                    }
+                    else
+                    {
+                        sbsql.AppendFormat(@" union all select {0} AS Index, ST_Contains(St_Astext(ST_Buffer(geography(ST_GeomFromText('LINESTRING({1})')),{2}))
+                    ,st_astext(geography(ST_GeomFromText('POINT({3})')))) AS Status", i, sbline.ToString().Trim(','), buffer, lonlat.Replace(',', ' '));
+                    }
+                }
+                DataSet ds = dbHelper.ExecuteQuery(sbsql.ToString());
+                DataRow[] rows = ds.Tables[0].Select("Status='true'");
+                if (rows.Length > 0)
+                {
+                    DataTable dtNew = ds.Tables[0].Clone();
+                    for (int i = 0; i < rows.Length; i++)
+                    {
+                        dtNew.Rows.Add(rows[i].ItemArray);
+                    }
+                    return dtNew;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Instance.Error("GetPointOnLines:" + ex.Message);
+                return null;
+            }
+        }
+ 
+        /// <summary>
+        /// 判断某个经纬度点所在的路线
+        /// </summary>
+        /// <param name="lonlat"></param>
+        /// <param name="lines"></param>
+        /// <param name="buffer"></param>
+        /// <returns>路线索引集合/null</returns>
+        public DataTable GetPointOnLinesByWidth(string lonlat, List<List<string>> lines, List<int> buffer)
+        {
+            try
+            {
+                StringBuilder sbsql = new StringBuilder();
+                for (int i = 0; i < lines.Count; i++)
+                {
+                    StringBuilder sbline = new StringBuilder();
+                    for (int j = 0; j < lines[i].Count; j++)
+                    {
+                        sbline.Append(lines[i][j].Replace(',', ' ') + ",");
+                    }
+ 
+                    if (i == 0)
+                    {
+                        sbsql.AppendFormat(@"select {0} AS Index, ST_Contains(St_Astext(ST_Buffer(geography(ST_GeomFromText('LINESTRING({1})')),{2}))
+                    ,st_astext(geography(ST_GeomFromText('POINT({3})')))) AS Status", i, sbline.ToString().Trim(','), buffer[i], lonlat.Replace(',', ' '));
+                    }
+                    else
+                    {
+                        sbsql.AppendFormat(@" union all select {0} AS Index, ST_Contains(St_Astext(ST_Buffer(geography(ST_GeomFromText('LINESTRING({1})')),{2}))
+                    ,st_astext(geography(ST_GeomFromText('POINT({3})')))) AS Status", i, sbline.ToString().Trim(','), buffer[i], lonlat.Replace(',', ' '));
+                    }
+                }
+                DataSet ds = dbHelper.ExecuteQuery(sbsql.ToString());
+                DataRow[] rows = ds.Tables[0].Select("Status='true'");
+                if (rows.Length > 0)
+                {
+                    DataTable dtNew = ds.Tables[0].Clone();
+                    for (int i = 0; i < rows.Length; i++)
+                    {
+                        dtNew.Rows.Add(rows[i].ItemArray);
+                    }
+                    return dtNew;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Instance.Error("GetPointOnLines:" + ex.Message);
+                return null;
+            }
+        }
+ 
+        /// <summary>
+        /// 判断某个经纬度点是否在这个区域内
+        /// </summary>
+        /// <param name="lonlat">经纬度点</param>
+        /// <param name="area">多个经纬度点组成的区域集合，区域点必须是闭合的，即以哪个经纬度点开始必须以那个经纬度点结束</param>
+        /// <returns>ture/false/null</returns>
+        public DataTable GetPointOnTheArea(string lonlat, List<string> area)
+        {
+            try
+            {
+                StringBuilder sbarea = new StringBuilder();
+                for (int i = 0; i < area.Count; i++)
+                {
+                    sbarea.Append(area[i].Replace(',', ' ') + ",");
+                }
+                string strsql = string.Format(@"SELECT ST_Contains( ST_MakePolygon(ST_GeomFromText('LINESTRING({0}) '))
+                    ,st_point({1})) AS Status", sbarea.ToString().Trim(','), lonlat);
+                return dbHelper.ExecuteQuery(strsql).Tables[0];
+            }
+            catch (Exception ex)
+            {
+                Log.Instance.Error("GetPointOnTheArea:" + ex.Message);
+                return null;
+            }
+        }
+ 
+        /// <summary>
+        /// 判断某个经纬度点所在区域
+        /// </summary>
+        /// <param name="lonlat">经纬度点</param>
+        /// <param name="areas">多个区域的经纬度集合</param>
+        /// <returns>区域索引集合/null</returns>
+        public DataTable GetPointOnAreas(string lonlat, List<List<string>> areas)
+        {
+            try
+            {
+                StringBuilder sbsql = new StringBuilder();
+                for (int i = 0; i < areas.Count; i++)
+                {
+                    StringBuilder sbarea = new StringBuilder();
+                    for (int j = 0; j < areas[i].Count; j++)
+                    {
+                        sbarea.Append(areas[i][j].Replace(',', ' ') + ",");
+                    }
+                    if (i == 0)
+                    {
+                        sbsql.AppendFormat(@"SELECT {0} AS Index, ST_Contains( ST_MakePolygon(ST_GeomFromText('LINESTRING({1}) '))
+                            ,st_point({2})) AS Status", i, sbarea.ToString().Trim(','), lonlat);
+                    }
+                    else
+                    {
+                        sbsql.AppendFormat(@" union all SELECT {0} AS Index, ST_Contains( ST_MakePolygon(ST_GeomFromText('LINESTRING({1}) '))
+                            ,st_point({2})) AS Status", i, sbarea.ToString().Trim(','), lonlat);
+                    }
+                }
+                DataSet ds = dbHelper.ExecuteQuery(sbsql.ToString());
+                DataRow[] rows = ds.Tables[0].Select("Status='true'");
+                if (rows.Length > 0)
+                {
+                    DataTable dtNew = ds.Tables[0].Clone();
+                    for (int i = 0; i < rows.Length; i++)
+                    {
+                        dtNew.Rows.Add(rows[i].ItemArray);
+                    }
+                    return dtNew;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Instance.Error("GetPointOnOneArea:" + ex.Message);
+                return null;
+            }
+        }
+ 
+        /// <summary>
+        /// 获取路线长度
+        /// </summary>
+        /// <param name="line">路线经纬度点集合</param>
+        /// <returns>路线长度（单位m）/null</returns>
+        public DataTable GetLineLength(List<string> line)
+        {
+            try
+            {
+                StringBuilder sbline = new StringBuilder();
+                for (int i = 0; i < line.Count; i++)
+                {
+                    sbline.Append(line[i].Replace(',', ' ') + ",");
+                }
+                string strsql = string.Format(@"select ST_Length(Geography(ST_GeomFromText('LINESTRING({0})'))) AS Length", sbline.ToString().Trim(','));
+                return dbHelper.ExecuteQuery(strsql).Tables[0];
+            }
+            catch (Exception ex)
+            {
+                Log.Instance.Error("GetLineLength:" + ex.Message);
+                return null;
+            }
+        }
+    }
+  ```
+
+
+  ```
+   public class PostgreHelper : IDBHelper
+    {
+        /// <summary>
+        /// 读取数据返回DataSet
+        /// </summary>
+        /// <param name="sqrstr"></param>
+        /// <returns></returns>
+        public DataSet ExecuteQuery(string sqrstr)
+        {
+            try
+            {
+                using (NpgsqlConnection conn = new NpgsqlConnection(Config.PostgreConnectionString))
+                {
+                    using (NpgsqlDataAdapter da = new NpgsqlDataAdapter(sqrstr, conn))
+                    {
+                        DataSet ds = new DataSet();
+                        da.Fill(ds, "ds");
+                        return ds;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Instance.Error("ExecuteQuery:"+ex.Message);
+                return null;
+            }
+        }
+ 
+        /// <summary>
+        /// 判断增删改执行状态
+        /// </summary>
+        /// <param name="sqrstr"></param>
+        /// <returns></returns>
+        public int ExecuteNonQuery(string sqrstr)
+        {
+            try
+            {
+                using (NpgsqlConnection conn = new NpgsqlConnection(Config.PostgreConnectionString))
+                {
+                    using (NpgsqlCommand SqlCommand = new NpgsqlCommand(sqrstr, conn))
+                    {
+                        int r = SqlCommand.ExecuteNonQuery();  //执行查询并返回受影响的行数
+                        conn.Close();
+                        return r; //r如果是>0操作成功！ 
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Instance.Error("ExecuteNonQuery:"+ex.Message);
+                return -1;
+            }
+        }
+ 
+        /// <summary>
+        /// 读取数据返回数据流
+        /// </summary>
+        /// <param name="cmdText"></param>
+        /// <returns></returns>
+        public DbDataReader GetReader(string cmdText)
+        {
+            try
+            {
+                using (NpgsqlConnection conn = new NpgsqlConnection(Config.PostgreConnectionString))
+                {
+                    using (NpgsqlCommand cmd = new NpgsqlCommand(cmdText, conn))
+                    {
+                        NpgsqlDataReader sdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+                        return sdr;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Instance.Error("GetReader:" + ex.Message);
+                return null;
+            }
+        }
+    }
+
+  ```
+  2. PostgreSQL中的GIS数据类型
+  ```
+	PostgreSQL提供了几种不同的GIS数据类型，用于存储空间数据。这些数据类型包括：
+	1) 点（Point）：表示地球表面的一个点，由经度和纬度坐标组成。
+	2) 线（LineString）：表示连接两个或多个点的线。
+	3) 多边形（Polygon）：表示一个由三个或以上点组成的封闭区域。
+	4) 多点（MultiPoint）：表示多个点的集合。
+	5) 多线（MultiLineString）：表示多条线的集合。
+	6) 多多边形（MultiPolygon）：表示多个多边形的集合。
+	7) 几何集合（GeometryCollection）：表示不同类型的几何对象的集合。
+	在PostgreSQL中，可以使用“geometry”类型来存储这些GIS数据类型。例如，以下命令将创建一个包含“point”类型的
+	几何图形的表：
+
+	CREATE TABLE my_points (id SERIAL PRIMARY KEY, shape GEOMETRY(Point, 4326));
+  ```
+	3. PostgreSQL中的GIS函数
+ ```
+	PostgreSQL提供了许多GIS函数，可以用来处理空间数据。这些函数包括：
+	1) ST_Intersects：用于检查两个几何对象是否相交。
+	2) ST_Contains：用于检查一个几何对象是否包含另一个几何对象。
+	3) ST_Distance：返回两个几何对象之间的距离。
+	4) ST_Area：计算多边形的面积。
+	5) ST_Length：计算线的长度。
+	6) ST_Centroid：计算多边形的重心。
+	7) ST_Buffer：生成一个缓冲区。
+	以下是一个示例查询，使用ST_Intersects函数查找包含在区域内的所有点：
+	
+	SELECT * FROM my_points WHERE ST_Intersects(shape, ST_MakeEnvelope(-90, 30, -80, 40, 4326));
+  ```
+
+	4. PostgreSQL中的GIS扩展
+  ```
+  	PostgreSQL的GIS功能可以通过GIS扩展进一步扩展。这些扩展可以提供额外的GIS功能，例如2D和3D地图可视化。其
+	中一些扩展包括：
+	1) PostGIS：提供了一组GIS函数和类型，用于空间数据的存储、查询和分析。
+	2) pgRouting：提供了一组GIS函数，用于执行路径搜索和路由分析。
+	3) PostGIS Raster：允许用户在PostgreSQL中存储和查询栅格数据（例如卫星图像）。
+	4) Pointcloud：允许用户在PostgreSQL中存储和查询大型点云数据。
+	以下是一个示例查询，使用PostGIS扩展创建地图：
+
+	SELECT ST_AsPNG(ST_AsRaster(ST_Buffer(shape, 1, ‘quad_segs=4’), 100, 100, ARRAY[‘8BUI’, ‘8BUI’, ‘8BUI’], ARRAY[0, 0, 255]));
+
+	这个查询将生成一个以点坐标为中心的缓冲区，使用四个段落的几何图形，并将其转换为栅格图像。然后，它将图像
+	转换为PNG格式，并返回结果。
+
+  ```
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 -----
