@@ -12888,6 +12888,217 @@ pthread_self (void);
 
   ```
 
+# 152  Enable PostGIS
+
+## 1. create database with postgreSQL
+```
+创建testdb数据库：
+
+CREATE DATABASE testdb;
+复制
+3.1.3 复制数据库
+创建demo数据库，内容与testdb数据库一致：
+
+CREATE DATABASE demo TEMPLATE=testdb;
+复制
+3.1.4 删除数据库
+删除demo数据库：
+
+drop database demo;
+复制
+3.1.5 查看数据库列表
+执行\l来查看数据库列表
+
+
+CREATE TABLE location_city (
+    name            varchar(80),
+    location        point
+);
+
+INSERT INTO location_city VALUES ('San Francisco', '(-194.0, 53.0)'), ('New York', '(-184.0, 43.0)'), ('北京', '(-94.0, 133.0)'), ('Los Angeles', '(-297.0, 63.0)'), ('Chicago', '(-94.0, 283.0)');
+
+SELECT * FROM public.location_city
+
+UPDATE location_city SET location = '(52,53)' WHERE name = 'Fort Worth';
+
+DELETE FROM location_city WHERE name = 'San Francisco';
+
+DELETE FROM location_city;
+# 或者
+TRUNCATE location_city;
+```
+
+## 2. create database with postgis
+
+```
+CREATE EXTENSION postgis;
+-- Enable Topology
+CREATE EXTENSION postgis_topology;
+-- Enable PostGIS Advanced 3D-- and other geoprocessing algorithms
+-- sfcgal not available with all distributions
+CREATE EXTENSION postgis_sfcgal;
+-- fuzzy matching needed for Tiger
+CREATE EXTENSION fuzzystrmatch;
+-- rule based standardizer
+CREATE EXTENSION address_standardizer;
+-- example rule data set
+CREATE EXTENSION address_standardizer_data_us;
+-- Enable US Tiger Geocoder
+CREATE EXTENSION postgis_tiger_geocoder;
+
+CREATE TABLE cities(id smallint,name varchar(50));
+INSERT INTO cities(id, the_geom, name) VALUES (1,ST_GeomFromText('POINT(-0.1257 51.508)',4326),'London, England'), (2,ST_GeomFromText('POINT(-81.233 42.983)',4326),'London, Ontario'), (3,ST_GeomFromText('POINT(27.91162491 -33.01529)',4326),'East London,SA');
+
+
+SELECT id, ST_AsText(the_geom), ST_AsEwkt(the_geom), ST_X(the_geom), ST_Y(the_geom) FROM cities;
+
+SELECT * FROM pg_available_extensions WHERE name = 'postgis';
+
+```
+
+```
+	-- Enable PostGIS (as of 3.0 contains just geometry/geography)
+	-- 启用PostGIS功能（仅包括geometry/geography相关）
+	CREATE EXTENSION postgis;
+
+	-- enable raster support (for 3+)
+	-- 启用栅格扩展
+	CREATE EXTENSION postgis_raster;
+
+	-- Enable Topology
+	-- 启用拓扑扩展
+	CREATE EXTENSION postgis_topology;
+
+	-- Enable PostGIS Advanced 3D
+	-- and other geoprocessing algorithms
+	-- sfcgal not available with all distributions
+	CREATE EXTENSION postgis_sfcgal;
+	-- fuzzy matching needed for Tiger
+	CREATE EXTENSION fuzzystrmatch;
+	-- rule based standardizer
+	CREATE EXTENSION address_standardizer;
+	-- example rule data set
+	CREATE EXTENSION address_standardizer_data_us;
+	-- Enable US Tiger Geocoder
+	CREATE EXTENSION postgis_tiger_geocoder;
+
+
+
+	启动postgresql服务，进入命令行操作界面，执行以下命令： 
+
+	create extension postgis
+
+	select * from pg_available_extensions where name like 'postgis%';
+
+```
+
+
+## 3. some  postgis data example
+
+```
+例如，下面是洛杉矶（Los Angeles）和巴黎（Paris）的地理坐标：
+• Los Angeles: POINT(-118.4079 33.9434)
+• Paris: POINT(2.3490 48.8533)
+使用标准的PostGIS笛卡尔平面坐标系空间函数ST_Distance(geometry, geometry)计算洛杉矶和
+巴黎之间的距离。请注意，SRID 4326声明了地理空间参考系统。
+SELECT ST_Distance(
+ST_GeometryFromText('POINT(-118.4079 33.9434)', 4326), -- Los Angeles (LAX)
+ST_GeometryFromText('POINT(2.5559 49.0083)', 4326) -- Paris (CDG)
+);
+121.898
+
+空间参考4326的单位是度，所以我们的答案是121度。但是，这表示什么呢？
+在地球球体上，1度对应的地球实际距离的大小是变化的。当远离赤道时，它会变得更小，当越接
+近两极时，地球上的经线相互之间越来越接近。因此，121度的距离并不意味着什么，这是一个没
+有意义的数字。
+为了计算出真实的距离，我们不能把地理坐标近似的看成笛卡尔平面坐标，而应该把它们看成是球
+坐标。我们必须把两点之间的距离作为球面上的真实路径来测量——大圆（大圆被定义为过球心
+的平面和球面的交线）的一部分。
+从1.5版开始，PostGIS通过地理（geography）数据类型提供此功能
+
+测量应该使用geography而不是geometry类型。也就是说使用geography这种数据类
+型时，PostGIS的内部计算是基于实际地球球体来计算的；而使用geometry这种数据类型时，
+PostGIS的内部计算是基于平面来计算的。
+让我们再次尝试测量洛杉矶和巴黎之间的距离，我们将使用ST_GeographyFromText(text)函
+数，而不是ST_GeometryFromText(text)。
+SELECT ST_Distance(
+ST_GeographyFromText('POINT(-118.4079 33.9434)'), -- Los Angeles (LAX)
+ST_GeographyFromText('POINT(2.5559 49.0083)') -- Paris (CDG)
+);
+
+9124665
+
+得到一个大数字！所有geography计算的返回值都以米为单位，所以我们的答案是9124km。
+
+```
+```
+如果我们将LAX-CDG航班路线转换成一条线串，并利用
+geography计算其到冰岛某个点的距离，我们可以得到正确的答案（以米为单位）。
+SELECT ST_Distance(
+ST_GeographyFromText('LINESTRING(-118.4079 33.9434, 2.5559 49.0083)'), -- LAX-CDG
+ST_GeographyFromText('POINT(-22.6056 63.9850)') -- Iceland (K
+);
+
+
+SELECT ST_Distance(
+ST_GeometryFromText('Point(-118.4079 33.9434)'), -- LAX
+ST_GeometryFromText('Point(139.733 35.567)')) -- NRT (Tokyo/Narita)
+AS geometry_distance,
+
+SELECT ST_Distance(
+ST_GeographyFromText('Point(-118.4079 33.9434)'), -- LAX
+ST_GeographyFromText('Point(139.733 35.567)')) -- NRT (Tokyo/Narita)
+AS geography_distance;
+
+
+CREATE TABLE airports (
+code VARCHAR(3),
+geog GEOGRAPHY(Point)
+);
+INSERT INTO airports VALUES ('LAX', 'POINT(-118.4079 33.9434)');
+INSERT INTO airports VALUES ('CDG', 'POINT(2.5559 49.0083)');
+INSERT INTO airports VALUES ('KEF', 'POINT(-22.6056 63.9850)');
+在表定义中，GEOGRAPHY(Point)将airport数据类型指定为点。新的geography字段不会在
+geometry_columns视图中注册，相反，它们是在名为geography_columns的视图中注册的。
+SELECT * FROM geography_columns;
+
+
+```
+
+```
+	-- Create table with spatial column
+	-- 创建一个表mytable，包含了一个空间列geom，格式是GEOMETRY(Point,26910)
+	-- 这里的26910是一个SRID，稍后会做解释
+	CREATE TABLE mytable (
+	id SERIAL PRIMARY KEY,
+	geom GEOMETRY(Point, 26910),
+	name VARCHAR(128)
+	);
+	
+	-- Add a spatial index
+	-- 给geom列添加一个空间索引，索引类型为GIST
+	CREATE INDEX mytable_gix
+	ON mytable
+	USING GIST (geom);
+	
+	-- Add a point
+	-- 插入一个数据点
+	INSERT INTO mytable (geom) VALUES (
+	ST_GeomFromText('POINT(0 0)', 26910)
+	);
+	
+	-- Query for nearby points
+	-- 查询与给定点周围1000米的点
+	SELECT id, name
+	FROM mytable
+	WHERE ST_DWithin(
+	geom,
+	ST_GeomFromText('POINT(0 0)', 26910),
+	1000
+	);
+
+```
+
 
 
 
