@@ -13169,6 +13169,9 @@ ALTER TABLE public.roads
 
 ```
 
+# 154 PostGIS Shapefile Import/Export Manager
+
+ from postgis.net, get the manager to import shp file into postgis or export the table to shp file;
 
 
 -----
