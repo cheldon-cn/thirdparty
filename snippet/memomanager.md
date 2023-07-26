@@ -13109,6 +13109,66 @@ SELECT * FROM geography_columns;
 
 ```
 
+# 153  PostGIS version
+
+## 1. QUESTION:
+```
+ERROR:  function postgis_full_version() does not exist
+LINE 5: SELECT PostGIS_Full_Version();
+               ^
+HINT:  No function matches the given name and argument types. You might need to add explicit type casts.
+SQL state: 42883
+Character: 49
+
+```
+## 2. SOLUTION:
+to fix this error, we should  create postgis extension firstly with the following sql command:
+
+```
+CREATE EXTENSION postgis;
+```
+after create postgis extension,in the target database,we get the table name 'spatial_ref_sys ';
+to check the spatial_ref_sys table,we can use the following sql command:
+
+```
+SELECT * FROM public.spatial_ref_sys
+```
+## 3. Query version
+
+```
+SELECT PostGIS_PROJ_Version();
+Rel. 5.2.0, September 15th, 2018
+
+SELECT PostGIS_GEOS_Version();
+3.8.0-CAPI-1.13.1 
+
+SELECT PostGIS_Full_Version();
+POSTGIS="3.0.0 r17983" [EXTENSION] PGSQL="120" GEOS="3.8.0-CAPI-1.13.1 " SFCGAL="1.3.2" PROJ="Rel. 5.2.0, September 15th, 2018" LIBXML="2.9.9" LIBJSON="0.12" LIBPROTOBUF="1.2.1" WAGYU="0.4.3 (Internal)" TOPOLOGY
+
+
+```
+
+```
+-- Table: public.roads
+
+-- DROP TABLE public.roads;
+
+CREATE TABLE public.roads
+(
+    road_id integer NOT NULL DEFAULT nextval('mytable_id_seq'::regclass),
+    roads_geom geometry(Point,26910),
+    road_name character varying(128) COLLATE pg_catalog."default",
+    CONSTRAINT roads_pkey PRIMARY KEY (road_id)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public.roads
+    OWNER to postgres;
+
+
+```
+
 
 
 -----
