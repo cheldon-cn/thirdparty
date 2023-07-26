@@ -12242,7 +12242,7 @@ Use -fPIC or -fpic to generate code. Whether to use -fPIC or -fpic to generate c
 
 # 150 pthread_create and pthread_exit
 
-1. 线程创建
+## 1. 线程创建
 
 　　在进程被创建时，系统会为其创建一个主线程，而要在进程中创建新的线程，则可以调用pthread_create函数：
 ```
@@ -12261,13 +12261,14 @@ Use -fPIC or -fpic to generate code. Whether to use -fPIC or -fpic to generate c
 
 pthread_self (void);
 
-2. 线程退出
+## 2. 线程退出
 
 　　线程的退出方式有三种：
 
 （1）执行完成后隐式退出；
+
 （2）由线程本身显示调用pthread_exit 函数退出；
-  ```
+   ```
    pthread_exit (void * retval);
    ```
 （3）被其他线程用pthread_cance函数终止：
@@ -12279,9 +12280,9 @@ pthread_self (void);
   ```
   pthread_join (pthread_t thread, void** threadreturn);
   ```
-3.  Compare 
+## 3.  Compare 
 
-    ```
+    
 	事项	       WIN32	                Linux	                     VxWorks
 	线程创建	    CreateThread	        pthread_create	         taskSpawn
 	线程终止(byself)  ExitThread            pthread_exit             exit
@@ -12293,9 +12294,9 @@ pthread_self (void);
 	创建信号量	     CreateSemaphore	    sem_init	             semBCreate
 	等待信号量	     WaitForSingleObject	sem_wait	             semTake
 	释放信号量	     ReleaseSemaphore	    sem_post	             semGive
-  ```
+  
 
-4. Demo
+## 4. Demo
 
   ```
 	#include <stdlib.h>
@@ -12366,6 +12367,7 @@ pthread_self (void);
 
 # 151 PostgreHelper gis function
   
+ ## 1. some SQL command
   ```
   "SELECT ST_Distance(ST_Transform(ST_SetSRID(ST_MakePoint({0}),4326), 26986),
                       ST_Transform(ST_SetSRID(ST_MakePoint({1}),4326), 26986)) AS Distance"
@@ -12385,6 +12387,8 @@ pthread_self (void);
 	SELECT ST_Contains( ST_MakePolygon(ST_GeomFromText('LINESTRING({0}) '))
                       ,st_point({1})) AS Status
   ```
+ 
+  ## 2. MainGISFunction for PostgreSQL
   ```
    public class MainGISFunction
     {
@@ -12758,7 +12762,7 @@ pthread_self (void);
     }
   ```
 
-
+## 3. PostgreHelper
   ```
    public class PostgreHelper : IDBHelper
     {
@@ -12841,8 +12845,8 @@ pthread_self (void);
     }
 
   ```
-  2. PostgreSQL中的GIS数据类型
-  ```
+  ## 2. PostgreSQL中的GIS数据类型
+  
 	PostgreSQL提供了几种不同的GIS数据类型，用于存储空间数据。这些数据类型包括：
 	1) 点（Point）：表示地球表面的一个点，由经度和纬度坐标组成。
 	2) 线（LineString）：表示连接两个或多个点的线。
@@ -12855,9 +12859,9 @@ pthread_self (void);
 	几何图形的表：
 
 	CREATE TABLE my_points (id SERIAL PRIMARY KEY, shape GEOMETRY(Point, 4326));
-  ```
-	3. PostgreSQL中的GIS函数
- ```
+  
+  ##  3. PostgreSQL中的GIS函数
+
 	PostgreSQL提供了许多GIS函数，可以用来处理空间数据。这些函数包括：
 	1) ST_Intersects：用于检查两个几何对象是否相交。
 	2) ST_Contains：用于检查一个几何对象是否包含另一个几何对象。
@@ -12867,11 +12871,11 @@ pthread_self (void);
 	6) ST_Centroid：计算多边形的重心。
 	7) ST_Buffer：生成一个缓冲区。
 	以下是一个示例查询，使用ST_Intersects函数查找包含在区域内的所有点：
-	
-	SELECT * FROM my_points WHERE ST_Intersects(shape, ST_MakeEnvelope(-90, 30, -80, 40, 4326));
-  ```
 
-	4. PostgreSQL中的GIS扩展
+	SELECT * FROM my_points WHERE ST_Intersects(shape, ST_MakeEnvelope(-90, 30, -80, 40, 4326));
+ 
+  ## 4. PostgreSQL中的GIS扩展
+
   ```
   	PostgreSQL的GIS功能可以通过GIS扩展进一步扩展。这些扩展可以提供额外的GIS功能，例如2D和3D地图可视化。其
 	中一些扩展包括：
@@ -12955,6 +12959,7 @@ SELECT id, ST_AsText(the_geom), ST_AsEwkt(the_geom), ST_X(the_geom), ST_Y(the_ge
 SELECT * FROM pg_available_extensions WHERE name = 'postgis';
 
 ```
+### 2.1. PostGIS EXTENSION
 
 ```
 	-- Enable PostGIS (as of 3.0 contains just geometry/geography)
@@ -12995,6 +13000,8 @@ SELECT * FROM pg_available_extensions WHERE name = 'postgis';
 
 ## 3. some  postgis data example
 
+### 3.1  ST_GeographyFromText
+
 ```
 例如，下面是洛杉矶（Los Angeles）和巴黎（Paris）的地理坐标：
 • Los Angeles: POINT(-118.4079 33.9434)
@@ -13031,6 +13038,8 @@ ST_GeographyFromText('POINT(2.5559 49.0083)') -- Paris (CDG)
 得到一个大数字！所有geography计算的返回值都以米为单位，所以我们的答案是9124km。
 
 ```
+
+### 3.2  ST_GeographyFromText
 ```
 如果我们将LAX-CDG航班路线转换成一条线串，并利用
 geography计算其到冰岛某个点的距离，我们可以得到正确的答案（以米为单位）。
@@ -13065,6 +13074,7 @@ SELECT * FROM geography_columns;
 
 ```
 
+### 3.3  ST_GeomFromText
 ```
 	-- Create table with spatial column
 	-- 创建一个表mytable，包含了一个空间列geom，格式是GEOMETRY(Point,26910)
@@ -13099,18 +13109,69 @@ SELECT * FROM geography_columns;
 
 ```
 
+# 153  PostGIS version
+
+## 1. QUESTION:
+```
+ERROR:  function postgis_full_version() does not exist
+LINE 5: SELECT PostGIS_Full_Version();
+               ^
+HINT:  No function matches the given name and argument types. You might need to add explicit type casts.
+SQL state: 42883
+Character: 49
+
+```
+## 2. SOLUTION:
+to fix this error, we should  create postgis extension firstly with the following sql command:
+
+```
+CREATE EXTENSION postgis;
+```
+after create postgis extension,in the target database,we get the table name 'spatial_ref_sys ';
+to check the spatial_ref_sys table,we can use the following sql command:
+
+```
+SELECT * FROM public.spatial_ref_sys
+```
+## 3. Query version
+
+```
+SELECT PostGIS_PROJ_Version();
+Rel. 5.2.0, September 15th, 2018
+
+SELECT PostGIS_GEOS_Version();
+3.8.0-CAPI-1.13.1 
+
+SELECT PostGIS_Full_Version();
+POSTGIS="3.0.0 r17983" [EXTENSION] PGSQL="120" GEOS="3.8.0-CAPI-1.13.1 " SFCGAL="1.3.2" PROJ="Rel. 5.2.0, September 15th, 2018" LIBXML="2.9.9" LIBJSON="0.12" LIBPROTOBUF="1.2.1" WAGYU="0.4.3 (Internal)" TOPOLOGY
 
 
+```
+
+```
+-- Table: public.roads
+
+-- DROP TABLE public.roads;
+
+CREATE TABLE public.roads
+(
+    road_id integer NOT NULL DEFAULT nextval('mytable_id_seq'::regclass),
+    roads_geom geometry(Point,26910),
+    road_name character varying(128) COLLATE pg_catalog."default",
+    CONSTRAINT roads_pkey PRIMARY KEY (road_id)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public.roads
+    OWNER to postgres;
 
 
+```
 
+# 154 PostGIS Shapefile Import/Export Manager
 
-
-
-
-
-
-
+ from postgis.net, get the manager to import shp file into postgis or export the table to shp file;
 
 
 -----
