@@ -13179,20 +13179,56 @@ ALTER TABLE public.roads
 
 # 155  drawRichText with QPaint
 
-## html string 
+## 1. html string 
+
+
+<body bgcolor="0" size="12" style="writing-mode:horizontal-tb;"><p><font face="0" style="color: rgb(0, 0, 239); font-size: 18pt; background-color: rgb(217, 255, 255);">标注</font></p></body>
+
 ```
 "<body bgcolor=\"0\" size=\"12\" style=\"writing-mode:horizontal-tb;\"><p><font face=\"0\" style=\"color: rgb(0, 0, 239); font-size: 18pt; background-color: rgb(217, 255, 255);\">标注</font></p></body>"
 ```
+"K<sub>max</sub>=K<sub>2</sub> - 3"
+
 ```
-<body bgcolor="0" size="12" style="writing-mode:horizontal-tb;"><p><font face="0">标注</font></p></body>
-"<body bgcolor=\"0\" size=\"12\" style=\"writing-mode:horizontal-tb;\"><p><font face=\"0\">标注</font></p></body>"
+"K<sub>max</sub>=K<sub>2</sub> - 3"
 ```
+ a<sup>n+1</sup>
+
 ```
-<body bgcolor="0" size="12" style="writing-mode:horizontal-tb;"><p><font face="0" style="color: rgb(127, 127, 127);">标注</font></p></body>
-"<body bgcolor=\"0\" size=\"12\" style=\"writing-mode:horizontal-tb;\"><p><font face=\"0\" style=\"color: rgb(127, 127, 127);\">标注</font></p></body>"
+上角标的代码为：<sup>上角</sup>。如：a的n次方 a<sup>n</sup>显示结果an
+```
+ C<sub>3</sub>
+```
+下角标的代码为：<sub>下角</sub>。如：C<sub>3</sub>显示结果C3
 ```
 
-## function
+H<sub>2</sub>O
+```
+H<sub>2</sub>O
+```
+
+Na<sub>2</sub>CO<sub>3</sub>
+```
+Na<sub>2</sub>CO<sub>3</sub>
+```
+
+
+
+<body bgcolor="0" size="12" style="writing-mode:horizontal-tb;"><p><font face="0">标注</font></p></body>
+
+
+```
+"<body bgcolor=\"0\" size=\"12\" style=\"writing-mode:horizontal-tb;\"><p><font face=\"0\">标注</font></p></body>"
+```
+
+<body bgcolor="0" size="8" style="writing-mode:horizontal-tb;"><p><font face="0" style="color: rgb(227, 127, 127);font-size: 18pt;">标注2</font></p></body>
+
+```
+<body bgcolor="0" size="8" style="writing-mode:horizontal-tb;"><p><font face="0" style="color: rgb(227, 127, 127);font-size: 18pt;">标注2</font></p></body>
+```
+
+
+## 2. function
 ```
 void drawRichText(double originX, double originY, const xString & richtext, double width,double dpi = 72)
 {
@@ -13229,6 +13265,12 @@ void CPaint::drawRichText(double x, double y, const xString & richtext, double d
 
 ```
 
+
+# 156  
+
+```
+
+```
 
 
 
