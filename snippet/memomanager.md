@@ -7546,6 +7546,8 @@ F:\osm2pgsql-bin>osm2pgsql -d osm_china -U postgres -P 5432 -C 12000 -S "F:/osm2
 2023-02-28 15:40:52  osm2pgsql took 11s overall.
 ```
 
+..\osm2pgsql.exe -U postgres -G --hstore --style openstreetmap-carto.style --tag-transform-script openstreetmap-carto.lua -d gis F:\mapov.osm
+
 
 ## createdb options and osm2pgsql options
 ```
@@ -13172,6 +13174,81 @@ ALTER TABLE public.roads
 # 154 PostGIS Shapefile Import/Export Manager
 
  from postgis.net, get the manager to import shp file into postgis or export the table to shp file;
+
+
+
+# 155  drawRichText with QPaint
+
+## html string 
+```
+"<body bgcolor=\"0\" size=\"12\" style=\"writing-mode:horizontal-tb;\"><p><font face=\"0\" style=\"color: rgb(0, 0, 239); font-size: 18pt; background-color: rgb(217, 255, 255);\">标注</font></p></body>"
+```
+```
+<body bgcolor="0" size="12" style="writing-mode:horizontal-tb;"><p><font face="0">标注</font></p></body>
+"<body bgcolor=\"0\" size=\"12\" style=\"writing-mode:horizontal-tb;\"><p><font face=\"0\">标注</font></p></body>"
+```
+```
+<body bgcolor="0" size="12" style="writing-mode:horizontal-tb;"><p><font face="0" style="color: rgb(127, 127, 127);">标注</font></p></body>
+"<body bgcolor=\"0\" size=\"12\" style=\"writing-mode:horizontal-tb;\"><p><font face=\"0\" style=\"color: rgb(127, 127, 127);\">标注</font></p></body>"
+```
+
+## function
+```
+void drawRichText(double originX, double originY, const xString & richtext, double width,double dpi = 72)
+{
+	QPainter* pPainter = new QPainter;
+	QPaintDevice* pDevice = new QImage();
+	double dScale = pDisplay->GetResolution();
+	double nHei = pDevice->Height();
+	originY = nHei - originY;
+	pPainter->Save();
+	pPainter->translate(originX, originY);
+
+	double xScale = (dScale / dpi * 25.4);
+	double yScale = (dScale / dpi * 25.4);
+	pPainter->scale(xScale, yScale);
+	pPainter->drawRichText(0, 0, xString(richtext, xString::GB18030), width * dpi / 25.4);
+	pPainter->Restore();
+}
+
+
+void CPaint::drawRichText(double x, double y, const xString & richtext, double dwid)
+{
+	// 修改说明：QPainter的drawstatictext方法对html语法支持较弱
+	// 使用QTextDocument绘制html
+	
+ 	QTextOption option;
+ 	option.setWrapMode(QTextOption::WrapAnywhere);//设置Html文本可在任何地方换行
+
+	QTextDocument doc;
+	doc.setDefaultTextOption(option);
+	doc.setHtml(ToQString(richtext));
+	doc.setTextWidth(dwid); // 若不调用此句，则水平方向的对齐设置会被忽略；
+	doc.drawContents(m_d->get()->qt);
+}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 -----
