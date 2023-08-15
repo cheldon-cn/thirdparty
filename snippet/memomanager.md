@@ -13187,10 +13187,10 @@ ALTER TABLE public.roads
 ```
 "<body bgcolor=\"0\" size=\"12\" style=\"writing-mode:horizontal-tb;\"><p><font face=\"0\" style=\"color: rgb(0, 0, 239); font-size: 18pt; background-color: rgb(217, 255, 255);\">标注</font></p></body>"
 ```
-"K<sub>max</sub>=K<sub>2</sub> - 3"
+K<sub>max</sub>=K<sub>2</sub> + K<sup>2</sup> + K<sup>n+n<sup>2</sup></sup> - 3<sup>K/2</sup>
 
 ```
-"K<sub>max</sub>=K<sub>2</sub> - 3"
+K<sub>max</sub>=K<sub>2</sub> + K<sup>2</sup> + K<sup>n+n<sup>2</sup></sup> - 3<sup>K/2</sup>
 ```
  a<sup>n+1</sup>
 
@@ -13266,13 +13266,59 @@ void CPaint::drawRichText(double x, double y, const xString & richtext, double d
 ```
 
 
-# 156  
+# 156  get schemaname from postgresql
 
 ```
+SELECT * FROM information_schema.schemata
+
+select * from pg_tables where schemaname = 'public'
+
+select * from pg_tables where schemaname = 'postgres'
+
+select * from pg_tables where schemaname = 'information_schema'
 
 ```
+```
+/*
+ Navicat Premium Data Transfer
 
+ Source Server         : osm
+ Source Server Type    : PostgreSQL
+ Source Server Version : 120001
+ Source Host           : localhost:5432
+ Source Catalog        : osm
+ Source Schema         : dbmaster
 
+ Target Server Type    : PostgreSQL
+ Target Server Version : 120001
+ File Encoding         : 65001
+
+ Date: 14/08/2023 20:28:21
+*/
+
+*/
+-- ----------------------------
+-- Table structure for gdbinfo
+-- ----------------------------
+DROP TABLE IF EXISTS "dbmaster"."gdbinfo";
+CREATE TABLE "dbmaster"."gdbinfo" (
+  "id" int4 NOT NULL,
+  "owner" varchar(128) COLLATE "pg_catalog"."default" NOT NULL,
+  "name" varchar(128) COLLATE "pg_catalog"."default" NOT NULL,
+  "status" int2 DEFAULT 0,
+  "status2" int2 DEFAULT 0,
+  "uuid" varchar(128) COLLATE "pg_catalog"."default" NOT NULL,
+  "db_name" text COLLATE "pg_catalog"."default",
+  "crttime" timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "backup_time" timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP
+)
+;
+
+-- ----------------------------
+-- Primary Key structure for table gdbinfo
+-- ----------------------------
+ALTER TABLE "dbmaster"."gdbinfo" ADD CONSTRAINT "gdbinfo_pkey" PRIMARY KEY ("id");
+```
 
 
 
