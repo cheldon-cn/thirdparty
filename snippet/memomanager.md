@@ -13463,6 +13463,44 @@ SELECT osm_id,way,ST_AsGeoJSON(way), ST_AsEWKT(way),ST_AsKML(way) FROM  public.p
 
 
 
+# 159  oracle download url
+
+
+```
+
+https://download.oracle.com/otn_software/nt/instantclient/19800/instantclient-basic-windows.x64-19.8.0.0.0dbru.zip
+
+https://download.oracle.com/otn_software/nt/instantclient/1919000/instantclient-basic-windows.x64-19.19.0.0.0dbru.zip
+```
+
+```
+https://download.oracle.com/otn_software/nt/instantclient/1919000/instantclient-sdk-windows.x64-19.19.0.0.0dbru.zip
+
+https://download.oracle.com/otn_software/linux/instantclient/1919000/instantclient-sdk-linux.x64-19.19.0.0.0dbru.zip
+
+```
+```
+
+https://download.oracle.com/otn_software/linux/instantclient/1919000/instantclient-odbc-linux.x64-19.19.0.0.0dbru.zip
+
+
+https://download.oracle.com/otn_software/nt/instantclient/1919000/instantclient-odbc-windows.x64-19.19.0.0.0dbru.zip
+```
+
+oracle version release time
+------------------
+```
+
+发布	     已发布                              	高级支持					         扩展支持
+21c	         1年零12个月前（2021 年 8 月 13 日）     8个月后结束（2024 年 4 月 30 日）     不可用
+19c（长期）	  4年前（2019 年 4 月 25 日）             8个月后结束（2024 年 4 月 30 日）    3年零8个月结束（2027 年 4 月 30 日）
+
+18c	         5年前（2018 年 7 月 23 日）             2年前结束（2021 年 6 月 30 日）       不可用
+12c 版本2	  6年前（2017 年 3 月 1 日）             结束于 1 年零4个月前（2022 年3月31)   不可用
+12c 版本1（长期）10年前（2013 年 6 月 25 日）        5年前结束（2018年7月31日）            结束于 1 年前（2022 年 7 月 31 日）
+```
+
+
 
 
 
