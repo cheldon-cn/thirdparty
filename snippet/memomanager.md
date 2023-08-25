@@ -13428,8 +13428,40 @@ STORAGE (
   FLASH_CACHE DEFAULT
 )
    USABLE;
-   
+
 ```
+
+# 158  get column_name from postgresql
+
+for postgresql
+
+```
+SELECT column_name,data_type FROM information_schema.columns 
+where table_name = 'mpf3';
+
+```
+
+for oracle
+```
+select column_name,data_type,data_length,data_precision,data_scale,nullable from all_tab_columns where table_name = 'SDEL' and owner = 'SDE' order by column_id
+
+select a.SHAPE.SRID from SDE.SDER a
+
+select a.FALSEX, a.FALSEY, a.xyunits, a.XYCLUSTER_TOL from sde.SPATIAL_REFERENCES a where a.auth_srid = 300015
+
+SELECT OBJECTID,  a.SHAPE.points  ,  a.SHAPE.numpts ,a.SHAPE.SRID from SDE.SDER a  order by OBJECTID asc 
+
+SELECT length(a.shape.points)  FROM SDE.SDER a 
+
+SELECT max(length(a.shape.points))  FROM SDE.SDER a 
+
+```
+
+```
+SELECT osm_id,way,ST_AsGeoJSON(way), ST_AsEWKT(way),ST_AsKML(way) FROM  public.planet_osm_line
+```
+
+
 
 
 
