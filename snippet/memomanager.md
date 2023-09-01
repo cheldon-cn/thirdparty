@@ -13439,6 +13439,8 @@ for postgresql
 SELECT column_name,data_type FROM information_schema.columns 
 where table_name = 'mpf3';
 
+COPY postgres.mpf80 FROM STDIN WITH BINARY;
+
 ```
 
 for oracle
@@ -13451,11 +13453,25 @@ select a.FALSEX, a.FALSEY, a.xyunits, a.XYCLUSTER_TOL from sde.SPATIAL_REFERENCE
 
 SELECT OBJECTID,  a.SHAPE.points  ,  a.SHAPE.numpts ,a.SHAPE.SRID from SDE.SDER a  order by OBJECTID asc 
 
+SELECT  g.OBJECTID, g.SHAPE.points, g.SHAPE.numpts, g.SHAPE.entity, g.SHAPE.minx, g.SHAPE.miny, g.SHAPE.maxx, g.SHAPE.maxy,g.SHAPE.SRID, g.rowid FROM SDE.road g ORDER BY OBJECTID
+
+
+UPDATE SDE.road g SET a.SHAPE.points=NULL, g.SHAPE.numpts=0,g.SHAPE.entity=0, g.SHAPE.minx=0, g.SHAPE.miny=0, g.SHAPE.maxx=0, g.SHAPE.maxy=0, g.SHAPE.SRID = NULL WHERE g.OBJECTID = 2
+
+SELECT OBJECTID,a.SHAPE  from SDE.T1 a order by OBJECTID asc
+
+SELECT  g.OBJECTID, g.SHAPE.points, g.SHAPE.numpts, g.SHAPE.entity, g.SHAPE.minx, g.SHAPE.miny, g.SHAPE.maxx, g.SHAPE.maxy, g.rowid FROM SDE.T1 g ORDER BY OBJECTID
+
+
+UPDATE SDE.T1 a SET a.SHAPE=NULL WHERE a.OBJECTID < 3
+
+
 SELECT length(a.shape.points)  FROM SDE.SDER a 
 
 SELECT max(length(a.shape.points))  FROM SDE.SDER a 
 
 ```
+
 
 ```
 SELECT osm_id,way,ST_AsGeoJSON(way), ST_AsEWKT(way),ST_AsKML(way) FROM  public.planet_osm_line
@@ -13503,7 +13519,10 @@ oracle version release time
 
 # 160  executeQuery return  ResultSet Methods next() and setDataBuffer in oracle
 
+for more information, please visit following url: 
 https://docs.oracle.com/cd/B19306_01/appdev.102/b14294/reference027.htm#i1082533
+
+or search 'Oracle C++ Call Interface Programmer’s Guide.pdf' with Bing to get book guide;
 
 <<Oracle C++ Call Interface Programmer’s Guide.pdf>>
 
@@ -13585,25 +13604,326 @@ export ORACLE_BASE ORACLE_HOME
 ***********************************************
 
 ## setDataBuffer()
-通过setDataBuffer()方法提供特定缓冲区，为next()方法提供要返回的数据行数
-对于single row data,当返回数据后数据将存储在OCCI内置缓冲区中，我们使用setXXX()方法取出特定数据；
-对于multiple row data,当时setDataBuffer()方法提供特定缓冲区时，数据存储将存放在用户指定的缓冲区中。
+
+对于ResultSet类中的next()方法，默认是一次检索一行数据，及一次检索执行一次网络往返，当结果集数量大时，效率低；对此OCCI提供了几种改善方法，即：在一次网络往返返回多行数据。
+
+1. 通过使用setPrefetchRowCount()或setPrefetchMemorySize()方法设置预取属性
+setPrefetchRowCount()设置要预取的行数，setPrefetchMemorySize()设置预取的大小。如果同时设置这两个属性，除非首先达到指定的内存限制，否则将预取指定的行数。如果首先达到指定的内存限制，则返回在调用setPreprichMemorySize()方法所定义的内存空间的尽可能多的行。默认情况下，预取属性是被打开的，并且数据库始终会获取一个额外的行。若要关闭预取属性，请将预取行计数和内存大小设置为0。
+
+	void setPrefetchRowCount(unsigned int rowCount);
+	void setPrefetchMemorySize(unsigned int bytes);
+
+2. 通过setDataBuffer()方法提供特定缓冲区，为next()方法提供要返回的数据行数
+对于前一种方法当返回数据后数据将存储在OCCI内置缓冲区中，我们使用setXXX()方法取出特定数据；当时setDataBuffer()方法提供特定缓冲区时，数据存储将存放在用户指定的缓冲区中。
 
 注意：在调用next()方法前调用setDataBuffer()方法，使用getNumArrayRows()方法得到获取的数据行数，
 
-Example1.1
-ResultSet *resultSet = stmt->executeQuery(...); 
+	Example1.1
 
-resultSet->setDataBuffer(...); 
+	ResultSet *resultSet = stmt->executeQuery(...); 
 
-while (resultSet->next(numRows) == DATA_AVAILABLE)  {
-    process(resultSet->getNumArrayRows() );
-}
+	resultSet->setDataBuffer(...); 
 
-
-
+	while (resultSet->next(numRows) == DATA_AVAILABLE)  {
+		process(resultSet->getNumArrayRows() );
+	}
 
 
+# 161 .   TOTP Algorithm: Reference Implementation
+
+
+```
+TOTP Algorithm: Reference Implementation
+
+ <CODE BEGINS>
+
+ /**
+ Copyright (c) 2011 IETF Trust and the persons identified as
+ authors of the code. All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, is permitted pursuant to, and subject to the license
+ terms contained in, the Simplified BSD License set forth in Section
+ 4.c of the IETF Trust's Legal Provisions Relating to IETF Documents
+ (http://trustee.ietf.org/license-info).
+ */
+
+ import java.lang.reflect.UndeclaredThrowableException;
+ import java.security.GeneralSecurityException;
+ import java.text.DateFormat;
+ import java.text.SimpleDateFormat;
+ import java.util.Date;
+ import javax.crypto.Mac;
+ import javax.crypto.spec.SecretKeySpec;
+ import java.math.BigInteger;
+ import java.util.TimeZone;
+
+
+ /**
+  * This is an example implementation of the OATH
+  * TOTP algorithm.
+  * Visit www.openauthentication.org for more information.
+  *
+  * @author Johan Rydell, PortWise, Inc.
+  */
+
+ public class TOTP {
+
+     private TOTP() {}
+
+     /**
+      * This method uses the JCE to provide the crypto algorithm.
+      * HMAC computes a Hashed Message Authentication Code with the
+      * crypto hash algorithm as a parameter.
+      *
+      * @param crypto: the crypto algorithm (HmacSHA1, HmacSHA256,
+      *                             HmacSHA512)
+      * @param keyBytes: the bytes to use for the HMAC key
+      * @param text: the message or text to be authenticated
+      */
+
+
+
+M'Raihi, et al.               Informational                     [Page 9]
+
+RFC 6238                      HOTPTimeBased                     May 2011
+
+
+     private static byte[] hmac_sha(String crypto, byte[] keyBytes,
+             byte[] text){
+         try {
+             Mac hmac;
+             hmac = Mac.getInstance(crypto);
+             SecretKeySpec macKey =
+                 new SecretKeySpec(keyBytes, "RAW");
+             hmac.init(macKey);
+             return hmac.doFinal(text);
+         } catch (GeneralSecurityException gse) {
+             throw new UndeclaredThrowableException(gse);
+         }
+     }
+
+
+     /**
+      * This method converts a HEX string to Byte[]
+      *
+      * @param hex: the HEX string
+      *
+      * @return: a byte array
+      */
+
+     private static byte[] hexStr2Bytes(String hex){
+         // Adding one byte to get the right conversion
+         // Values starting with "0" can be converted
+         byte[] bArray = new BigInteger("10" + hex,16).toByteArray();
+
+         // Copy all the REAL bytes, not the "first"
+         byte[] ret = new byte[bArray.length - 1];
+         for (int i = 0; i < ret.length; i++)
+             ret[i] = bArray[i+1];
+         return ret;
+     }
+
+     private static final int[] DIGITS_POWER
+     // 0 1  2   3    4     5      6       7        8
+     = {1,10,100,1000,10000,100000,1000000,10000000,100000000 };
+
+
+
+M'Raihi, et al.               Informational                    [Page 10]
+
+RFC 6238                      HOTPTimeBased                     May 2011
+
+
+     /**
+      * This method generates a TOTP value for the given
+      * set of parameters.
+      *
+      * @param key: the shared secret, HEX encoded
+      * @param time: a value that reflects a time
+      * @param returnDigits: number of digits to return
+      *
+      * @return: a numeric String in base 10 that includes
+      *              {@link truncationDigits} digits
+      */
+
+     public static String generateTOTP(String key,
+             String time,
+             String returnDigits){
+         return generateTOTP(key, time, returnDigits, "HmacSHA1");
+     }
+
+
+     /**
+      * This method generates a TOTP value for the given
+      * set of parameters.
+      *
+      * @param key: the shared secret, HEX encoded
+      * @param time: a value that reflects a time
+      * @param returnDigits: number of digits to return
+      *
+      * @return: a numeric String in base 10 that includes
+      *              {@link truncationDigits} digits
+      */
+
+     public static String generateTOTP256(String key,
+             String time,
+             String returnDigits){
+         return generateTOTP(key, time, returnDigits, "HmacSHA256");
+     }
+
+
+M'Raihi, et al.               Informational                    [Page 11]
+
+RFC 6238                      HOTPTimeBased                     May 2011
+
+
+     /**
+      * This method generates a TOTP value for the given
+      * set of parameters.
+      *
+      * @param key: the shared secret, HEX encoded
+      * @param time: a value that reflects a time
+      * @param returnDigits: number of digits to return
+      *
+      * @return: a numeric String in base 10 that includes
+      *              {@link truncationDigits} digits
+      */
+
+     public static String generateTOTP512(String key,
+             String time,
+             String returnDigits){
+         return generateTOTP(key, time, returnDigits, "HmacSHA512");
+     }
+
+
+     /**
+      * This method generates a TOTP value for the given
+      * set of parameters.
+      *
+      * @param key: the shared secret, HEX encoded
+      * @param time: a value that reflects a time
+      * @param returnDigits: number of digits to return
+      * @param crypto: the crypto function to use
+      *
+      * @return: a numeric String in base 10 that includes
+      *              {@link truncationDigits} digits
+      */
+
+     public static String generateTOTP(String key,
+             String time,
+             String returnDigits,
+             String crypto){
+         int codeDigits = Integer.decode(returnDigits).intValue();
+         String result = null;
+
+         // Using the counter
+         // First 8 bytes are for the movingFactor
+         // Compliant with base RFC 4226 (HOTP)
+         while (time.length() < 16 )
+             time = "0" + time;
+
+         // Get the HEX in a Byte[]
+         byte[] msg = hexStr2Bytes(time);
+         byte[] k = hexStr2Bytes(key);
+
+
+
+M'Raihi, et al.               Informational                    [Page 12]
+
+RFC 6238                      HOTPTimeBased                     May 2011
+
+
+         byte[] hash = hmac_sha(crypto, k, msg);
+
+         // put selected bytes into result int
+         int offset = hash[hash.length - 1] & 0xf;
+
+         int binary =
+             ((hash[offset] & 0x7f) << 24) |
+             ((hash[offset + 1] & 0xff) << 16) |
+             ((hash[offset + 2] & 0xff) << 8) |
+             (hash[offset + 3] & 0xff);
+
+         int otp = binary % DIGITS_POWER[codeDigits];
+
+         result = Integer.toString(otp);
+         while (result.length() < codeDigits) {
+             result = "0" + result;
+         }
+         return result;
+     }
+
+     public static void main(String[] args) {
+         // Seed for HMAC-SHA1 - 20 bytes
+         String seed = "3132333435363738393031323334353637383930";
+         // Seed for HMAC-SHA256 - 32 bytes
+         String seed32 = "3132333435363738393031323334353637383930" +
+         "313233343536373839303132";
+         // Seed for HMAC-SHA512 - 64 bytes
+         String seed64 = "3132333435363738393031323334353637383930" +
+         "3132333435363738393031323334353637383930" +
+         "3132333435363738393031323334353637383930" +
+         "31323334";
+         long T0 = 0;
+         long X = 30;
+         long testTime[] = {59L, 1111111109L, 1111111111L,
+                 1234567890L, 2000000000L, 20000000000L};
+
+         String steps = "0";
+         DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+         df.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+
+
+M'Raihi, et al.               Informational                    [Page 13]
+
+RFC 6238                      HOTPTimeBased                     May 2011
+
+
+         try {
+             System.out.println(
+                     "+---------------+-----------------------+" +
+             "------------------+--------+--------+");
+             System.out.println(
+                     "|  Time(sec)    |   Time (UTC format)   " +
+             "| Value of T(Hex)  |  TOTP  | Mode   |");
+             System.out.println(
+                     "+---------------+-----------------------+" +
+             "------------------+--------+--------+");
+
+             for (int i=0; i<testTime.length; i++) {
+                 long T = (testTime[i] - T0)/X;
+                 steps = Long.toHexString(T).toUpperCase();
+                 while (steps.length() < 16) steps = "0" + steps;
+                 String fmtTime = String.format("%1$-11s", testTime[i]);
+                 String utcTime = df.format(new Date(testTime[i]*1000));
+                 System.out.print("|  " + fmtTime + "  |  " + utcTime +
+                         "  | " + steps + " |");
+                 System.out.println(generateTOTP(seed, steps, "8",
+                 "HmacSHA1") + "| SHA1   |");
+                 System.out.print("|  " + fmtTime + "  |  " + utcTime +
+                         "  | " + steps + " |");
+                 System.out.println(generateTOTP(seed32, steps, "8",
+                 "HmacSHA256") + "| SHA256 |");
+                 System.out.print("|  " + fmtTime + "  |  " + utcTime +
+                         "  | " + steps + " |");
+                 System.out.println(generateTOTP(seed64, steps, "8",
+                 "HmacSHA512") + "| SHA512 |");
+
+                 System.out.println(
+                         "+---------------+-----------------------+" +
+                 "------------------+--------+--------+");
+             }
+         }catch (final Exception e){
+             System.out.println("Error : " + e);
+         }
+     }
+ }
+
+<CODE ENDS>
+
+```
 
 
 
