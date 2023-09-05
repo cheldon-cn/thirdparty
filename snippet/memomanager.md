@@ -13925,11 +13925,108 @@ RFC 6238                      HOTPTimeBased                     May 2011
 
 ```
 
+# 162  .  sscanf(strInfo, "%hhd;%hhd;%ld;%ld;%s",)
+
+##  %hhd;%hhd;%ld;%ld;%s
+```
+#pragma pack(push,1)
+typedef	struct	SVCINFO
+{
+	char		svcName[512];	//服务名称
+	char		dnsName[512];	//对应的服务名
+	char		svcType;					//服务类型
+	
+	DWORD		ipAdd;						//IP地址
+	char		ptcType;					//协议类型
+	gisLONG		portNo;						//端口号
+#ifdef __cplusplus
+	SVCINFO()							
+	{
+		svcName[0]= 0;
+		dnsName[0]= 0;
+		svcType	  = 0;
+		ipAdd	  = 0;
+		ptcType   = 0;
+		portNo    = 0; 
+	}
+#endif
+	
+}SVCINFO;
+#pragma pack(pop)
+
+/////////
+
+SVCINFO info;
+SVCINFO* pInfo = &info;
+char szInfo[1024] = "\0";
+sprintf(szInfo, "%hhd;%hhd;%ld;%ld;%s",
+	pInfo->ptcType, pInfo->svcType, pInfo->ipAdd, pInfo->portNo, pInfo->dnsName);
+
+std::string strInfo = "0;21;-1;5432;localhost:5432/osm"
+sscanf(strInfo.c_str(), "%hhd;%hhd;%ld;%ld;%s",
+		&info.ptcType, &info.svcType, &info.ipAdd, &info.portNo, info.dnsName);
+```
+
+```
+不同转换规范代表的转换方式如下表：
+
+长度指示符	转换规范	转换为某种类型的二进制
+hh	d	char
+h	d	short int
+无	d	int
+l	d	long
+ll	d	long long
+hh	u	unsigned char
+h	u	unsigned short int
+无	u	unsigned int
+l	u	unsigned long
+ll	u	unsigned long long
+无	f	float
+l	f	double
+无	c	char
+无	s	char
 
 
+根据上表，对照我们的例子中的转换方式如下。
 
+子串"1"对应转换规范"%hhd"，将转换为char类型的二进制表示，1字节。
 
+子串"2"对应转换规范"%hd"，将转换为short类型的二进制表示，2字节。
 
+子串"3"对应转换规范"%d"，将转换为int类型的二进制表示，4字节。
+
+子串"4"对应转换规范"%ld"，将转换为long类型的二进制表示，4字节。
+
+子串"5.6"对应转换规范"%f"，将转换为float类型的二进制表示，4字节。
+
+子串"7.8"对应转换规范"%lf"，将转换为double类型的二进制表示，8字节
+```
+
+##  sscanf
+C 库函数 int sscanf(const char *str, const char *format, ...) 从字符串读取格式化输入
+如果成功，该函数返回成功匹配和赋值的个数。如果到达文件末尾或发生读错误，则返回 EOF。
+```
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+int main()
+{
+   int day, year;
+   char weekday[20], month[20], dtm[100];
+
+   strcpy( dtm, "Saturday March 25 1989" );
+   sscanf( dtm, "%s %s %d  %d", weekday, month, &day, &year );
+
+   printf("%s %d, %d = %s\n", month, day, year, weekday );
+    
+   return(0);
+}
+```
+让我们编译并运行上面的程序，这将产生以下结果：
+```
+March 25, 1989 = Saturday
+```
 
 
 
