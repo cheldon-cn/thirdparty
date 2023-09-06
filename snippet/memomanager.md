@@ -14028,6 +14028,212 @@ int main()
 March 25, 1989 = Saturday
 ```
 
+# 163  .  auto send email with python 
+
+```
+# auto_send_mail.py
+#from smtplib import SMTP
+
+import os
+import smtplib
+from email import encoders
+from email.header import Header
+from email.mime.image import MIMEImage
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email.mime.multipart import MIMEMultipart
+from email.mime.application import MIMEApplication
+from email.utils import parseaddr, formataddr
+from email.utils import make_msgid
+
+def auto_send_mail() :
+	# 请自行修改下面的邮件发送者和接收者
+	#【发送者邮箱】
+	sender = 'chelly@outlook.com'
+	#【接受者邮箱】
+	to_list = 'chelly@outlook.com'
+	#cc_list = ['ycaa@outlook.com', 'chelly@outlook.com']
+	cc_list = 'ycaa@outlook.com'
+	#【邮件内容】
+	message =  MIMEMultipart('related')
+	#message = MIMEText('hello world ! now i can send email with python modudle.', 'plain', 'utf-8')
+	#【发件人】
+	message['From'] = 'cycle'
+	#【收件人】
+	#message['To'] = Header('chelly@outlook.com')
+	message['To'] = 'chelly@outlook.com'
+	#【邮件主题】
+	message['Subject'] = Header('Butter Cookies License', 'utf-8')
+	#message['Message-ID'] = make_msgid()
+	#---这是附件部分---
+	#xlsx类型附件
+	#part = MIMEApplication(open(r'./file/foo.xlsx','rb').read())
+	#part.add_header('Content-Disposition', 'attachment', filename="foo.xlsx")
+	#message.attach(part)
+
+	##pdf类型附件
+	part = MIMEApplication(open(r'F:/User/Pictures/P020230210433055525061.pdf','rb').read())
+	part.add_header('Content-Disposition', 'attachment', filename="P020230210433055525061.pdf")
+	message.attach(part)
+	
+	##py类型附件,会被认为是垃圾邮件
+	#part = MIMEApplication(open(r'F:/User/Desktop/auto_send_mail.py','rb').read())
+	#part.add_header('Content-Disposition', 'attachment', filename="auto_send_mail.py")
+	#message.attach(part)
+	
+	# 添加附件就是加上一个MIMEBase，从本地读取一个图片:
+	with open('F:/User/Pictures/github-f2a-recovery-codes.png', 'rb') as f:
+		# 设置附件的MIME和文件名，这里是png类型:
+		mime = MIMEBase('image', 'png', filename='github-f2a-recovery-codes.png')
+		# 加上必要的头信息:
+		mime.add_header('Content-Disposition', 'attachment', filename='github-f2a-recovery-codes.png')
+		mime.add_header('Content-ID', '<0>')
+		mime.add_header('X-Attachment-Id', '0')
+		# 把附件的内容读进来:
+		mime.set_payload(f.read())
+		# 用Base64编码:
+		encoders.encode_base64(mime)
+		# 添加到MIMEMultipart:
+		message.attach(mime)
+		# 然后，按正常发送流程把msg（注意类型已变为MIMEMultipart）发送出去，就可以
+	
+	# 正文展示图片和一个链接
+	
+# plain
+	plain_text_head = """
+		<p>Hello,cycle</p> 
+		<p>The license key for your Butter cookies trial is ready to be installed.</p>
+		<p>This is one of two mails you will receive with unique license keys.  Deploy the Butter cookies Virtual Appliance you downloaded at each end of the WAN link you plan to optimize. </p>
+		<p>Once deployed, install the unique license key below on one appliance and the unique license key from the second email on the other appliance to enable optimization.</p> 
+		<p></p>"""
+		
+	plain_text_license = """
+		<p>Product: <b>ButterCookies Pro 2023</b></p>  
+		<p>License Key:</p> 
+		<p><b>P6F0-lBmL-34Pm-IZ3m-3MGL-s2ND-eLKC-+3pe-HROq-VMGQ-spH</b></p>
+		<p><b>kOBb-LJOV-QC3p-nPw1-OJGy-KUem-egFc-sXWB-uDwm-goPa-gw==</b></p>
+		<p>Your license will expire on: <b>Mon Jan 19 2023</b></p>
+		<p></p>
+		"""
+		
+	plain_text_tail = """
+		<p>Before you start your trial, we recommend you visit the Butter cookies Marketplace website and read the ‘Getting Started’ page:</p> 
+		<p>http://cyclezone.com/products/butter-cookies/2023.html</p> 
+		<p></p>
+		<p>If you have any questions about installing and configuring your virtual appliance, you can contact the Butter cookies support team directly.</p>  
+		<p>The support team can be reached in one of three ways:</p>
+		<p>Via the support center at http://www.cyclezone.com/support/portal_login.asp </p>
+		<p>you should have received an email with instructions on how to enable your account</p>
+		<p>By phone at <b>866-665-7325 / 865-655-1850</b></p> 
+		<p>By email at <b>support@cyclezone.com</b></p>
+		<p></p>
+		"""
+		
+	plain_text_Logo = """
+		<html><body><h1>github-f2a-codes</h1><p><img src="cid:0"></p></body></html>
+		"""
+		
+	plain_text = """
+		<p>Hello,cycle</p> 
+		<p>The license key for your Butter cookies trial is ready to be installed.</p>
+		<p>This is one of two mails you will receive with unique license keys.  Deploy the Butter cookies Virtual Appliance you downloaded at each end of the WAN link you plan to optimize. </p>
+		<p>Once deployed, install the unique license key below on one appliance and the unique license key from the second email on the other appliance to enable optimization.</p> 
+		<p></p>
+		<p>Product: <b>ButterCookies Pro 2023</b></p>  
+		<p>License Key:</p> 
+		<p><b>P6F0-lBmL-34Pm-IZ3m-3MGL-s2ND-eLKC-+3pe-HROq-VMGQ-spH</b></p>
+		<p><b>kOBb-LJOV-QC3p-nPw1-OJGy-KUem-egFc-sXWB-uDwm-goPa-gw==</b></p>
+		<p>Your license will expire on: <b>Mon Jan 19 2023</b></p>
+		<p></p>
+		<p>Before you start your trial, we recommend you visit the Butter cookies Marketplace website and read the ‘Getting Started’ page:</p> 
+		<p>https://cyclezone.github.io</p> 
+		<p></p>
+		<p>If you have any questions about installing and configuring your virtual appliance, you can contact the Butter cookies support team directly.</p>  
+		<p>The support team can be reached in one of three ways:</p>
+		<p>Via the support center at http://www.cyclezone.com/support/portal_login.asp </p>
+		<p>you should have received an email with instructions on how to enable your account</p>
+		<p>By phone at <b>866-665-7325 / 865-655-1850</b></p> 
+		<p>By email at <b>support@cyclezone.com</b></p>
+		<p></p>
+		<p>For more detail,please visit <a href="https://cyclezone.github.io">cyclezone</a></p>
+		<html><body><h1>github-f2a-codes</h1><p><img src="cid:0"></p></body></html>"""
+
+	##<p>For more detail,please visit <a href="https://cyclezone.github.io">cyclezone</a></p>
+	plain_context = plain_text_head + plain_text_license + plain_text_tail + plain_text_Logo
+		
+	plain = MIMEText(plain_context, 'html', 'utf-8')
+	message.attach(plain)
+	# 详细代码
+	######### outlook.com #########
+	# 发件人邮箱地址
+	sendAddress = 'chelly@outlook.com'
+	port_no = 587
+	email_host = 'smtp.office365.com'
+	# 发件人授权码
+	# password = 'xbbgckycdiylcsgq'
+	password = 'xnmckaezexajzkhq'
+	print('begin connect: ' + sendAddress)
+	send_list = cc_list
+	print('send to : ' + send_list)
+	try :
+	 # 连接服务器
+	 # 登录邮箱
+	 smtp = smtplib.SMTP(email_host, port_no)
+	 #smtp.set_debuglevel(1)
+	 smtp.connect(email_host, port_no)
+	 smtp.ehlo()
+	 smtp.starttls()
+	 smtp.login(sender, password)
+	 print('smtp.login.ok')
+	 smtp.sendmail(sender, send_list, message.as_string())
+	 smtp.noop()
+	 smtp.quit()
+	 print('smtp.sendmail.ok!')
+	except:
+	 print("email send failed")
+ 
+	
+
+#xnmckaezexajzkhq
+##POP
+#服务器名称: outlook.office365.com
+#端口: 995
+#加密方法: TLS
+
+##IMAP
+#服务器名称: outlook.office365.com
+#端口: 993
+#加密方法: TLS
+
+##SMTP：
+#服务器名称: smtp.office365.com
+#端口: 587
+#加密方法: STARTTLS
+
+if __name__ == '__main__':
+    auto_send_mail()
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
