@@ -14457,6 +14457,7 @@ UUID是指在一台机器上生成的数字，它保证对在同一时空中的�
 如果你在生成一个UUID之后，过几秒又生成一个UUID，
 则第一个部分不同，其余相同(实际测试结果每次都不同）。
 即每次生成的UUID都是不同的。
+
 UUID由以下几部分的组合：
 
 	1 全局唯一的IEEE机器识别号。（如果有网卡，从网卡MAC地址获得；没有网卡，以其他方式获得）
@@ -14529,8 +14530,45 @@ int main()
 
 
 
+# 167 . How to generate and check serial codes
 
 
+## 1. 注册码 / 序列号组成
+
+1. 产品版本：限定具体到哪个版本、同产品的其他版本不能用。
+2. 到期时间：限定截止服务运行时间，到给定截止前一周会有界面提示和邮件提醒。
+3. 唯一标识：限定一个软件产品和MAC地址或者磁盘UUID(linux系统) / GUID（Windows系统）绑定。
+4. 预留字段：用于分模块限定核心功能、分模块收费等。
+
+以下是Silver - peak产品序列号使用期限截止前一周前邮件提示全文：
+```
+Hello,
+This is to notify you that the Proof of Concept currently in process at XXX@163.com will expire on Wed Jan 21 2015.
+This affects the following appliances, shipped on Mon Dec 22 2014:
+VX - 2000, S / N 001BBC03A8E9
+VX - 2000, S / N 001BBC03A8EA
+If you have questions, please contact your account executive(Tricia Png, tpng@silver-peak.com).
+Thank you,
+Silver Peak Systems
+
+```
+
+## 2. 序列号生成逻辑
+
+1. 获取安装设备的UUID，如：
+	9d669361 - 7f8a - 4f97 - b08a - 488e4a92ee52；
+	该UUID应该存储在设备的软件安装路径一份，以备对比验证。
+2.  填写对应安装的软件版本号，如1.0.0.1；
+3.  填写使用或授权限定使用的期限，如3年。
+4.  点击生成序列号生成授权序列号（后台会调用RSA加密算法，对输入内容进行加密）。
+
+
+## 3. 序列号验证逻辑
+
+1. 输入获取的序列号。
+2. 后台执行RSA解密序列号。
+3. 判定各个属性值和安装设备是否一致。
+4. 全部相同确定为有效序列号，可以放行软件功能权限。
 
 
 
