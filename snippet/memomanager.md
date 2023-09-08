@@ -14448,6 +14448,84 @@ if __name__ == '__main__':
 
 ```
 
+# 166 . UUID
+
+UUID是指在一台机器上生成的数字，它保证对在同一时空中的所有机器都是唯一的。
+通常平台会提供生成的API。
+按照开放软件基金会(OSF)制定的标准计算，
+用到了全局唯一的IEEE机器识别号、纳秒级时间、芯片ID码和许多可能的数字。
+如果你在生成一个UUID之后，过几秒又生成一个UUID，
+则第一个部分不同，其余相同(实际测试结果每次都不同）。
+即每次生成的UUID都是不同的。
+UUID由以下几部分的组合：
+
+	1 全局唯一的IEEE机器识别号。（如果有网卡，从网卡MAC地址获得；没有网卡，以其他方式获得）
+	2 纳秒级时间
+	3 芯片ID码
+	4 许多可能的数字
+
+UUID的唯一缺陷在于生成的结果串会比较长。
+关于UUID这个标准使用最普遍的是微软的GUID(Globals Unique Identifiers)。
+在ColdFusion中可以用CreateUUID()函数很简单地生成UUID，
+
+	其格式为：xxxxxxxx - xxxx - xxxx - xxxxxxxxxxxxxxxx(8 - 4 - 4 - 16)，
+
+其中每个x是0 - 9 a - f 范围内的一个十六进制的数字。
+
+	而标准的UUID格式为：xxxxxxxx - xxxx - xxxx - xxxx - xxxxxxxxxxxx(8 - 4 - 4 - 4 - 12)
+
+
+```
+#include <stdio.h>
+#include <string>
+#include <iostream>
+
+#ifdef WIN32
+#include <objbase.h>
+#else
+#include <uuid/uuid.h>
+#endif
+
+	using namespace std;
+
+#define MAX_LEN 128
+
+
+/*
+**@brief: get windows guid or linux uuid
+**@return: string type windows guid or linux uuid
+*/
+string GetGuid()
+{
+	char szuuid[MAX_LEN] = { 0 };
+#ifdef WIN32
+	GUID guid;
+	CoCreateGuid(&guid);
+	_snprintf_s(
+		szuuid,
+		sizeof(szuuid),
+		"{%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X}",
+		guid.Data1, guid.Data2, guid.Data3,
+		guid.Data4[0], guid.Data4[1],
+		guid.Data4[2], guid.Data4[3],
+		guid.Data4[4], guid.Data4[5],
+		guid.Data4[6], guid.Data4[7]);
+#else
+	uuid_t uuid;
+	uuid_generate(uuid);
+	uuid_unparse(uuid, szuuid);
+#endif
+
+	return std::string(szuuid);
+}
+
+int main()
+{
+	string strGuid = GetGuid();
+	cout << strGuid.c_str() << endl;
+	return 0;
+}
+```
 
 
 
