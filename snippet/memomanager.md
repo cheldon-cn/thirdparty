@@ -14326,13 +14326,127 @@ int main() {
 	return 0;
 }
 ```
+# 165  . start process in python
+
+```
+
+# 第一种创建进程的方式
+from multiprocessing import Process
+import time
 
 
+def task(name):
+    print('%s is running' % name)
+    time.sleep(3)
+    print('%s is over' % name)
 
 
+if __name__ == '__main__':
+    p = Process(target=task, args=('jason',))  # 创建一个进程对象
+    p.start()  # 告诉操作系统创建一个新的进程
+    print('主进程')
+
+# 创建进程的第二种方式
+from multiprocessing import Process
+import time
+class MyProcess(Process):
+    def __init__(self, username):
+        self.username = username
+        super().__init__()
+    def run(self):
+        print('你好啊 小姐姐',self.username)
+        time.sleep(3)
+        print('get out!!!',self.username)
+if __name__ == '__main__':
+    p = MyProcess('tony')
+    p.start()
+    print('主进程')
+    
+该段代码就是主进程，因为用模块启动了新的子进程，所以在内存空间中新申请一块内存空间用于存放子进程代码，
 
 
+```
 
+```
+from multiprocessing import Process
+import time
+
+
+def task(name, n):
+    print(f'{name} is running')
+    time.sleep(n)
+    print(f'{name} is over')
+
+
+if __name__ == '__main__':
+    p1 = Process(target=task, args=('jason', 1))
+    p2 = Process(target=task, args=('tony', 2))
+    p3 = Process(target=task, args=('kevin', 3))
+    start_time = time.time()
+    p1.start()
+    p2.start()
+    p3.start()
+    p1.join()
+    p2.join()
+    p3.join()
+    end_time = time.time() - start_time
+    print('主进程', f'总耗时:{end_time}')  # 主进程 总耗时:3.015652894973755,在p1进行join时候，p2,p3也同时在进行，所以时间是最大的那个进程的耗时
+    # 如果是一个start一个join交替执行 那么总耗时就是各个任务耗时总和
+
+
+```
+
+```
+# 代码模拟抢票(有问题)
+import json
+from multiprocessing import Process
+import time
+import random
+from multiprocessing import Process, Lock
+
+
+# 查票
+def search(name):
+    with open(r'ticket_data.json', 'r', encoding='utf8') as f:
+        data = json.load(f)
+    print(f'{name}查询当前余票:%s' % data.get('ticket_num'))
+
+
+# 买票
+def buy(name):
+    '''
+    点击买票是需要再次查票的 因为期间其他人可能已经把票买走了
+    '''
+    # 1.查票
+    with open(r'ticket_data.json', 'r', encoding='utf8') as f:
+        data = json.load(f)
+    time.sleep(random.randint(1, 3))
+    # 2.判断是否还有余票
+    if data.get('ticket_num') > 0:
+        data['ticket_num'] -= 1
+        with open(r'ticket_data.json', 'w', encoding='utf8') as f:
+            json.dump(data, f)
+        print(f'{name}抢票成功')
+    else:
+        print(f'{name}抢票失败 没有余票了')
+
+
+def run(name):
+    search(name)
+	mutex.acquire()  # 抢锁
+    buy(name)
+	mutex.release()  # 放锁
+
+
+# 模拟多人同时抢票
+if __name__ == '__main__':
+	mutex = Lock()
+    for i in range(1, 10):
+        p = Process(target=run, args=('用户:%s' % i,))
+        p.start()
+        
+
+```
 
 
 
