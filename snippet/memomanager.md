@@ -14555,7 +14555,7 @@ Silver Peak Systems
 
 ## 2. 序列号生成逻辑
 
-1. 获取安装设备的UUID，如：
+1.  获取安装设备的UUID，如：
 	9d669361 - 7f8a - 4f97 - b08a - 488e4a92ee52；
 	该UUID应该存储在设备的软件安装路径一份，以备对比验证。
 2.  填写对应安装的软件版本号，如1.0.0.1；
@@ -14569,6 +14569,45 @@ Silver Peak Systems
 2. 后台执行RSA解密序列号。
 3. 判定各个属性值和安装设备是否一致。
 4. 全部相同确定为有效序列号，可以放行软件功能权限。
+
+
+# 168  print error msg 
+
+```
+size_t sde_err(std::string& szerr, std::string& szSql, int code,const char* func,int ln)
+{
+	std::string stFile = __FILE__;
+	int pos = stFile.rfind("\\");
+
+	char szError[2048] = "\0";
+	sprintf(szError, "| code:[%d] ,%s(%d): %s ", code, stFile.substr(pos + 1).c_str(), ln, func);
+	szerr = szerr  + szError + "| " + szSql;
+
+	Log("sde_error", "%s", szerr.c_str());
+	return szerr.size();
+}
+
+#define  error(ex,sql,code) sde_err(ex, sql, code, __FUNCTION__, __LINE__);
+
+//////demo
+
+try{}
+catch (SQLException &sqlExcp)
+{
+	int i = sqlExcp.getErrorCode();
+	string strinfo = sqlExcp.getMessage(); 
+	error(strinfo,sql, i);
+}
+
+```
+
+
+
+
+
+
+
+
 
 
 
