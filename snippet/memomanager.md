@@ -14601,6 +14601,173 @@ catch (SQLException &sqlExcp)
 
 ```
 
+# 169 Auto Oracle Query
+
+
+```
+typedef struct tagAutoOracleQuery
+{
+	ResultSet * pRs;
+	Statement * pStmt;
+	Connection *pConn;
+	COracleDataBase *pGDB;
+	std::string	sql;
+
+	tagAutoOracleQuery(COracleDataBase *gdb) :pRs(nullptr),
+		pStmt(nullptr),
+		pConn(nullptr),
+		pGDB(gdb)
+	{
+		Initialize(pGDB);
+	}
+
+	~tagAutoOracleQuery()
+	{
+		DeInitialize();
+	}
+
+	ResultSet * Execute(std::string& strSQL)
+	{
+		if (pStmt == nullptr) return nullptr;
+		pRs = pStmt->executeQuery(strSQL);
+		return pRs;
+	}
+
+private:
+	int Initialize(COracleDataBase *pGDB)
+	{
+		if (pGDB == nullptr) return -1;
+		pConn = pGDB->AcquireConn();
+		if (pConn == nullptr) return -2;
+		pStmt = pConn->createStatement();
+		if (pStmt == nullptr) return -4;
+		return 1;
+	}
+
+	void DeInitialize()
+	{
+		if (pStmt != nullptr)
+		{
+			if (pRs != nullptr)
+			{
+				pStmt->closeResultSet(pRs);
+				pRs = nullptr;
+			}
+			pConn->terminateStatement(pStmt);
+			pStmt = nullptr;
+		}
+		if (pGDB && pConn != nullptr)
+		{
+			pGDB->ReleaseConn(pConn);
+			pConn = nullptr;
+		}
+	}
+
+}AutoOracleQuery;
+
+#define throw_exception_sql(sqlExcp,strSQL)     \
+		int i = sqlExcp.getErrorCode();         \
+		string strinfo = sqlExcp.getMessage();  \
+		error(strinfo, strSQL, i);              \
+		SetLastError(ERR_IO_FAIL);             \
+		SetLastAuxiliaryErrorMsg(strinfo.c_str());
+
+
+gisLONG GetNullObjCount()
+{
+	//"SELECT OBJECTID   from SDE.T1 a WHERE a.SHAPE IS  NULL order by OBJECTID asc"
+	//	"SELECT COUNT(OBJECTID)   from SDE.T1 a WHERE a.SHAPE IS  NULL";
+
+	char szSQL[1024] = { 0 };
+	sprintf(szSQL, "SELECT COUNT(%s) FROM  %s  a  ", strObjectName.c_str(), xclsInf.name);
+	std::string	strSQL = szSQL;
+	strSQL += shape_pts_is_null;
+	ResultSet * pRs = nullptr;
+	gisLONG ncount = 0;
+
+	try
+	{
+		AutoOracleQuery query(m_ptGDB);
+		pRs = query.Execute(strSQL);
+		if (pRs&&pRs->next())
+			ncount = pRs->getInt(1);
+	}
+	catch (SQLException &sqlExcp)
+	{
+		throw_exception_sql(sqlExcp, strSQL);
+	}
+	return ncount;
+}
+
+gisLONG GetNullObjIDs()
+{
+	//"SELECT OBJECTID   from SDE.T1 a WHERE a.SHAPE IS  NULL order by OBJECTID asc"
+	//	"SELECT COUNT(OBJECTID)   from SDE.T1 a WHERE a.SHAPE IS  NULL";
+	char szSQL[1024] = { 0 };
+	sprintf(szSQL, "SELECT %s FROM  %s  a  ", strObjectName.c_str(), xclsInf.name);
+	std::string	strSQL = szSQL;
+	strSQL += shape_pts_is_null;
+	sprintf(szSQL, " ORDER BY %s asc  ", strObjectName.c_str());
+	strSQL += szSQL;
+	ResultSet * pRs = nullptr;
+	gisLONG ncount = 0;
+	m_objIds.clear();
+	try
+	{
+		AutoOracleQuery query(m_ptGDB);
+		pRs = query.Execute(strSQL);
+		const int num = 500;
+		while (pRs&&pRs->next()){
+			int id = pRs->getInt(1);
+			m_objIds.push_back(id);
+			if(m_objIds.size() > num + 2) break;
+		}
+	}
+	catch (SQLException &sqlExcp)
+	{
+		throw_exception_sql(sqlExcp, strSQL);
+	}
+	return ncount;
+
+}
+
+gisLONG CheckNullObj()
+{
+	if (m_begin == 0) return 0;
+	const char* szTag = "sde_null";
+	
+	gisLONG ncount = GetNullObjCount();
+	if (ncount > 0) 
+	{
+		yLog(szTag, "sde null object count：%d", ncount);
+		GetNullObjIDs();
+
+		char szVal[256] = "\0";
+		sprintf(szVal, "(%s, %s)", xclsInf.owner, xclsInf.name);
+		std::string str(szVal);
+		str += "无效几何数据OBJECTID";
+		size_t nsize = m_objIds.size();
+		const int num = 500;
+		if (nsize > num) {
+			sprintf(szVal, " [%d/%d]", num, nsize);
+			str += szVal;
+		}
+		str += ":";
+		if (nsize > num) nsize = num;
+		for (size_t m = 0; m < nsize; m++)
+		{
+			sprintf(szVal, "%d,", m_objIds[m]);
+			str += szVal;
+		}
+		yLog(szTag, "%s", str.c_str());
+		SetLastError(ERR_GEOMETY_CORRUPT_STREAM);
+		SetLastAuxiliaryErrorMsg(str.c_str());
+	}
+	return ncount;
+}
+
+```
+
 
 
 
