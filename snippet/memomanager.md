@@ -14767,6 +14767,122 @@ gisLONG CheckNullObj()
 }
 
 ```
+# 170 Oracle server connect
+
+```
+#define  SERVER_CONNECT_DEFAULT_MIN_POOLSIZE  5
+#define  SERVER_CONNECT_DEFAULT_MAX_POOLSIZE  10
+#define  SERVER_CONNECT_INCREAMENT_POOLSIZE   5
+class CORLServer
+{
+public:
+	CORLServer();
+
+	~CORLServer();
+
+public:
+	string					m_Svr;		//服务名(Oracle实例名)
+	string                  m_login;	//用户名
+	string                  m_psw;		//密码
+	gisLONG					m_cnnFlg;   //连接成功标志
+	string					m_dbguid;   //数据库GUID
+	short					m_cnnType;	//服务类型
+	Environment				*m_env;		//环境
+	Connection				*m_conn;
+	StatelessConnectionPool	*m_connPool;
+
+	std::mutex				m_mutex;
+	std::condition_variable m_condition;
+	CriticalSection         cs;
+};
+
+CORLServer* pServer = new CORLServer;
+Connection	* AcquireConn()
+{
+try
+	{
+		std::lock_guard<std::mutex> lk(pServer->m_mutex);
+		if (NULL == pServer->m_connPool)
+		{
+			pServer->m_env = Environment::createEnvironment(Environment::THREADED_MUTEXED);
+
+			//由于连接不上时连接池也会创建成功，故需要单独进行一次连接测试。
+			pServer->m_conn = pServer->m_env->createConnection(szLog, szPsw, szSvr);
+			if (pServer->m_conn != NULL)
+			{
+				pServer->m_env->terminateConnection(pServer->m_conn);
+				pServer->m_conn = NULL;
+
+				memset(&optionInfo, 0, sizeof(CLN_CFG_OPT));
+				if (cfg_GetOptionInfo(CFG_NDXSERVER_CONNECTPOOL_SIZE, optionInfo))
+				{
+					lPoolSize = optionInfo.value.lngValue;
+				}
+				if (lPoolSize <= 0)
+				{
+					lPoolSize = SERVER_CONNECT_DEFAULT_MAX_POOLSIZE;
+				}
+				//创建连接池
+				pServer->m_connPool = pServer->m_env->createStatelessConnectionPool(
+					szLog, szPsw, szSvr,
+					lPoolSize,
+					SERVER_CONNECT_DEFAULT_MIN_POOLSIZE,
+					SERVER_CONNECT_INCREAMENT_POOLSIZE);
+				
+				rtn = 1;
+			}
+		}
+
+		std::unique_lock<std::mutex> lk(pServer->m_mutex);
+
+		Connection *pConn = NULL;
+		pConn = pServer->m_connPool->getConnection(pServer->m_Svr);
+		while (pConn == NULL)
+		{
+		   pServer->m_condition.wait(lk);
+		   pConn = pServer->m_connPool->getConnection(pServer->m_Svr);
+		}
+		return pConn;
+	}
+	catch (SQLException &sqlExcp)
+	{
+		int i = sqlExcp.getErrorCode();
+		string strinfo = sqlExcp.getMessage();
+        Disconnect();
+	}
+}
+
+```
+```
+void Disconnect()
+{
+	try
+	{
+         cs.lock();
+		if (pServer->m_env != NULL)
+		{
+			if (pServer->m_connPool != NULL)
+			{
+				pServer->m_env->terminateStatelessConnectionPool(pServer->m_connPool);
+				pServer->m_connPool = NULL;
+			}
+
+			Environment::terminateEnvironment(pServer->m_env);
+			pServer->m_env = NULL;
+			pServer->m_cnnFlg = 0;
+		}
+		cs.UnLock();
+	}
+	catch (SQLException &sqlExcp)
+	{
+		int i = sqlExcp.getErrorCode();
+		string strinfo = sqlExcp.getMessage();
+       
+	}
+}
+```	
+
+
 
 
 
