@@ -14882,6 +14882,183 @@ void Disconnect()
 }
 ```	
 
+# 171 Oracle search batch
+
+```
+long GetMaxShpLen()
+{
+	if (m_maxGemBlob != -1)
+		return 1;
+	string sql = "SELECT max(length(a.shape.points))  FROM ";
+	sql += name;
+	sql += " a ";
+	Statement *stmt = NULL;
+	ResultSet *rs = NULL;
+	Connection *pConn = NULL;
+	try
+	{
+		pConn = AcquireConn();
+		stmt = pConn->createStatement();
+		rs = stmt->executeQuery(sql);
+		if (rs->next())
+		{
+			m_maxGemBlob = rs->getInt(1);
+		}
+		rtn = 1;
+	}
+	catch (SQLException &sqlExcp)
+	{
+		int i = sqlExcp.getErrorCode();
+		string strinfo = sqlExcp.getMessage(); 
+		error(strinfo, sql, i);
+		rtn = 0;
+	}
+
+	if (stmt != NULL)
+	{
+		if (rs != NULL)
+		{
+			stmt->closeResultSet(rs);
+			rs = NULL;
+		}
+		pConn->terminateStatement(stmt);
+		stmt = NULL;
+	}
+	if (pConn != NULL)
+	{
+		ReleaseConn(pConn);
+		pConn = NULL;
+	}
+	return rtn;
+}
+
+```
+
+```
+void SearchORLBatch()
+{
+	
+	char					*ptOIDGem;			//要素ID缓冲区(字符串类型)
+	int						*ptCbLenOIDGem;		//存OID字段NULL标志
+	char					*ptShape;			    //要素shape缓冲区(BLOB类型)
+	int						*ptShapePntNum;	    //点个数
+	int					    *ptCbLenShape;	//存shape字段NULL标志
+	int					    *ptCbLenShapePntNum;
+    const int                m_batNum = 100;
+	long                    m_maxGemBlob;
+
+	
+	Statement				*m_stmtGem;
+	ResultSet				*m_rsGem;
+	Connection				*m_connGem;
+	Connection				*m_connAtt;
+	string strSQGem = " SELECT OBJECTID,  a.SHAPE.points  ,  a.SHAPE.numpts  FROM SDE.road a  WHERE a.SHAPE.points IS NOT NULL  order by OBJECTID asc";
+	try
+	{
+		m_connGem = AcquireConn();
+		m_stmtGem = m_connGem->createStatement();
+		if (m_isBatGem == false)
+		{
+			gisLONG  num = 0;
+			GetObjNum(&num);
+			m_stmtGem->setPrefetchRowCount(rowCount);
+			m_stmtGem->setPrefetchMemorySize(bytes);
+		}
+		GetMaxShpLen();
+		m_rsGem = m_stmtGem->executeQuery(strSQGem);
+
+       {
+		ptOIDGem = new char[m_batNum * 21];
+		ptCbLenOIDGem = new int[m_batNum];
+		memset(ptOIDGem, 0, m_batNum * 21);
+		memset(ptCbLenOIDGem, 0, m_batNum * sizeof(int));
+
+		ptShape = new char[m_batNum * m_maxGemBlob];
+
+		memset(ptShape, 0, m_batNum * m_maxGemBlob);
+		ptShapePntNum = new int[m_batNum];
+		memset(ptShapePntNum, 0, m_batNum * sizeof(int));
+
+		ptShape = new char[m_batNum * m_maxGemBlob];
+		ptCbLenShape = new int[m_batNum];
+		memset(ptCbLenShape, 0, m_batNum * sizeof(int));
+		ptCbLenShapePntNum = new int[m_batNum];
+		memset(ptCbLenShapePntNum, 0, m_batNum * sizeof(int));
+    
+       }
+		m_rsGem->setDataBuffer(1, ptOIDGem, OCCI_SQLT_CHR, 21, (ub4*)ptCbLenOIDGem, NULL, NULL);
+		m_rsGem->setDataBuffer(2, ptShape, OCCI_SQLT_LBI, m_maxGemBlob, (ub4*)ptCbLenShape, NULL, NULL);
+		m_rsGem->setDataBuffer(3, ptShapePntNum, OCCIINT, sizeof(int), (ub4*)ptCbLenShapePntNum, NULL, NULL);
+
+		////
+		if (m_isBatGem)
+		{
+			try
+			{
+				stus = m_rsGem->next(m_batNum);
+				fetchCnt = m_rsGem->getNumArrayRows();
+				rtn = 1;
+			}
+			catch (SQLException &sqlExcp)
+			{
+				int i = sqlExcp.getErrorCode();
+				string strinfo = sqlExcp.getMessage(); 
+			}
+		}
+		else{
+		ResultSet::Status stus = m_rsGem->next();
+		if (stus == ResultSet::END_OF_FETCH)
+		{
+			return(GET_NO_DATA);
+		}
+		oid = m_rsGem->getInt(1);
+		Blob shapeBlob = m_rsGem->getBlob(2);
+		int pntNum = 0;
+		pntNum = m_rsGem->getInt(3);
+		bool isNULL = shapeBlob.isNull();
+		if (isNULL == false)
+		{
+			int lenBlob = shapeBlob.length();
+			char *chr_out = new char[lenBlob];
+			memset(chr_out, 0, lenBlob);
+			shapeBlob.open(OCCI_LOB_READONLY);
+			shapeBlob.read(lenBlob, (unsigned char*)chr_out, lenBlob, 1);
+			shapeBlob.close();
+		}
+
+	}
+		
+	int m_curFetchPos = 0;
+	for (int i=0; i<fetchCnt; i++)
+	{
+		int nOid = _atoi64(ptOIDGem + 21 * m_curFetchPos);
+		char *ptWKB = ptShape + m_maxGemBlob * m_curFetchPos;
+		int lenBlob = ptCbLenShape[m_curFetchPos];
+		int pntNum = 0;
+		pntNum = ptShapePntNum[m_curFetchPos];
+	}
+
+	}
+	catch (SQLException &sqlExcp)
+	{
+		int i = sqlExcp.getErrorCode();
+		string strinfo = sqlExcp.getMessage(); 
+	}
+	
+	if (m_stmtGem != NULL)
+	{
+		if (m_rsGem != NULL)
+		{
+			m_stmtGem->closeResultSet(m_rsGem);
+			m_rsGem = NULL;
+		}
+		m_connGem->terminateStatement(m_stmtGem);
+		m_stmtGem = NULL;
+	}
+
+}
+
+```	
 
 
 
