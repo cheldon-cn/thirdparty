@@ -13938,7 +13938,7 @@ typedef	struct	SVCINFO
 	
 	DWORD		ipAdd;						//IP地址
 	char		ptcType;					//协议类型
-	gisLONG		portNo;						//端口号
+	long		portNo;						//端口号
 #ifdef __cplusplus
 	SVCINFO()							
 	{
@@ -14673,7 +14673,7 @@ private:
 		SetLastAuxiliaryErrorMsg(strinfo.c_str());
 
 
-gisLONG GetNullObjCount()
+long GetNullObjCount()
 {
 	//"SELECT OBJECTID   from SDE.T1 a WHERE a.SHAPE IS  NULL order by OBJECTID asc"
 	//	"SELECT COUNT(OBJECTID)   from SDE.T1 a WHERE a.SHAPE IS  NULL";
@@ -14683,7 +14683,7 @@ gisLONG GetNullObjCount()
 	std::string	strSQL = szSQL;
 	strSQL += shape_pts_is_null;
 	ResultSet * pRs = nullptr;
-	gisLONG ncount = 0;
+	long ncount = 0;
 
 	try
 	{
@@ -14699,7 +14699,7 @@ gisLONG GetNullObjCount()
 	return ncount;
 }
 
-gisLONG GetNullObjIDs()
+long GetNullObjIDs()
 {
 	//"SELECT OBJECTID   from SDE.T1 a WHERE a.SHAPE IS  NULL order by OBJECTID asc"
 	//	"SELECT COUNT(OBJECTID)   from SDE.T1 a WHERE a.SHAPE IS  NULL";
@@ -14710,7 +14710,7 @@ gisLONG GetNullObjIDs()
 	sprintf(szSQL, " ORDER BY %s asc  ", strObjectName.c_str());
 	strSQL += szSQL;
 	ResultSet * pRs = nullptr;
-	gisLONG ncount = 0;
+	long ncount = 0;
 	m_objIds.clear();
 	try
 	{
@@ -14731,12 +14731,12 @@ gisLONG GetNullObjIDs()
 
 }
 
-gisLONG CheckNullObj()
+long CheckNullObj()
 {
 	if (m_begin == 0) return 0;
 	const char* szTag = "sde_null";
 	
-	gisLONG ncount = GetNullObjCount();
+	long ncount = GetNullObjCount();
 	if (ncount > 0) 
 	{
 		yLog(szTag, "sde null object count：%d", ncount);
@@ -14784,7 +14784,7 @@ public:
 	string					m_Svr;		//服务名(Oracle实例名)
 	string                  m_login;	//用户名
 	string                  m_psw;		//密码
-	gisLONG					m_cnnFlg;   //连接成功标志
+	long					m_cnnFlg;   //连接成功标志
 	string					m_dbguid;   //数据库GUID
 	short					m_cnnType;	//服务类型
 	Environment				*m_env;		//环境
@@ -14959,7 +14959,7 @@ void SearchORLBatch()
 		m_stmtGem = m_connGem->createStatement();
 		if (m_isBatGem == false)
 		{
-			gisLONG  num = 0;
+			long  num = 0;
 			GetObjNum(&num);
 			m_stmtGem->setPrefetchRowCount(rowCount);
 			m_stmtGem->setPrefetchMemorySize(bytes);
@@ -15077,12 +15077,168 @@ osm2pgsql -d osm_china -U postgres -P 5432 -C 12000 -S "F:/osm2pgsql-bin/default
 
 ```
 
+# 173 open close  read write file
+
+```
+#define MAX_LEN 512
+typedef  struct 
+{
+	//
+	char	fileType[16];	//文件验证码：CYCLECFGFILE
+	short	version;     	//配置文件的版本号()
+
+    //1. 系统ID记录
+	long	maxConnID;			//目前系统中分配的最大连接ID
+	long	maxGdbID;			//目前系统中分配的最大GDB ID
+	long	maxUserID;			//目前系统中分配的最大用户ID
+
+	//2.连接信息表
+	long	connOff;				//连接信息表起始位置
+	long	connNum;				//连接的数目，即有效的连接数，也是连接信息表的记录数。
+	long	connBufLen;			    //预留的连接信息表的记录数目，即为连接表预留记录数。
+	
+	//4.用户信息表;	
+	long	userOff;             //用户信息表的起始地址
+	long	userNum;             //用户信息数目,即有效的用户数,也是用户信息表的记录数
+	long	userBufLen;          //预留的用户信息表的记录数目,即为用户信息表预留的记录数
+	
+	//5.用户权限信息表
+	long	privOff;			//用户权限信息表的地址;
+	long	privNum;			//用户权限信息表的记录数
+	long    privBufLen;         //预留的用户权限表的记录数目,即为用户权限表预留的记录数
+
+	//7.临时目录路径
+	char  tempDirName[MAX_LEN];
+	//8. 保留
+    char  res[512];   
+}GLOBAL_INFO;	
+
+typedef struct USER_INFO
+{
+	long	userID;		
+	char	userName[MAX_LEN];
+	char    pswd[MAX_LEN];	
+}USER_INFO;
+
+
+HANDLE OpenFile()
+{
+	HANDLE hFile=NULL;
+	hFile=CreateFile(
+					g_CfgFName,
+					GENERIC_READ|GENERIC_WRITE,
+					FILE_SHARE_READ|FILE_SHARE_WRITE,
+					NULL,
+					OPEN_EXISTING,
+					NULL,
+					NULL);	
+	return (hFile);
+}
+
+long  CloseFile(HANDLE hFile)
+{
+	if(hFile!=INVALID_HANDLE_VALUE)
+		CloseHandle(hFile);
+	return(1);
+}
+
+long	SetGlobalInfo(HANDLE hFile,GLOBAL_INFO & cfgInfo)
+{
+	DWORD	off=0; 
+	
+	SetFilePointer(hFile,0,NULL,FILE_BEGIN);
+	WriteFile(hFile,&cfgInfo,sizeof(GLOBAL_INFO),&off,NULL);
+	return (1);
+}
+
+long	GetGlobalInfo(HANDLE hFile,GLOBAL_INFO & cfgInfo)
+{
+	DWORD	off=0; 
+	
+	SetFilePointer(hFile,0,NULL,FILE_BEGIN);
+	ReadFile(hFile,&cfgInfo,sizeof(GLOBAL_INFO),&off,NULL);
+	return (1);
+}
+
+long 	UpdateUser(long userID,char * pswd)
+{
+	HANDLE			hFile;
+	GLOBAL_INFO	    cfgInfo;
+	USER_INFO       userInfo;
+	DWORD           off=0;
+	long            rtn=0;
+	long			woff=0;
+	
+	if(userID <=0)
+		return (0);
+	if(pswd ==NULL)
+		return (0);
+	
+	//1.打开文件
+	hFile =OpenFile();
+	if(hFile == INVALID_HANDLE_VALUE)
+		return (0);
+	
+	//2.取文件全局信息
+	GetGlobalInfo(hFile,cfgInfo);	
+	
+	//3.比较，取对应ID的记录的信息
+	SetFilePointer(hFile,cfgInfo.userOff,NULL,FILE_BEGIN);
+	for(long i=0;i<cfgInfo.userNum;i++)
+	{
+		ReadFile(hFile,&userInfo,sizeof(USER_INFO),&off,NULL);	
+		if(userID ==userInfo.userID)
+		{			
+		strncpy(userInfo.pswd,pswd,MAX_LEN);
+		woff=sizeof(USER_INFO) * i;
+		SetFilePointer(hFile,cfgInfo.userOff+woff,NULL,FILE_BEGIN);
+		WriteFile(hFile,&userInfo,sizeof(USER_INFO),&off,NULL);
+		rtn=1;
+		break;
+		}
+	}
+	//4.关闭文件
+	CloseFile(hFile);
+	return (rtn);	
+}
+
+long 	GetUserIDs(std::vector<long> &IDs)
+{
+	HANDLE				hFile;
+	GLOBAL_INFO		    cfgInfo;
+	USER_INFO	    	info;
+	DWORD               off=0;
+	long                rtn=0;
+	
+	//0.清空输出信息
+	IDs.clear();
+	
+	//1.打开文件
+	hFile =OpenFile();
+	if(hFile== INVALID_HANDLE_VALUE)
+		return (0);
+				
+	//2.取文件全局信息
+	GetGlobalInfo(hFile,cfgInfo);				
+				
+	//4.取连接信息
+	SetFilePointer(hFile,cfgInfo.userOff,NULL,FILE_BEGIN);
+	for(long i=0;i<cfgInfo.userNum;i++)
+		{
+		ReadFile(hFile,&info,sizeof(USER_INFO),&off,NULL);	
+		rtn=IDs.pushback(info.userID);
+		}
+	
+	//5.关闭文件
+	CloseFile(hFile);
+
+	return (IDs.Size());		
+}
 
 
 
 
-
-
+```
 
 
 
