@@ -15240,7 +15240,7 @@ long 	GetUserIDs(std::vector<long> &IDs)
 
 ```
 
-# 174 get disk information
+# 174 get disk information type  space
 
 
 ```
@@ -15416,7 +15416,9 @@ long  GetDiskSign(char *ptDiskSign, long len)
 ```
 
 
-# 175 get disk information
+# 175 
+
+
 
 
 
