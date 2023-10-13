@@ -15061,7 +15061,21 @@ void SearchORLBatch()
 ```	
 
 
+# 172 view OSM road
 
+```
+1. download osm file 'china-latest.osm.pbf' from  http://download.geofabrik.de/asia.html
+
+2. import osm data into postgreSQL with osm2pgsql with following command
+osm2pgsql -d osm_china -U postgres -P 5432 -C 12000 -S "F:/osm2pgsql-bin/default.style" F:/osmdata/china-latest.osm.pbf
+
+3. open QGIS and then link postgresql database 'osm_china' ;
+
+4. if link ok, gather the layer 'planet_osm_roads' into view window in QGIS;
+
+5.open the corresponding property window, symbolize the roads with some color and style ,set the matched annotations,then we can see the interested region in the view;
+
+```
 
 
 
