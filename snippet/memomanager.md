@@ -15240,9 +15240,183 @@ long 	GetUserIDs(std::vector<long> &IDs)
 
 ```
 
+# 174 get disk information
 
 
+```
 
+#include "direct.h"
+#include "io.h"
+
+typedef struct  tag_DriveInfo
+{
+	ULONGLONG  freeSpace;   //可用空间(字节为单位)
+	ULONGLONG  totalSpace;  //总空间(字节为单位)
+	char       diskType;    //磁盘类型（windows.h中定义的磁盘类型）：
+							//#define DRIVE_UNKNOWN     0
+							//#define DRIVE_NO_ROOT_DIR 1 
+							//#define DRIVE_REMOVABLE   2
+							//#define DRIVE_FIXED       3
+							//#define DRIVE_REMOTE      4
+							//#define DRIVE_CDROM       5
+							//#define DRIVE_RAMDISK     6
+	char    diskSign[4];    //盘符
+}DRIVER_INFO; 
+
+//功能：取当前计算机的磁盘数
+//参数：无
+//返回：成功返回磁盘数（>=0），失败返回-1
+long  GetDiskNum() 
+{
+	int		num = 0;
+	char    strVol[16];
+	char    i;
+	DWORD   msk;
+	DWORD   drvMsk;
+	UINT    drvType;
+
+	msk=0x01;
+	drvMsk=GetLogicalDrives();
+
+	strcpy(strVol,"A:");
+	for(i=0;i<26;i++)
+	{
+		if((drvMsk & msk))
+			{
+			drvType=GetDriveType(strVol);
+			if((drvType == DRIVE_FIXED) || (drvType==DRIVE_REMOTE))  
+				num++;
+			}
+		msk=msk<<1;
+		strVol[0]++;
+	}
+	return(num);
+}
+
+
+//功能：取给定盘符磁盘的可用空间和总空间
+//参数：diskSign[in]         -  传入char类型的磁盘盘符（如C盘为'C')。
+//      freeSpace[in, out]   -  传入ULONGLONG类型参数的地址，返回磁盘可用空间大小（字节为单位）
+//      totalSpace[in, out]  -  传入ULONGLONG类型参数的地址，返回磁盘总空间大小（字节为单位）
+//返回：成功返回1，失败返回-1
+long  GetDiskSpace(char diskSign,ULONGLONG *freeSpace, ULONGLONG *totalSpace)
+{
+		char	        strVol[3];
+		UINT			drvType;
+		_ULARGE_INTEGER result_freeSpace;
+		_ULARGE_INTEGER result_totalSpace;
+		_ULARGE_INTEGER result_g;
+	
+	//strVol.Format("%c:",diskSign);
+	strVol[0]=diskSign;
+	strVol[1]=':';
+	strVol[2]=0;
+
+	drvType = (UINT)GetDriveType(strVol);
+	
+	if(drvType != DRIVE_FIXED)  //是否是硬盘
+	if((drvType != DRIVE_FIXED) && 
+	   (drvType != DRIVE_REMOTE))  
+		return -1;
+
+	GetDiskFreeSpaceEx(strVol, &result_freeSpace, &result_totalSpace, &result_g);	
+	*freeSpace = result_freeSpace.QuadPart;
+	*totalSpace= result_totalSpace.QuadPart;
+	return(1);
+}
+
+
+//功能：获取给定磁盘信息（磁盘盘符，磁盘类型，总空间，可用空间）
+//参数：dskSign[in]       - 传入char类型的磁盘盘符
+//      driveInfo[in out]   - 传入DRIVER_INFO结构体参数地址，返回相应的磁盘信息
+//返回：成功返回1，失败返回-1
+long  GetDiskInfo(char dskSign, DRIVER_INFO* driveInfo)
+{
+	char    strVol[3];
+	int        diskType;
+	_ULARGE_INTEGER result_freeSpace;
+	_ULARGE_INTEGER result_totalSpace;
+	_ULARGE_INTEGER result_g;
+	
+	strVol[0]=dskSign;
+	strVol[1]=':';
+	strVol[2]=0;
+
+	if(GetDiskType(dskSign, &diskType) >= 0)
+	{
+	strcpy(driveInfo->diskSign,strVol);
+	driveInfo->diskType = diskType;
+	if(GetDiskFreeSpaceEx(strVol, &result_freeSpace, &result_totalSpace, &result_g)!=-1)
+		{
+		driveInfo->freeSpace = result_freeSpace.QuadPart;
+		driveInfo->totalSpace= result_totalSpace.QuadPart;
+		return(1);
+		}
+	}
+	return(-1);
+}
+
+
+//功能：取给定盘符磁盘的类型
+//参数：diskSign[in]     -  传入char类型的磁盘盘符
+//      diskType[in out] -  传入int型参数地址，返回磁盘类型，
+//返回：成功返回1，失败返回-1
+long  GetDiskType(char diskSign,int *diskType)
+{
+	char strVol[3];
+
+	strVol[0]=diskSign;
+	strVol[1]=':';
+	strVol[2]=0;
+
+	*diskType = GetDriveType(strVol);
+	
+	if((*diskType != DRIVE_UNKNOWN) && (*diskType != DRIVE_NO_ROOT_DIR))
+		return 1;
+	else
+		return -1;
+}
+
+//功能：取当前计算机的所有磁盘盘符
+//参数：ptDiskSign[in,out] - 传入char类型数组地址，返回磁盘盘符（如C盘为'C')。
+//      len       [in]     - 传入ptDiskSign的长度
+//返回：成功返回磁盘数(>=0)，失败返回-1
+long  GetDiskSign(char *ptDiskSign, long len)
+{
+		long	diskNo = 0;
+		char    i;
+		char    strVol[16];
+		DWORD   msk;
+		DWORD   drvMsk;
+		UINT    drvType;
+
+	msk=0x01;
+	drvMsk=GetLogicalDrives();
+
+	strcpy(strVol,"A:");
+	for(i=0;i<26;i++)
+	{
+		if((drvMsk & msk))
+		{
+			drvType=GetDriveType(strVol);
+			if((drvType == DRIVE_FIXED) || (drvType==DRIVE_REMOTE))  
+			{
+			ptDiskSign[diskNo] = strVol[0];
+			diskNo++;
+			if(diskNo>=len)
+				break;
+			}
+		}
+		msk=msk<<1;
+		strVol[0]++;
+	}
+	return(diskNo);
+}
+
+```
+
+
+# 175 get disk information
 
 
 
