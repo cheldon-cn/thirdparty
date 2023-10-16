@@ -15416,7 +15416,304 @@ long  GetDiskSign(char *ptDiskSign, long len)
 ```
 
 
-# 175 
+# 175 CREATE TABLE public.planet_osm_roads  planet_osm_polygon
+
+## 1. planet_osm_roads
+
+```
+-- Table: public.planet_osm_roads
+
+-- DROP TABLE public.planet_osm_roads;
+
+CREATE TABLE public.planet_osm_roads
+(
+    osm_id bigint,
+    access text COLLATE pg_catalog."default",
+    "addr:housename" text COLLATE pg_catalog."default",
+    "addr:housenumber" text COLLATE pg_catalog."default",
+    "addr:interpolation" text COLLATE pg_catalog."default",
+    admin_level text COLLATE pg_catalog."default",
+    aerialway text COLLATE pg_catalog."default",
+    aeroway text COLLATE pg_catalog."default",
+    amenity text COLLATE pg_catalog."default",
+    barrier text COLLATE pg_catalog."default",
+    bicycle text COLLATE pg_catalog."default",
+    bridge text COLLATE pg_catalog."default",
+    boundary text COLLATE pg_catalog."default",
+    building text COLLATE pg_catalog."default",
+    construction text COLLATE pg_catalog."default",
+    covered text COLLATE pg_catalog."default",
+    foot text COLLATE pg_catalog."default",
+    highway text COLLATE pg_catalog."default",
+    historic text COLLATE pg_catalog."default",
+    horse text COLLATE pg_catalog."default",
+    junction text COLLATE pg_catalog."default",
+    landuse text COLLATE pg_catalog."default",
+    layer integer,
+    leisure text COLLATE pg_catalog."default",
+    lock text COLLATE pg_catalog."default",
+    man_made text COLLATE pg_catalog."default",
+    military text COLLATE pg_catalog."default",
+    name text COLLATE pg_catalog."default",
+    "natural" text COLLATE pg_catalog."default",
+    oneway text COLLATE pg_catalog."default",
+    place text COLLATE pg_catalog."default",
+    power text COLLATE pg_catalog."default",
+    railway text COLLATE pg_catalog."default",
+    ref text COLLATE pg_catalog."default",
+    religion text COLLATE pg_catalog."default",
+    route text COLLATE pg_catalog."default",
+    service text COLLATE pg_catalog."default",
+    shop text COLLATE pg_catalog."default",
+    surface text COLLATE pg_catalog."default",
+    tourism text COLLATE pg_catalog."default",
+    tracktype text COLLATE pg_catalog."default",
+    tunnel text COLLATE pg_catalog."default",
+    water text COLLATE pg_catalog."default",
+    waterway text COLLATE pg_catalog."default",
+    way_area real,
+    z_order integer,
+    way geometry(LineString,3857)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public.planet_osm_roads
+    OWNER to postgres;
+
+-- Index: planet_osm_roads_way_idx
+
+-- DROP INDEX public.planet_osm_roads_way_idx;
+
+CREATE INDEX planet_osm_roads_way_idx
+    ON public.planet_osm_roads USING gist
+    (way)
+    WITH (FILLFACTOR=100)
+    TABLESPACE pg_default;
+
+```
+
+## 2. planet_osm_polygon
+
+```
+-- Table: public.planet_osm_polygon
+
+-- DROP TABLE public.planet_osm_polygon;
+
+CREATE TABLE public.planet_osm_polygon
+(
+    osm_id bigint,
+    access text COLLATE pg_catalog."default",
+    "addr:housename" text COLLATE pg_catalog."default",
+    "addr:housenumber" text COLLATE pg_catalog."default",
+    "addr:interpolation" text COLLATE pg_catalog."default",
+    admin_level text COLLATE pg_catalog."default",
+    aerialway text COLLATE pg_catalog."default",
+    aeroway text COLLATE pg_catalog."default",
+    amenity text COLLATE pg_catalog."default",
+    barrier text COLLATE pg_catalog."default",
+    bicycle text COLLATE pg_catalog."default",
+    bridge text COLLATE pg_catalog."default",
+    boundary text COLLATE pg_catalog."default",
+    building text COLLATE pg_catalog."default",
+    construction text COLLATE pg_catalog."default",
+    covered text COLLATE pg_catalog."default",
+    foot text COLLATE pg_catalog."default",
+    highway text COLLATE pg_catalog."default",
+    historic text COLLATE pg_catalog."default",
+    horse text COLLATE pg_catalog."default",
+    junction text COLLATE pg_catalog."default",
+    landuse text COLLATE pg_catalog."default",
+    layer integer,
+    leisure text COLLATE pg_catalog."default",
+    lock text COLLATE pg_catalog."default",
+    man_made text COLLATE pg_catalog."default",
+    military text COLLATE pg_catalog."default",
+    name text COLLATE pg_catalog."default",
+    "natural" text COLLATE pg_catalog."default",
+    oneway text COLLATE pg_catalog."default",
+    place text COLLATE pg_catalog."default",
+    power text COLLATE pg_catalog."default",
+    railway text COLLATE pg_catalog."default",
+    ref text COLLATE pg_catalog."default",
+    religion text COLLATE pg_catalog."default",
+    route text COLLATE pg_catalog."default",
+    service text COLLATE pg_catalog."default",
+    shop text COLLATE pg_catalog."default",
+    surface text COLLATE pg_catalog."default",
+    tourism text COLLATE pg_catalog."default",
+    tracktype text COLLATE pg_catalog."default",
+    tunnel text COLLATE pg_catalog."default",
+    water text COLLATE pg_catalog."default",
+    waterway text COLLATE pg_catalog."default",
+    way_area real,
+    z_order integer,
+    way geometry(Geometry,3857)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public.planet_osm_polygon
+    OWNER to postgres;
+
+-- Index: planet_osm_polygon_way_idx
+
+-- DROP INDEX public.planet_osm_polygon_way_idx;
+
+CREATE INDEX planet_osm_polygon_way_idx
+    ON public.planet_osm_polygon USING gist
+    (way)
+    WITH (FILLFACTOR=100)
+    TABLESPACE pg_default;
+```
+## 3. planet_osm_point
+
+```
+-- Table: public.planet_osm_point
+
+-- DROP TABLE public.planet_osm_point;
+
+CREATE TABLE public.planet_osm_point
+(
+    osm_id bigint,
+    access text COLLATE pg_catalog."default",
+    "addr:housename" text COLLATE pg_catalog."default",
+    "addr:housenumber" text COLLATE pg_catalog."default",
+    admin_level text COLLATE pg_catalog."default",
+    aerialway text COLLATE pg_catalog."default",
+    aeroway text COLLATE pg_catalog."default",
+    amenity text COLLATE pg_catalog."default",
+    barrier text COLLATE pg_catalog."default",
+    boundary text COLLATE pg_catalog."default",
+    building text COLLATE pg_catalog."default",
+    highway text COLLATE pg_catalog."default",
+    historic text COLLATE pg_catalog."default",
+    junction text COLLATE pg_catalog."default",
+    landuse text COLLATE pg_catalog."default",
+    layer integer,
+    leisure text COLLATE pg_catalog."default",
+    lock text COLLATE pg_catalog."default",
+    man_made text COLLATE pg_catalog."default",
+    military text COLLATE pg_catalog."default",
+    name text COLLATE pg_catalog."default",
+    "natural" text COLLATE pg_catalog."default",
+    oneway text COLLATE pg_catalog."default",
+    place text COLLATE pg_catalog."default",
+    power text COLLATE pg_catalog."default",
+    railway text COLLATE pg_catalog."default",
+    ref text COLLATE pg_catalog."default",
+    religion text COLLATE pg_catalog."default",
+    shop text COLLATE pg_catalog."default",
+    tourism text COLLATE pg_catalog."default",
+    water text COLLATE pg_catalog."default",
+    waterway text COLLATE pg_catalog."default",
+    way geometry(Point,3857)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public.planet_osm_point
+    OWNER to postgres;
+
+-- Index: planet_osm_point_way_idx
+
+-- DROP INDEX public.planet_osm_point_way_idx;
+
+CREATE INDEX planet_osm_point_way_idx
+    ON public.planet_osm_point USING gist
+    (way)
+    WITH (FILLFACTOR=100)
+    TABLESPACE pg_default;
+```
+## 4. planet_osm_line
+
+```
+-- Table: public.planet_osm_line
+
+-- DROP TABLE public.planet_osm_line;
+
+CREATE TABLE public.planet_osm_line
+(
+    osm_id bigint,
+    access text COLLATE pg_catalog."default",
+    "addr:housename" text COLLATE pg_catalog."default",
+    "addr:housenumber" text COLLATE pg_catalog."default",
+    "addr:interpolation" text COLLATE pg_catalog."default",
+    admin_level text COLLATE pg_catalog."default",
+    aerialway text COLLATE pg_catalog."default",
+    aeroway text COLLATE pg_catalog."default",
+    amenity text COLLATE pg_catalog."default",
+    barrier text COLLATE pg_catalog."default",
+    bicycle text COLLATE pg_catalog."default",
+    bridge text COLLATE pg_catalog."default",
+    boundary text COLLATE pg_catalog."default",
+    building text COLLATE pg_catalog."default",
+    construction text COLLATE pg_catalog."default",
+    covered text COLLATE pg_catalog."default",
+    foot text COLLATE pg_catalog."default",
+    highway text COLLATE pg_catalog."default",
+    historic text COLLATE pg_catalog."default",
+    horse text COLLATE pg_catalog."default",
+    junction text COLLATE pg_catalog."default",
+    landuse text COLLATE pg_catalog."default",
+    layer integer,
+    leisure text COLLATE pg_catalog."default",
+    lock text COLLATE pg_catalog."default",
+    man_made text COLLATE pg_catalog."default",
+    military text COLLATE pg_catalog."default",
+    name text COLLATE pg_catalog."default",
+    "natural" text COLLATE pg_catalog."default",
+    oneway text COLLATE pg_catalog."default",
+    place text COLLATE pg_catalog."default",
+    power text COLLATE pg_catalog."default",
+    railway text COLLATE pg_catalog."default",
+    ref text COLLATE pg_catalog."default",
+    religion text COLLATE pg_catalog."default",
+    route text COLLATE pg_catalog."default",
+    service text COLLATE pg_catalog."default",
+    shop text COLLATE pg_catalog."default",
+    surface text COLLATE pg_catalog."default",
+    tourism text COLLATE pg_catalog."default",
+    tracktype text COLLATE pg_catalog."default",
+    tunnel text COLLATE pg_catalog."default",
+    water text COLLATE pg_catalog."default",
+    waterway text COLLATE pg_catalog."default",
+    way_area real,
+    z_order integer,
+    way geometry(LineString,3857)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public.planet_osm_line
+    OWNER to postgres;
+
+-- Index: planet_osm_line_way_idx
+
+-- DROP INDEX public.planet_osm_line_way_idx;
+
+CREATE INDEX planet_osm_line_way_idx
+    ON public.planet_osm_line USING gist
+    (way)
+    WITH (FILLFACTOR=100)
+    TABLESPACE pg_default;
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
