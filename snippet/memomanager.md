@@ -15699,6 +15699,18 @@ CREATE INDEX planet_osm_line_way_idx
     TABLESPACE pg_default;
 ```
 
+# 176  get oracle version
+
+
+在PL/SQL中执行下面语句，即可获取当前oracle版本号：
+```
+Select product, version,status FROM Product_component_version     Where SUBSTR(PRODUCT,0,6)='Oracle';
+
+
+Oracle Database 12c Enterprise Edition 	12.2.0.1.0	64bit Production
+
+```
+
 
 
 
