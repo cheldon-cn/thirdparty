@@ -15702,7 +15702,7 @@ CREATE INDEX planet_osm_line_way_idx
 # 176  get oracle version
 
 
-在PL/SQL中执行下面语句，即可获取当前oracle版本号：
+## 1. 在PL/SQL中执行下面语句，即可获取当前oracle版本号：
 ```
 Select product, version,status FROM Product_component_version     Where SUBSTR(PRODUCT,0,6)='Oracle';
 
@@ -15711,6 +15711,21 @@ Oracle Database 12c Enterprise Edition 	12.2.0.1.0	64bit Production
 
 ```
 
+## 2. 使用navicat查看
+首先需要下载安装navicat然后连接Oracle数据库；
+
+然后执行查询Oracle版本的命令，效果如下图所示
+
+select * from v$version
+
+
+## 3. 查看安装的Oracle客户端版本
+
+如下所示，使用sqlplus -v命令，可以查到该客户端安装的 11.2.0.1.0的客户端版本。
+
+C:\Users>sqlplus -v
+
+SQL*Plus: Release 11.2.0.1.0 Production
 
 
 
