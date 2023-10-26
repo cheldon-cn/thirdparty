@@ -15732,9 +15732,6 @@ SQL*Plus: Release 11.2.0.1.0 Production
 
 ## create core dump
 
-
-## debug dump
-
 ```
 for core-dump file in linux
 1. check if Failed to write core dump, use 'ulimit -c '
@@ -15749,6 +15746,11 @@ ulimit -c unlimited
 [root@king ~]# echo '/dump/core-%e-%p-%t' > /proc/sys/kernel/core_pattern
 [root@king ~]# more /proc/sys/kernel/core_pattern 
 /dump/core-%e-%p-%t
+
+```
+## debug dump
+
+```
 
 3. run target execute,if crash,get the dumpfile in folder '/dump/' 
 
@@ -15773,7 +15775,41 @@ thread apply all bt
 ```
 
 
+# 178　debug multiple thread process with gdb  in linux
 
+```
+1. root@king80105:/home/king#  ps -aux | grep kingserverjava
+root       29255  8.5  4.1 8038568 671984 pts/2  Sl   19:41   0:19 /program/java/jre/bin/kingserverjava -Ddcs.dubboPort=50080 -Dcycle.home=.. -Digs.home=. -Dloader.path=../program/java/lib/hdfs -jar /kingserver/java/lib/dcserver-host-10.6.6.10.jar
+root       29308 45.8 11.9 10222152 1955008 pts/2 Sl  19:41   1:43 /program/java/jre/bin/kingserverjava -Dfile.encoding=UTF-8 -Dcycle.home=.. -Digs.home=. -jar /kingserver/java/lib/igserver-webapp-10.6.6.10.jar
+root       31140  0.0  0.0  11656   668 pts/2    S+   19:45   0:00 grep --color=auto kingserverjava
+
+
+2. root@king80105:/home/king# netstat -tnlp
+激活Internet连接 (仅服务器)
+Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name
+tcp        0      0 0.0.0.0:5900            0.0.0.0:*               LISTEN      2167/vino-server
+tcp        0      0 127.0.0.1:8752          0.0.0.0:*               LISTEN      746/kysecdbd
+tcp        0      0 0.0.0.0:54321           0.0.0.0:*               LISTEN      1370/kingbase
+tcp        0      0 0.0.0.0:7250            0.0.0.0:*               LISTEN      2407/miracle-agent
+tcp        0      0 127.0.0.1:53            0.0.0.0:*               LISTEN      1071/dnsmasq
+tcp        0      0 127.0.0.53:53           0.0.0.0:*               LISTEN      749/systemd-resolve
+tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN      1105/sshd: /usr/sbi
+tcp        0      0 127.0.0.1:6011          0.0.0.0:*               LISTEN      26129/sshd: root@pt
+tcp6       0      0 :::4236                 :::*                    LISTEN      1092/dmap
+tcp6       0      0 :::80                   :::*                    LISTEN      1161/nginx: master
+tcp6       0      0 :::54321                :::*                    LISTEN      1370/kingbase
+
+3. locate the target port 54321,get the matched PID '1370'
+   then debug the process with target pid 
+
+4. root@king80105:/home/king# gdb --pid=1370
+int gdb command env, set the lib path with 'set  solib-search-path '; such as  
+set  solib-search-path /home/kingserver/program
+
+if encounter SIGSEGV， gdb will stop, then ignore it with following command:
+
+handle SIGSEGV nostop noprint
+```
 
 
 
