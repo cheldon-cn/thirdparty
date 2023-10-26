@@ -15728,17 +15728,49 @@ C:\Users>sqlplus -v
 SQL*Plus: Release 11.2.0.1.0 Production
 
 
+# 177  create and debug dump file in linux
+
+## create core dump
 
 
+## debug dump
 
+```
+for core-dump file in linux
+1. check if Failed to write core dump, use 'ulimit -c '
+if we get the return value '0' which means we cannot write core dump;
+if wanna write core dump,use command:
 
+ulimit -c unlimited
 
+2. set dump location
 
+[root@king ~]# mkdir /dump/
+[root@king ~]# echo '/dump/core-%e-%p-%t' > /proc/sys/kernel/core_pattern
+[root@king ~]# more /proc/sys/kernel/core_pattern 
+/dump/core-%e-%p-%t
 
+3. run target execute,if crash,get the dumpfile in folder '/dump/' 
 
+4. debug dump file 
 
+[root@king ~]# gdb core-file core-igserverjava-13430-1698032409
+[root@king ~]# set solib-search-path /data/kingserver/java/program:/lib/aarch64-linux-gnu:/data//kingserver/java/program/java/jre/lib/aarch64:/data/kingserver/java/program/java/jre/lib/aarch64/jli:/data/kingserver/java/program/QtPlugins/imageformats
+[root@king ~]# info sharedlibrary
+[root@king ~]# bt
+[root@king ~]# thread apply all bt
 
+```
 
+```
+gdb core-file core-serverjava-13430-1698032409
+
+set solib-search-path /home/zone/program/:/lib/aarch64-linux-gnu:/home/zone/program/java/jre/lib/aarch64:/home/zone/program/java/jre/lib/aarch64/jli:/home/zone/program/QtPlugins/imageformats
+
+info sharedlibrary
+
+thread apply all bt
+```
 
 
 
