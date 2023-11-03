@@ -15906,6 +15906,268 @@ long long CMemoryMnger::Reset()
 ```
 
 
+# 180  CPhysicalMemory
+
+```
+
+//物理内存管理器，提供比new类函数更高效，更灵活，更底层的内存管理服务
+namespace CPhysicalMemory
+{
+	//long long  Init();//初始化
+	void __EXPORT_API_ *MemoryAlloc(DWORD size);
+	void __EXPORT_API_ *VirtualAlloc(DWORD size);
+	void __EXPORT_API_ *PhysicalAlloc(DWORD size);
+	BOOL __EXPORT_API_ MapMemory(void *virMem,void *phyMem);
+	BOOL __EXPORT_API_ UnMapMemory(void *virMem,void *phyMem);
+	BOOL __EXPORT_API_ VirtualCopy(void *virDst,void *virSrc,void *phyMem);
+	BOOL __EXPORT_API_ VirtualSwap(void *virDst,void *phyDst,void *virSrc,void *phySrc);
+	BOOL __EXPORT_API_ VirtualFree(void *virMem);
+	BOOL __EXPORT_API_ PhysicalFree(void *phyMem);
+	BOOL __EXPORT_API_ GetStatus();
+};
+```
+
+```
+
+BOOL LoggedSetLockPagesPrivilege ( HANDLE hProcess,
+                              BOOL bEnable);
+
+struct tagPhyMem
+{
+	ULONG_PTR NumberOfPages;        // number of pages to request
+	ULONG_PTR *aPFNs;				// page info; holds opaque data
+};
+
+BOOL		   g_bStatus;
+long long	   g_dwPageSize;
+
+long long PhyMemoryInit()
+{
+	//return(FALSE);
+	SYSTEM_INFO sSysInfo;           // useful system information
+	GetSystemInfo(&sSysInfo);  // fill the system information structure
+	g_dwPageSize=sSysInfo.dwPageSize;
+
+	// Enable the privilege.
+
+  if( ! LoggedSetLockPagesPrivilege( GetCurrentProcess(), TRUE ) ) 
+  {
+    return(0);
+  }
+  g_bStatus=TRUE;
+  return(1);
+}
+
+void *CPhysicalMemory::MemoryAlloc(DWORD size)
+{
+	return ::VirtualAlloc( NULL,
+                           size,
+                           MEM_COMMIT,
+                           PAGE_READWRITE );
+}
+
+void *CPhysicalMemory::VirtualAlloc(DWORD size)
+{
+	return ::VirtualAlloc( NULL,
+                           size,
+                           MEM_RESERVE | MEM_PHYSICAL,
+                           PAGE_READWRITE );
+}
+
+BOOL  CPhysicalMemory::GetStatus()
+{
+	return(g_bStatus);
+}
+
+void  loger(const char* pInfo)
+{
+#ifdef _WIN32
+	FILE *fp=fopen("c:\\memerror.log","a+");
+	fprintf(fp,pInfo);
+	fclose(fp);
+#endif
+}
+
+void *CPhysicalMemory::PhysicalAlloc(DWORD size)
+{
+	BOOL bResult;
+	ULONG_PTR NumberOfPagesInitial; // initial number of pages requested
+	tagPhyMem	*pt=new tagPhyMem;
+	pt->NumberOfPages = (size+g_dwPageSize-1)/g_dwPageSize;
+	int PFNArraySize = pt->NumberOfPages * sizeof (ULONG_PTR);
+	pt->aPFNs = (ULONG_PTR *) HeapAlloc(GetProcessHeap(), 0, PFNArraySize);
+	if(pt->aPFNs==NULL)
+		goto END;
+
+	NumberOfPagesInitial = pt->NumberOfPages;
+    bResult = AllocateUserPhysicalPages( GetCurrentProcess(),
+                                       &(pt->NumberOfPages),
+                                       pt->aPFNs );
+	if( bResult != TRUE )
+		goto END1;
+	if( NumberOfPagesInitial != pt->NumberOfPages )
+		goto END2;
+	return(pt);
+
+END2:
+	FreeUserPhysicalPages( GetCurrentProcess(),
+                                   &(pt->NumberOfPages),
+                                   pt->aPFNs );
+	{
+	loger("申请物理内存数量不够\n\n");
+	}
+
+END1:
+	HeapFree(GetProcessHeap(), 0, pt->aPFNs);
+	{
+	loger("申请物理内存失败\n\n");
+	}
+
+END:
+	if(pt)delete pt;
+	{
+	   loger("申请堆失败\n\n");
+	}
+
+	return(NULL);
+}
+
+BOOL  CPhysicalMemory::MapMemory(void *virMem,void *phyMem)
+{
+	return MapUserPhysicalPages( virMem,
+                                  ((tagPhyMem*)phyMem)->NumberOfPages,
+                                  ((tagPhyMem*)phyMem)->aPFNs );
+}
+
+BOOL  CPhysicalMemory::UnMapMemory(void *virMem,void *phyMem)
+{
+	return MapUserPhysicalPages( virMem,
+                                  ((tagPhyMem*)phyMem)->NumberOfPages,
+                                  NULL );
+}
+
+BOOL  CPhysicalMemory::VirtualCopy(void *virDst,void *virSrc,void *phyMem)
+{
+	MapUserPhysicalPages( virSrc,
+                                 ((tagPhyMem*)phyMem)->NumberOfPages,
+                                  NULL );
+	return MapUserPhysicalPages( virDst,
+                                  ((tagPhyMem*)phyMem)->NumberOfPages,
+                                  ((tagPhyMem*)phyMem)->aPFNs );
+}
+
+BOOL  CPhysicalMemory::VirtualSwap(void *virDst,void *phyDst,void *virSrc,void *phySrc)
+{
+	return(FALSE);
+}
+
+BOOL CPhysicalMemory::VirtualFree(void *virMem)
+{
+	return ::VirtualFree( virMem,
+                         0,
+                         MEM_RELEASE );
+}
+
+BOOL CPhysicalMemory::PhysicalFree(void *phyMem)
+{
+	BOOL rtn=FreeUserPhysicalPages( GetCurrentProcess(),
+                                   &(((tagPhyMem*)phyMem)->NumberOfPages),
+                                   ((tagPhyMem*)phyMem)->aPFNs);
+	HeapFree(GetProcessHeap(), 0, ((tagPhyMem*)phyMem)->aPFNs);
+	delete (tagPhyMem*)phyMem;
+	return(rtn);
+}
+
+
+/*****************************************************************
+   LoggedSetLockPagesPrivilege: a function to obtain or
+   release the privilege of locking physical pages.
+   Inputs:
+       HANDLE hProcess: Handle for the process for which the
+       privilege is needed
+       BOOL bEnable: Enable (TRUE) or disable?
+   Return value: TRUE indicates success, FALSE failure.
+
+*****************************************************************/
+
+BOOL
+LoggedSetLockPagesPrivilege ( HANDLE hProcess,
+                              BOOL bEnable)
+{
+  struct {
+    DWORD Count;
+    LUID_AND_ATTRIBUTES Privilege [1];
+  } Info;
+
+  HANDLE Token;
+  BOOL Result;
+
+  // Open the token.
+
+  Result = OpenProcessToken ( hProcess,
+                              TOKEN_ADJUST_PRIVILEGES|TOKEN_QUERY,
+                              & Token);
+
+  if( Result != TRUE ) 
+  {
+    //printf( "Cannot open process token.\n" );
+    return FALSE;
+  }
+
+  // Enable or disable?
+
+  Info.Count = 1;
+  if( bEnable ) 
+  {
+    Info.Privilege[0].Attributes = SE_PRIVILEGE_ENABLED;
+  } 
+  else 
+  {
+    Info.Privilege[0].Attributes = 0;
+  }
+
+  // Get the LUID.
+
+  Result = LookupPrivilegeValue ( NULL,
+                                  SE_LOCK_MEMORY_NAME,
+                                  &(Info.Privilege[0].Luid));
+
+  if( Result != TRUE ) 
+  {
+    //printf( "Cannot get privilege for %s.\n", SE_LOCK_MEMORY_NAME );
+    return FALSE;
+  }
+
+  // Adjust the privilege.
+
+  Result = AdjustTokenPrivileges ( Token, FALSE,
+                                   (PTOKEN_PRIVILEGES) &Info,
+                                   0, NULL, NULL);
+
+  // Check the result.
+  if( Result != TRUE ) 
+  {
+    //printf ("Cannot adjust token privileges (%u)\n", GetLastError() );
+    return FALSE;
+  } 
+  else 
+  {
+	  DWORD e;
+    if( (e=GetLastError()) != ERROR_SUCCESS ) 
+    {
+      //printf ("Cannot enable the SE_LOCK_MEMORY_NAME privilege; ");
+      //printf ("please check the local policy.\n");
+      return FALSE;
+    }
+  }
+
+  CloseHandle( Token );
+
+  return TRUE;
+}
+
+```
+
 
 
 
