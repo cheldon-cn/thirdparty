@@ -55,7 +55,7 @@ private:
 };
 
 
-#define MEMBLOCKSIZE	(1024*1024*10)	//10M space
+#define MEM_BLOCK_SIZE	(1024*1024*10)	//10M space
 CMemManager::CMemManager(void)
 {
 	m_buf = NULL;
@@ -85,7 +85,7 @@ void *CMemManager::Alloc(int size)
 {
 	if (m_buf == NULL)
 	{
-		m_buf = new char[MEMBLOCKSIZE];
+		m_buf = new char[MEM_BLOCK_SIZE];
 		m_list.Add(m_buf);
 	}
 
@@ -102,15 +102,15 @@ void *CMemManager::Alloc(int size)
 #endif
 
 	//m_buf
-	if (MEMBLOCKSIZE < size + m_pos)
+	if (MEM_BLOCK_SIZE < size + m_pos)
 	{
 		m_idx++;
 		if (m_idx >= m_list.Size())
 		{
-			m_buf = new char[((MEMBLOCKSIZE > size) ? MEMBLOCKSIZE : size)];
+			m_buf = new char[((MEM_BLOCK_SIZE > size) ? MEM_BLOCK_SIZE : size)];
 			m_list.Add(m_buf);
 		}
-		else if (MEMBLOCKSIZE >= size)
+		else if (MEM_BLOCK_SIZE >= size)
 			m_buf = m_list[m_idx];
 		else
 		{
@@ -15810,6 +15810,110 @@ if encounter SIGSEGV， gdb will stop, then ignore it with following command:
 
 handle SIGSEGV nostop noprint
 ```
+
+# 179.  CMemoryMnger
+
+```
+
+//内存分配管理类
+class  CMemoryMnger                           
+{
+public:
+	 CMemoryMnger(void);
+	~CMemoryMnger(void);
+
+public:
+	void *Alloc(DWORD size);                //分配空间
+	long long Free();						//重新回到空间开始位置
+	long long Reset();                       //重新回到空间开始位置
+
+private:
+	std::vector<char *> m_BufferSet;
+	char			   *m_pBuff;
+	long long			m_idx;
+	DWORD				m_pos;
+};
+
+```
+
+```
+#define MEM_BLOCK_SIZE	(1024*1024*10)	//10M 空间
+
+CMemoryMnger::CMemoryMnger(void)
+{
+	m_pBuff=NULL;
+	m_pos=0;              //记录每一块的位置
+	m_idx=0;              //记录块序号
+}
+
+CMemoryMnger::~CMemoryMnger(void)
+{
+	for (long long i=0;i<m_BufferSet.Size();i++)
+	{
+		delete []m_BufferSet[i];
+	}
+}
+
+void *CMemoryMnger::Alloc(DWORD size)
+{
+	if(m_pBuff==NULL)
+	{
+		m_pBuff=new char[MEM_BLOCK_SIZE];
+		m_BufferSet.push_back(m_pBuff);
+	}
+	//m_pBuff
+	if(MEM_BLOCK_SIZE<size+m_pos)
+	{
+		m_idx++;
+		if(m_idx>=m_BufferSet.Size())
+		{
+			m_pBuff=new char[((MEM_BLOCK_SIZE>size)?MEM_BLOCK_SIZE:size)];
+			m_BufferSet.push_back(m_pBuff);
+		}
+		else if(MEM_BLOCK_SIZE>=size)
+			m_pBuff=m_BufferSet[m_idx];
+		else
+		{
+			delete []m_BufferSet[m_idx];
+			m_pBuff=new char[size];
+			m_BufferSet.insert(m_idx,m_pBuff);
+		}
+		m_pos=0;
+	}
+	
+	//分配
+	void *rtn=m_pBuff+m_pos;
+	m_pos+=size;
+	return(rtn);
+}
+
+long long CMemoryMnger::Free()       
+{
+	if(m_pBuff==NULL)return(1);
+
+	m_pBuff=m_BufferSet[0];
+	m_pos=0;
+	m_idx=0;
+	return(1);
+}
+
+long long CMemoryMnger::Reset()
+{
+	return(Free());
+}
+
+
+```
+
+
+
+
+
+
+
+
+
+
 
 
 
