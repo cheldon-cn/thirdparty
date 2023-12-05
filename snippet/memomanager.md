@@ -16168,16 +16168,360 @@ LoggedSetLockPagesPrivilege ( HANDLE hProcess,
 
 ```
 
+# 181 
+
+## get current free space
+通过statvfs得到磁盘的空闲块数量(f_bfree)，以及每个空闲块大小(f_bsize)。
+
+```
+#include <cstdio>
+#include <sys/statvfs.h>
+#include <cerrno>
+#include <cstring>
+using namespace std;
+
+int printFreeSpace(const char *path)
+{
+    struct statvfs st;
+
+    if (::statvfs(path, &st) != 0) {
+        printf("statvfs error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    auto freeSize = st.f_bsize * st.f_bfree;
+    printf("current free space of path %s: %lu byte\n", path, freeSize);
+
+    return 0;
+}
+
+int main()
+{
+    printFreeSpace("/");
+    return 0;
+}
+
+```
+
+statvfs, fstatvfs 函数说明
+```
+有2个接口能获取磁盘信息方式，statvfs需要传入一个C风格Posix路径；fstatvfs需要一个打开的文件描述符。
+
+#include <sys/statvfs.h>
+int statvfs(const char *path, struct statvfs *buf);
+int fstatvfs(int fd, struct statvfs *buf);
+
+参数说明：
+
+path 要获取磁盘信息的路径，只要是挂载到操作文件系统的路径即可。
+fd 是已打开文件描述符，代表要获取磁盘信息的文件。
+buf 指向一个statvfs结构，定义如下：
+struct statvfs {
+    unsigned long  f_bsize;    /* Filesystem block size 文件系统块大小 */
+    unsigned long  f_frsize;   /* Fragment size 碎片大小 */
+    fsblkcnt_t     f_blocks;   /* Size of fs in f_frsize units  */
+    fsblkcnt_t     f_bfree;    /* Number of free blocks 空闲块数量 */
+    fsblkcnt_t     f_bavail;   /* Number of free blocks for
+                                             unprivileged users 非特权用户的空闲块数量 */
+    fsfilcnt_t     f_files;    /* Number of inodes i节点数量 */
+    fsfilcnt_t     f_ffree;    /* Number of free inodes 空闲i节点数量 */
+    fsfilcnt_t     f_favail;   /* Number of free inodes for
+                                             unprivileged users 非特权用户的空闲i节点数量 */
+    unsigned long  f_fsid;     /* Filesystem ID 文件系统id */
+    unsigned long  f_flag;     /* Mount flags  挂载标识 */
+    unsigned long  f_namemax;  /* Maximum filename length 最大文件名长度 */
+};
+
+f_flag是bit位掩码的，表示当挂载到该文件系统时的各种选项。包含以下几个选项：
+
+ST_MANDLOCK 文件系统上允许强制锁。
+ST_NOATIME 不更新访问时间。
+ST_NODEV 不允许访问设备特殊文件。
+ST_NODIRATIME 不更新目录访问时间。
+ST_NOEXEC 不允许找文件系统上执行程序。
+ST_NOSUID 对于文件系统上的可执行文件，exec加载器忽略set-user-ID 和 set-group-ID bit位。
+ST_RDONLY 文件系统挂载为只读。
+ST_RELATIME 更新访问时间，参考mtime/ctime。
+ST_SYNCHRONOUS 写立即同步到文件系统，参见open的O_SYNC选项。
+返回值：
+成功返回0；失败返回-1，errno被设置。
+```
+
+```
+
+#if !defined(AFX_14BEC153_17B9_47BE_845F_71A27BF26B59__INCLUDED_)
+#define AFX_14BEC153_17B9_47BE_845F_71A27BF26B59__INCLUDED_
+#if _MSC_VER > 1000
+#pragma once
+#endif // _MSC_VER > 1000
+#include <iostream>
+#include <string>
+#include <windows.h>
+	//#define CPUSIZE 17
+	using namespace std;
+	//--------------------------------------------------------------
+	// CPU序列号
+	//--------------------------------------------------------------
+	BOOL GetCpuByCmd(string &ider, int len = 128);
+	BOOL GetDiskByCmd(string &ider, int len = 128);
+#endif // !defined(AFX_14BEC153_17B9_47BE_845F_71A27BF26B59__INCLUDED_)
+	//--------------------------------------------------------------
+	// CPU序列号
+	//--------------------------------------------------------------
+	BOOL GetCpuByCmd(string &ider, int len/*=128*/)
+	{
+		//CPU序列
+		const long MAX_COMMAND_SIZE = 10000; // 命令行输出缓冲大小
+		WCHAR szFetCmd[] = L"wmic cpu get processorid"; // 获取CPU序列号命令行
+		const string strEnSearch = "ProcessorId"; // CPU序列号的前导信息
+		BOOL bret = FALSE;
+		HANDLE hReadPipe = NULL; //读取管道
+		HANDLE hWritePipe = NULL; //写入管道
+		PROCESS_INFORMATION pi; //进程信息
+		STARTUPINFO si; //控制命令行窗口信息
+		SECURITY_ATTRIBUTES sa; //安全属性
+		char szBuffer[MAX_COMMAND_SIZE + 1] = { 0 }; // 放置命令行结果的输出缓冲区
+		string strBuffer;
+		unsigned long count = 0;
+		long ipos = 0;
+		memset(&pi, 0, sizeof(pi));
+		memset(&si, 0, sizeof(si));
+		memset(&sa, 0, sizeof(sa));
+		pi.hProcess = NULL;
+		pi.hThread = NULL;
+		si.cb = sizeof(STARTUPINFO);
+
+		sa.nLength = sizeof(SECURITY_ATTRIBUTES);
+		sa.lpSecurityDescriptor = NULL;
+		sa.bInheritHandle = TRUE;
+		//1.0 创建管道
+		bret = CreatePipe(&hReadPipe, &hWritePipe, &sa, 0);
+		if (!bret)
+		{
+			goto END;
+		}
+		//2.0 设置命令行窗口的信息为指定的读写管道
+		GetStartupInfo(&si);
+		si.hStdError = hWritePipe;
+		si.hStdOutput = hWritePipe;
+		si.wShowWindow = SW_HIDE; //隐藏命令行窗口
+		si.dwFlags = STARTF_USESHOWWINDOW | STARTF_USESTDHANDLES;
+		//3.0 创建获取命令行的进程
+		bret = CreateProcess(NULL, szFetCmd, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi);
+		if (!bret)
+		{
+			goto END;
+		}
+		//4.0 读取返回的数据
+		WaitForSingleObject(pi.hProcess, 500/*INFINITE*/);
+		bret = ReadFile(hReadPipe, szBuffer, MAX_COMMAND_SIZE, &count, 0);
+		if (!bret)
+		{
+			goto END;
+		}
+		//5.0 查找CPU序列号
+		bret = FALSE;
+		strBuffer = szBuffer;
+		ipos = strBuffer.find(strEnSearch);
+		if (ipos < 0) // 没有找到
+		{
+			goto END;
+		}
+		else
+		{
+			strBuffer = strBuffer.substr(ipos + strEnSearch.length());
+		}
+		memset(szBuffer, 0x00, sizeof(szBuffer));
+		strcpy_s(szBuffer, strBuffer.c_str());
+		//modify here
+		//去掉中间的空格 \r \n
+		char temp[512];
+		memset(temp, 0, sizeof(temp));
+		int index = 0;
+		for (size_t i = 0; i < strBuffer.size(); i++)
+		{
+			if (strBuffer[i] != ' '&&strBuffer[i] != '\n'&&strBuffer[i] != '\r')
+			{
+				temp[index] = strBuffer[i];
+				index++;
+			}
+		}
+		ider = temp;
+		bret = TRUE;
+	END:
+				   //关闭所有的句柄
+		CloseHandle(hWritePipe);
+		CloseHandle(hReadPipe);
+		CloseHandle(pi.hProcess);
+		CloseHandle(pi.hThread);
+		return(bret);
+	}
+	//--------------------------------------------------------------
+	// 硬盘编号
+	//--------------------------------------------------------------
+	BOOL GetDiskByCmd(string &ider, int len/*=128*/)
+	{
+		//diskdrive
+		const long MAX_COMMAND_SIZE = 10000; // 命令行输出缓冲大小
+		WCHAR szFetCmd[] = L"wmic diskdrive get serialnumber"; // 获取DiskDrive命令行
+		const string strEnSearch = "SerialNumber"; // DiskDrive序列号的前导信息
+		BOOL bret = FALSE;
+		HANDLE hReadPipe = NULL; //读取管道
+		HANDLE hWritePipe = NULL; //写入管道
+		PROCESS_INFORMATION pi; //进程信息
+		STARTUPINFO si; //控制命令行窗口信息
+		SECURITY_ATTRIBUTES sa; //安全属性
+		char szBuffer[MAX_COMMAND_SIZE + 1] = { 0 }; // 放置命令行结果的输出缓冲区
+		string strBuffer;
+		unsigned long count = 0;
+		long ipos = 0;
+		memset(&pi, 0, sizeof(pi));
+		memset(&si, 0, sizeof(si));
+		memset(&sa, 0, sizeof(sa));
+		pi.hProcess = NULL;
+		pi.hThread = NULL;
+		si.cb = sizeof(STARTUPINFO);
+		sa.nLength = sizeof(SECURITY_ATTRIBUTES);
+		sa.lpSecurityDescriptor = NULL;
+		sa.bInheritHandle = TRUE;
+		//1.0 创建管道
+		bret = CreatePipe(&hReadPipe, &hWritePipe, &sa, 0);
+		if (!bret)
+		{
+			goto END;
+		}
+		//2.0 设置命令行窗口的信息为指定的读写管道
+		GetStartupInfo(&si);
+		si.hStdError = hWritePipe;
+		si.hStdOutput = hWritePipe;
+		si.wShowWindow = SW_HIDE; //隐藏命令行窗口
+		si.dwFlags = STARTF_USESHOWWINDOW | STARTF_USESTDHANDLES;
+		//3.0 创建获取命令行的进程
+		bret = CreateProcess(NULL, szFetCmd, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi);
+		if (!bret)
+		{
+			goto END;
+		}
+		//4.0 读取返回的数据
+		WaitForSingleObject(pi.hProcess, 500/*INFINITE*/);
+		bret = ReadFile(hReadPipe, szBuffer, MAX_COMMAND_SIZE, &count, 0);
+		if (!bret)
+		{
+			goto END;
+		}
+		//5.0 查找CPU序列号
+		bret = FALSE;
+		strBuffer = szBuffer;
+		ipos = strBuffer.find(strEnSearch);
+		if (ipos < 0) // 没有找到
+		{
+			goto END;
+		}
+		else
+		{
+			strBuffer = strBuffer.substr(ipos + strEnSearch.length());
+		}
+		memset(szBuffer, 0x00, sizeof(szBuffer));
+		strcpy_s(szBuffer, strBuffer.c_str());
+		//modify here
+		//去掉中间的空格 \r \n
+		char temp[512];
+		memset(temp, 0, sizeof(temp));
+		int index = 0;
+		for (size_t i = 0; i < strBuffer.size(); i++)
+		{
+			if (strBuffer[i] != ' '&&strBuffer[i] != '\n'&&strBuffer[i] != '\r')
+			{
+				temp[index] = strBuffer[i];
+				index++;
+			}
+		}
+		ider = temp;
+		bret = TRUE;
+	END:
+		//关闭所有的句柄
+		CloseHandle(hWritePipe);
+		CloseHandle(hReadPipe);
+		CloseHandle(pi.hProcess);
+		CloseHandle(pi.hThread);
+		return(bret);
+	}
+	int main()
+	{
+		string cpuid;
+		if (!GetCpuByCmd(cpuid))
+		{
+			cout << "get cpu id failed!\n";
+			return false;
+		}
+		cout << "cpu ID: " << cpuid << endl;
+		string diskid;
+		if (!GetDiskByCmd(diskid))
+		{
+			cout << "get diskdrive failed!\n";
+			return false;
+		}
+		cout << "disk ID: " << diskid << endl;
+	}
+```
+
+# 182 strcspn function
 
 
+```
+#include<stdio.h>
+#include<string.h>
 
+ int IsCodeLegal(char* code){
+	char* rule1="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	char* rule2="abcdefghijklmnopqrstuvwxyz";
+	char* rule3="~!@#$%^&*";
+	int result_rule1=0,result_rule2=0,result_rule3=0;
+	result_rule1=strcspn(rule1,code);
+	result_rule2=strcspn(rule2,code);
+	result_rule3=strcspn(rule3,code);
+	if(result_rule1==26||result_rule2==26||result_rule3==9)
+		return 0;
+	else
+		return 1;
+ }
 
+ int main(){
+	char* code1="1234567890";
+	char* code2="123@Ab27418";
+	printf("%s，%s\n",code1,IsCodeLegal(code1)?"合法":"不合法");
+	printf("%s，%s\n",code2,IsCodeLegal(code2)?"合法":"不合法");
+ }
 
+```
 
+#183 查询表空间使用情况
 
+```
+select 
+b.tablespace_name  --表空间名
+,b.m_bytes  --表空间大小
+,b.m_bytes-nvl(a.mbytes_free,0) used  --已使用空间
+,nvl(a.mbytes_free,0) free --剩余空间
+,round(((b.m_bytes-nvl(a.mbytes_free,0))/b.m_bytes),2)*100||'%' pct_used --使用率
+from
+(select sum(bytes)/(1024*1024) mbytes_free,max(bytes)/(1024*1024) largest,tablespace_name
+from sys.dba_free_space group by tablespace_name)a,
+(select sum(bytes)/(1024*1024) m_bytes,sum(maxbytes)/(1024*1024) mbytes_max,tablespace_name 
+from sys.dba_data_files group by tablespace_name
+union all
+select sum(bytes)/(1024*1024) m_bytes,sum(maxbytes)/(1024*1024) mbytes_max,tablespace_name 
+from sys.dba_temp_files group by tablespace_name)b
+where a.tablespace_name (+)= b.tablespace_name order by a.tablespace_name asc
+```
 
+```
+查看数据文件以及所属表空间的相关信息
 
-
+SELECT * FROM DBA_DATA_FILES;  --查看数据文件信息
+SELECT * FROM DBA_TEMP_FILES;  --查看临时数据文件信息
+SELECT * FROM DBA_FREE_SPACE;  --查看表空间剩余空间,每段剩余空间都会有一条记录，如果一个表空间记录过多说明碎片过多
+```
 
 
 
