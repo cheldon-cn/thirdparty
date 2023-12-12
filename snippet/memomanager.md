@@ -16495,7 +16495,8 @@ ST_SYNCHRONOUS 写立即同步到文件系统，参见open的O_SYNC选项。
 
 ```
 
-#183 查询表空间使用情况
+# 183 查询oracle表空间使用情况
+
 
 ```
 select 
@@ -16522,6 +16523,79 @@ SELECT * FROM DBA_DATA_FILES;  --查看数据文件信息
 SELECT * FROM DBA_TEMP_FILES;  --查看临时数据文件信息
 SELECT * FROM DBA_FREE_SPACE;  --查看表空间剩余空间,每段剩余空间都会有一条记录，如果一个表空间记录过多说明碎片过多
 ```
+
+
+# 184  Query postgresql table space
+
+
+
+Postgresql自带了pg_default、pg_global这两个表空间
+
+表空间pg_default是用来存储系统目录对象、用户表、用户表index、和临时表、临时表index、内部临时表的默认空间。对应存储目录$PADATA/base/
+
+表空间pg_global是用来存放集群级别的系统字典表(比如pg_database)的空间；对应存储目录$PADATA/global/
+
+```
+select spcname from pg_tablespace
+
+select * from pg_tablespace
+```
+
+```
+SELECT oid,spcname AS "Name",
+       pg_catalog.pg_get_userbyid(spcowner) AS "Owner",
+	   pg_catalog.pg_tablespace_location(oid) AS "Location" 
+	   FROM pg_catalog.pg_tablespace where spcname not like 'pg_%'
+
+  oid | Name | Owner | Location
+------+--------------+----------+-------------------
+ 25632| dwtablespace | postgres | /mnt/dw
+ 28632| dw2          | postgres | /Pgtablespace/dw2
+
+```
+
+```
+select a.oid,a.datname as "Name",b.spcname as "Tablespace" 
+     FROM pg_catalog.pg_database a JOIN pg_catalog.pg_tablespace b 
+	 on a.dattablespace = b.oid where b.spcname  like 'pg_%';
+	 
+  oid | Name | Tablespace
+------+------+--------------
+15632 | osm  | pg_default
+25632 | dwdb | dwtablespace
+
+
+```
+
+
+# 185  postgresql default_tablespace
+
+1. 默认表空间只是针对新建的表和索引而言，
+新建数据库时如果不指定表空间名称，新数据库不会使用默认表空间而是继承模板数据库继承其表空间设置；
+
+2. 新建表和索引时，如果参数default_tablespace设置了有效的默认表空间，
+这些新建的表和索引会使用default_tablespace设置的默认表空间而不会使用这些表和索引对应的数据库的表空间，
+也就是当default_tablespace被设置为非空字符串并且有效，那么它就为没有显式TABLESPACE子句的CREATE TABLE和CREATE INDEX命令提供一个隐式TABLESPACE子句。
+
+3. 通过命令show default_tablespace可以看到参数default_tablespace指向的默认表空间，
+   该值为空的话，说明就是默认表空间就是当前数据库的表空间
+
+4. 设置：
+   alter system set default_tablespace=newtablespace，
+   该参数不需要重启只需要执行select pg_reload_conf()就可以马上生效并且重启后也生效，
+   如果是SET default_tablespace=newtablespace则只是在当前会话生效
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
