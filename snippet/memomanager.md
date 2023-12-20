@@ -16547,7 +16547,7 @@ SELECT oid,spcname AS "Name",
 	   pg_catalog.pg_tablespace_location(oid) AS "Location" 
 	   FROM pg_catalog.pg_tablespace where spcname not like 'pg_%'
 
-  oid | Name | Owner | Location
+  oid | Name         | Owner    | Location
 ------+--------------+----------+-------------------
  25632| dwtablespace | postgres | /mnt/dw
  28632| dw2          | postgres | /Pgtablespace/dw2
@@ -16751,6 +16751,137 @@ ALTER TABLE tbl_name ADD INDEX index_name (column_list): 添加普通索引，�
 
 ALTER TABLE tbl_name ADD FULLTEXT index_name (column_list):该语句指定了索引为 FULLTEXT ，用于全文索引。
 ```
+
+
+# 187   oracle getColumnListMetaData meta crash
+
+## example
+ 
+```
+int main(int argc, char* argv[])
+{
+    string program = argv[0];
+    glogInit();
+    Environment *env = NULL;
+    Connection *conn = NULL;
+    Statement *stmt = NULL;
+    ResultSet *rs = NULL;
+    int errNum;
+    string errMsg;
+    string username = "usr1";
+    string password = "usr1";
+    string connstring = "192.168.0.1:1521/orcl";
+    env = Environment::createEnvironment();
+
+    assert(env != NULL);
+    conn = env->createConnection(username,password,connstring);
+    if(!conn)
+    {
+        return -1;
+    }
+
+    Statement *pStmt = NULL;
+    string sqlStmt="select * from USER_TABLES";
+    pStmt = conn->createStatement(sqlStmt);
+    ResultSet *pRs = pStmt->executeQuery(sqlStmt);
+
+    vector<MetaData> metafield = pRs->getColumnListMetaData();
+
+    while(pRs->next()) {
+        for(int col =0;col <metafield.size();col++)
+        {
+            string reStr = pRs->getString(col + 1).empty() ? "" : pRs->getString(col + 1).c_str();
+            cout<<" "<<reStr<<" ";
+        }
+        cout<<endl;
+    }
+
+    pStmt->closeResultSet(pRs);
+    env->terminateConnection(conn);
+    Environment::terminateEnvironment(env);
+
+    return 0;
+}
+```
+
+## crash log
+
+```
+E0827 17:32:38.492885 30841 oracleconnector.cpp:40] *** Aborted at 1566898358 (unix time) try "date -d @1566898358" if you are using GNU date ***
+E0827 17:32:38.494403 30841 oracleconnector.cpp:40] PC: @                0x0 (unknown)
+E0827 17:32:38.494635 30841 oracleconnector.cpp:40] *** SIGSEGV (@0x10) received by PID 30841 (TID 0x7feef115ae80) from PID 16; stack trace: ***
+E0827 17:32:38.495303 30841 oracleconnector.cpp:40]     @     0x7feef0d605d0 (unknown)
+E0827 17:32:38.504227 30841 oracleconnector.cpp:40]     @     0x7feeefc45cd2 kpuhhfre
+E0827 17:32:38.511675 30841 oracleconnector.cpp:40]     @     0x7feeeedce5df OCIPHeapFree
+E0827 17:32:38.512270 30841 oracleconnector.cpp:40]     @     0x7feef05b2974 oracle::occi::HeapAlloc<>::operator delete()
+E0827 17:32:38.512823 30841 oracleconnector.cpp:40]     @     0x7feef05e024f _ZN6oracle4occi12MetaDataImplD9Ev
+E0827 17:32:38.513456 30841 oracleconnector.cpp:40]     @     0x7feef05e027a oracle::occi::MetaDataImpl::~MetaDataImpl()
+E0827 17:32:38.514011 30841 oracleconnector.cpp:40]     @     0x7feef05e011a oracle::occi::RefCounted::onZeroReferences()
+E0827 17:32:38.514832 30841 oracleconnector.cpp:40]     @     0x7feef05e0137 oracle::occi::RefCounted::deleteRef()
+E0827 17:32:38.515621 30841 oracleconnector.cpp:40]     @     0x7feef05b8079 _ZN6oracle4occi8ConstPtrINS0_12MetaDataImplEED9Ev
+E0827 17:32:38.516194 30841 oracleconnector.cpp:40]     @     0x7feef05b8062 oracle::occi::ConstPtr<>::~ConstPtr()
+E0827 17:32:38.516757 30841 oracleconnector.cpp:40]     @     0x7feef05b804d _ZN6oracle4occi3PtrINS0_12MetaDataImplEED9Ev
+E0827 17:32:38.517264 30841 oracleconnector.cpp:40]     @     0x7feef05b803e oracle::occi::Ptr<>::~Ptr()
+E0827 17:32:38.517736 30841 oracleconnector.cpp:40]     @     0x7feef05e06eb _ZN6oracle4occi8MetaDataD9Ev
+E0827 17:32:38.518162 30841 oracleconnector.cpp:40]     @     0x7feef05e06dc oracle::occi::MetaData::~MetaData()
+E0827 17:32:38.518338 30841 oracleconnector.cpp:40]     @           0x4128c2 std::_Destroy<>()
+E0827 17:32:38.518527 30841 oracleconnector.cpp:40]     @           0x4127aa std::_Destroy_aux<>::__destroy<>()
+E0827 17:32:38.518707 30841 oracleconnector.cpp:40]     @           0x41265d std::_Destroy<>()
+E0827 17:32:38.518891 30841 oracleconnector.cpp:40]     @           0x4124f1 std::_Destroy<>()
+E0827 17:32:38.519076 30841 oracleconnector.cpp:40]     @           0x412239 std::vector<>::~vector()
+E0827 17:32:38.519229 30841 oracleconnector.cpp:40]     @           0x411d99 main
+E0827 17:32:38.519829 30841 oracleconnector.cpp:40]     @     0x7feeecfe8495 __libc_start_main
+E0827 17:32:38.520076 30841 oracleconnector.cpp:40]     @           0x40f5b9 (unknown)
+E0827 17:32:38.520521 30841 oracleconnector.cpp:40]     @                0x0 (unknown)
+```
+
+根据错误提示，是程序执行完，MetaData在析构时出错;
+通过测试
+```
+void testMeta()
+{
+    vector<MetaData> metafield = pRs->getColumnListMetaData();
+	log("getColumnListMetaData may crash");
+}
+```
+发现，对于特定数据会有crash 的现象;对于常规数据，则正常运行；
+
+**当使用getColumnListMetaData获取表列数时，超过63列则释放该 Vector 会报错。**
+
+有人这么说
+
+```
+经过测试，发现是OCCI库版本选用错误导致。在VS2015上使用的sdk目录msvc下的oraocci12.dll，未选用vc14子文件夹中的库。所以在编程时一定要选正确所用开发环
+境对应的版本库文件，即使能编译过，也能运行。但是有些不正常的BUG还是会出现的！
+```
+
+但对于列数超过63的数据， 如果连接的是oraocci12.lib,同样会有崩溃现象；
+**可以确定的是oraocci12 库的函数 getColumnListMetaData 有bug**
+
+## solution
+
+在不能更新oraocci 库版本的情况下，如果需要获取列类型，需使用其他方式来达到目的；
+
+```
+string sql = "select column_name,data_type,data_length,data_precision,data_scale,nullable "
+	"from all_tab_columns where table_name = '";
+sql += tableName;
+sql += "' and owner = '";
+sql += owner;
+sql += "' order by column_id";
+while (rs->next())
+{
+	fldName = rs->getString(1);
+	arcFld.data_type = rs->getString(2);
+	if (arcFld.data_type == "BLOB" || arcFld.data_type == "CLOB" || arcFld.data_type == "NCLOB")
+	{
+		std::string fldName = fldhd.fieldname;
+		RecordLOB(arcFld.data_type, fldName,tableName,owner);
+	}
+}	
+```
+
+
 
 
 
