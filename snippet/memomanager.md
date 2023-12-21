@@ -16755,7 +16755,7 @@ ALTER TABLE tbl_name ADD FULLTEXT index_name (column_list):该语句指定了索
 
 # 187   oracle getColumnListMetaData meta crash
 
-## example
+## 1. example
  
 ```
 int main(int argc, char* argv[])
@@ -16804,7 +16804,7 @@ int main(int argc, char* argv[])
 }
 ```
 
-## crash log
+## 2. crash log
 
 ```
 E0827 17:32:38.492885 30841 oracleconnector.cpp:40] *** Aborted at 1566898358 (unix time) try "date -d @1566898358" if you are using GNU date ***
@@ -16855,10 +16855,10 @@ void testMeta()
 境对应的版本库文件，即使能编译过，也能运行。但是有些不正常的BUG还是会出现的！
 ```
 
-但对于列数超过63的数据， 如果连接的是oraocci12.lib,同样会有崩溃现象；
+但**对于列数超过63的数据**， 如果连接的是oraocci12.lib,同样会有崩溃现象；
 **可以确定的是oraocci12 库的函数 getColumnListMetaData 有bug**
 
-## solution
+## 3. solution
 
 在不能更新oraocci 库版本的情况下，如果需要获取列类型，需使用其他方式来达到目的；
 
@@ -16872,18 +16872,36 @@ sql += "' order by column_id";
 while (rs->next())
 {
 	fldName = rs->getString(1);
-	arcFld.data_type = rs->getString(2);
-	if (arcFld.data_type == "BLOB" || arcFld.data_type == "CLOB" || arcFld.data_type == "NCLOB")
+	aFld.data_type = rs->getString(2);
+	if (aFld.data_type == "BLOB" || aFld.data_type == "CLOB" || aFld.data_type == "NCLOB")
 	{
-		std::string fldName = fldhd.fieldname;
-		RecordLOB(arcFld.data_type, fldName,tableName,owner);
+		RecordLOB(aFld.data_type, fldName,tableName,owner);
 	}
 }	
 ```
 
 
+# 188. ALTER TABLE ADD or DROP COLUMN
 
+```
+--添加一列
+ALTER TABLE table_name ADD column_1 DATE NOT NULL;
+ALTER TABLE table_name ADD column_2 VARCHAR2(44) DEFAULT '';
+ALTER TABLE table_name ADD column_3 number(28,10);
+--添加一列
+ALTER TABLE table_name
+ADD(
+column_1 type constraint,--列名 类型 约束
+column_2 type constraint,
+ ...
+ );
 
+ --删除一列
+ ALTER TABLE table_name DROP COLUMN column_name;
+ --删除多列
+ ALTER TABLE table_name DROP(column_1, column_2,...);
+
+```
 
 
 
