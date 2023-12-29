@@ -16938,7 +16938,7 @@ LIB 创建标准库、导入库和导出文件，在生成程序时可将它们�
 
 # 190.  lstrcpyn and strncpy
 
-## example
+## 1. example
 使用了lstrcpyn来进行 unicode 的字符拷贝，结果发现少拷贝了一个字符，看了下MSDN：
 ```
 TCHAR chBuffer[512];
@@ -16948,7 +16948,7 @@ chBuffer的结果为abc, 也就是指定了长度4，拷贝3个字符，同时�
 
 而strncpy（unicode版本为_tcsncpy)则中规中矩的拷贝参数指定的字符数。
 
-## function
+## 2. function
 
 这两个函数作用相近，很容易用错。
 ```
