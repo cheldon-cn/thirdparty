@@ -16936,9 +16936,47 @@ LIB 创建标准库、导入库和导出文件，在生成程序时可将它们�
 
 ```
 
+# 190.  lstrcpyn and strncpy
 
+## example
+使用了lstrcpyn来进行 unicode 的字符拷贝，结果发现少拷贝了一个字符，看了下MSDN：
+```
+TCHAR chBuffer[512];
+lstrcpyn(chBuffer, "abcdefghijklmnop", 4);
+```
+chBuffer的结果为abc, 也就是指定了长度4，拷贝3个字符，同时加一个'/0'字符。
 
+而strncpy（unicode版本为_tcsncpy)则中规中矩的拷贝参数指定的字符数。
 
+## function
+
+这两个函数作用相近，很容易用错。
+```
+LPTSTR lstrcpyn(
+LPTSTR lpString1,
+LPCTSTR lpString2,
+int iMaxLength
+);
+```
+
+Specifies the number of TCHAR values to be copied from the string pointed to by lpString2 into the buffer pointed to by lpString1, including a terminating null character. This refers to bytes for
+ANSI versions of the function or WCHAR values for Unicode versions.
+
+从lpString2中向lpString1复制**iMaxLength**个字节，包括 **/0**，也就是实际复制 **iMaxLength-1**个字节
+
+```
+char *strncpy(
+ char *strDest,
+ const char *strSource,
+ size_t count
+);
+```
+
+The strncpy function copies the initial count characters of strSource to strDest and returns strDest. If count is less than or equal to
+the length of strSource, a null character is not appended automatically to the copied string. If count is greater than the length of
+strSource, the destination string is padded with null characters up to length count. The behavior of strncpy is undefined if the source
+and destination strings overlap.
+从strSource向strDest中复制**count**个字节，如果strSource长度不够，后面的字节用/0补齐
 
 
 
