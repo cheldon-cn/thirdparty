@@ -16979,6 +16979,56 @@ and destination strings overlap.
 从strSource向strDest中复制**count**个字节，如果strSource长度不够，后面的字节用/0补齐
 
 
+# 191.  oracle vs postgresql
+
+	oracle        |         postgresql
+	NUMBER[5]     |           int2
+	NUMBER[0]     |           int4
+	FLOAT         |           int4
+	NUMBER[38/8]  |           float8
+	NUMBER[38]    |           float4
+	NUMBER[5]     |           bool
+	VARCHAR2      |           varchar
+	NVARCHAR2     |           varchar
+	DATE          |           timestamp
+	TIMESTAMP     |           timestamp
+	NCLOB         |           bytea
+	BLOB          |           bytea
+	CLOB          |           bytea
+	LONG          |            *
+		*          |           text
+
+```
+   NVARCHAR2[255]   <----->  varchar[2*255  + 1]
+   NVARCHAR2[1000]  <----->  varchar[2*1000 + 1]
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
