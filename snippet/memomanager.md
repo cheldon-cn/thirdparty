@@ -17003,7 +17003,69 @@ and destination strings overlap.
    NVARCHAR2[1000]  <----->  varchar[2*1000 + 1]
 ```
 
+# 192. check little endian
 
+```
+//判断大端小端
+static union
+{
+	char c[4];
+	unsigned long lEndian;
+} endian_test = { { 'l', '?', '?', 'b' } };
+#define ENDIANNESS   ((char)endian_test.lEndian)
+#define B_LITTLE_ENDIAN   ('l' == ENDIANNESS)
+
+namespace reverseBytes
+{
+	
+uint16_t Rvb_uint16t(uint16_t value) 
+{
+	return(value & 0x00FFU) << 8 | (value & 0xFF00U) >> 8;
+}
+
+uint32_t Rvb_uint32t(uint32_t value) 
+{
+	return (value & 0x000000FFU) << 24 | (value & 0x0000FF00U) << 8 |
+		(value & 0x00FF0000U) >> 8 | (value & 0xFF000000U) >> 24;
+}
+
+uint64_t Rvb_uint64t(uint64_t value) 
+{
+	return (value & 0x00000000000000FFU) << 56 | (value & 0x000000000000FF00U) << 40 |
+		(value & 0x0000000000FF0000U) << 24 | (value & 0x00000000FF000000U) << 8 |
+		(value & 0x000000FF00000000U) >> 8 | (value & 0x0000FF0000000000U) >> 24 |
+		(value & 0x00FF000000000000U) >> 40 | (value & 0xFF00000000000000U) >> 56;
+}
+
+float Rvb_float(float value)
+{
+	float_conv f1, f2;
+	f1.f = value;
+	f2.c[0] = f1.c[3];
+	f2.c[1] = f1.c[2];
+	f2.c[2] = f1.c[1];
+	f2.c[3] = f1.c[0];
+	return f2.f;
+}
+
+double Rvb_double(double value)
+{
+	uint64_t Temp = 0;
+	Temp = Rvb_uint64t(*((uint64_t *)&value));
+	return *((double *)&Temp);
+}
+
+}
+
+
+```
+## example
+
+```
+if (B_LITTLE_ENDIAN)
+	nAdFldLen = reverseBytes::Rvb_uint32t(nFldLen);
+
+```
 
 
 
@@ -17036,4 +17098,4 @@ and destination strings overlap.
 
 
 -----
-Copyright 2020 - 2023 @ [cheldon](https://github.com/cheldon-cn/).
+Copyright 2020 - 2024 @ [cheldon](https://github.com/cheldon-cn/).
