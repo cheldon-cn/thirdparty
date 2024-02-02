@@ -17067,12 +17067,75 @@ if (B_LITTLE_ENDIAN)
 
 ```
 
+# 193. oracle类型	vs postgresql类型
+
+oracle类型	postgresql类型
+date	timestamp
+tinestamp	timestamp
+long	text
+long raw	bytea
+clob	text
+nclob	text
+blob	bytea
+bfile	bytea
+raw	bytea
+decimal	decimal
+float	double precision
+double precision	double precision
+dec	decimal
+int	integer
+integer	integer
+real	real
+smallint	smallint
+binary_float	double precision
+binary_double	double precision
+rowid	oid
+xmltype	xml
+binary_integer	integer
+pls_integer	integer
+timestamp with time zone	timestamp with time zone
+timestamp with local time zone	timestamp with time zone
 
 
+# 194 联合索引
+```
+select  * from user_favorite
+where
+ create_user_id = '1234567'
+  and channel_id = 1
+  and is_delete = 0
+order by
+ create_time desc
+limit 0, 20;
+```
+执行计划（EXPLAIN）
+```
+select_type  | table        | type| possible_keys| key| key_len| ref |rows |filtered Extra
+SIMPLE       | user_favorite| ref | idx_create_user_id_goods_id |idx_create_user_id_goods_id| 266| const,const |1 10.0 | Using index condition; Using where; Using filesort
+```
 
+```
+explain select mpoid::int8  ,  ST_AsBinary(mpshape, 'NDR')  , mpginf_id, mpshapebyte,LU_CODE from postgres.sde_landusepg2 where (LU_FUNCTION LIKE '%居住%' AND LU_CODE LIKE '%R%' )  order by mpoid
+```
 
+问题分析
+上面的explain的key可以看出，命中了表里唯一的索引
+重点是Extra：
+• Using index condition：使用了索引下推，5.6的新功能，如果索引包含多个条件，索引过滤一遍再回表查询
+• Using where：有字段不在索引上，回表过滤
+• Using filesort：需要排序，不一定是文件排序也有可能是内存排序
+先不管是文件排序还是内存排序（可通过optimizer_trace分析），但可以大致确定的是，是因为需要排序，影响了整体性能。将order by命令去掉，验证得出与数据量少的用户查询耗时一致。
 
+## 解决方案
+因为一定是需要按创建时间排序的，但排序又影响了性能，这个问题看似也没办法解决了，那有没有办法是，查询到的结果集已经不需要排序，可以直接返回呢？
+答案是肯定的，按照MySQL常用的B+树索引，索引里面结果已经是排好序的，按照我们的查询条件是create_user_id+channel_id，再加上排序字段create_time，创建联合索引
+```
+CREATE INDEX user_favorite_cui_ci_ct_IDX USING BTREE 
+ON user_favorite (create_user_id,channel_id,create_time);
+```
+条件create_user_id+channel_id查询后的结果已经是按照create_time排序好的结果集
 
+# 195
 
 
 
