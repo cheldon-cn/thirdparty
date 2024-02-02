@@ -17135,13 +17135,24 @@ ON user_favorite (create_user_id,channel_id,create_time);
 ```
 条件create_user_id+channel_id查询后的结果已经是按照create_time排序好的结果集
 
-# 195
+# 195 ORDER BY 
+
+```
+ORDER BY 可能出现 FileSort 的几种情况：
+order by 字段混用 ASC 和 DESC 排序方式。
+SELECT * 时，如果 order by 排序字段不是主键可能导致 FileSort。
+联合索引情况下，order by 多字段排序的字段左右顺序和联合索引的字段左右顺序不一致导致 FileSort。
+联合索引情况下，where 字段和 order by 字段的左右顺序和联合索引字段左右顺序或者 where 字段出现范围查询都可能导致 FileSort
+
+```
 
 
 
+## 适当加大 sort_buffer_size 排序区，
+尽量让排序在内存中完成，而不是通过创建临时表放在文件中进行；当然也不能无限加大 sort_buffer_size 排序区，因为 sort_buffer_size 参数是每个线程独占的，设置过大会导致服务器 SWAP 严重，要考虑数据库活动连接数和服务器内存的大小来适当设置排序区。
 
-
-
+## 尽量只使用必要的字段，SELECT 具体的字段名称，
+而不是 SELECT * 选择所有字段，这样可以减少排序区的使用，提高 SQL 性能
 
 
 
