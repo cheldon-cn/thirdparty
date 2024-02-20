@@ -17155,6 +17155,112 @@ SELECT * 时，如果 order by 排序字段不是主键可能导致 FileSort。
 而不是 SELECT * 选择所有字段，这样可以减少排序区的使用，提高 SQL 性能
 
 
+# 196.监视oracle执行的SQL语句(正在执行，已执行，执行性能查看)
+
+```
+
+ select b.FIRST_LOAD_TIME, b.LAST_ACTIVE_TIME, b.SQL_TEXT,b.SQL_FULLTEXT,b.MODULE,b.PARSING_SCHEMA_NAME
+from v$sqlarea b
+where b.FIRST_LOAD_TIME between '2024-02-20/10:22:00' and '2024-02-20/18:52:02'
+and b.SQL_FULLTEXT LIKE '%LANDUSE%'
+order by b.LAST_ACTIVE_TIME
+
+```
+
+1.正在执行的
+```
+ select a.username, a.sid,b.SQL_TEXT, b.SQL_FULLTEXT 
+ from v$session a, v$sqlarea b 
+ where a.sql_address = b.address
+```
+2.执行过的
+```
+select b.SQL_TEXT,b.FIRST_LOAD_TIME,b.SQL_FULLTEXT
+from v$sqlarea b
+where b.FIRST_LOAD_TIME between '2019-08-15/01:52:00' and '2020-02-20/13:52:02'
+order by b.FIRST_LOAD_TIM
+```
+（此方法好处可以查看某一时间段执行过的sql，并且 SQL_FULLTEXT 包含了完整的 sql 语句）
+--注意格式：2019-08-15/01:52:00 可以使用 2019-08-15/1:52:00 不能使用
+
+3.查找前十条性能差的sql
+```
+ SELECT * FROM (select PARSING_USER_ID,EXECUTIONS,SORTS,
+ COMMAND_TYPE,DISK_READS,sql_text FROM v$sqlare
+ order BY disk_reads DESC )where ROWNUM<10 
+```
+
+4.查看占io较大的正在运行的 session
+```
+ SELECT se.sid,se.serial#,pr.SPID,se.username,se.status,
+ se.terminal,se.program,se.MODULE,se.sql_address,st.event,st.p1text,si.physical_reads,
+ si.block_changes FROM v$session se,v$session_wait st,
+ v$sess_io si,v$process pr WHERE st.sid=se.sid AND st.
+ sid=si.sid AND se.PADDR=pr.ADDR AND se.sid>6 AND st.
+ wait_time=0 AND st.event NOT LIKE '%SQL%' ORDER BY physical_reads DESC ;
+```
+5.其他
+
+```
+ select OSUSER, PROGRAM, USERNAME, SCHEMANAME, B.Cpu_Time, STATUS, B.SQL_TEXT
+ from V$SESSION A
+ LEFT JOIN V$SQL B
+ ON A.SQL_ADDRESS = B.ADDRESS
+ AND A.SQL_HASH_VALUE = B.HASH_VALUE
+ order by b.cpu_time desc ;
+```
+6.
+```
+Select a.Sid,
+ a.SERIAL#,
+ a.status,
+ a.USERNAME, --哪个用户运行的SQL
+ d.SPID 进程号,
+ b.sql_text SQL内容,
+ a.MACHINE 计算机名称,
+ a.MODULE 运行方式,
+ to_char(cast((c.sofar / totalwork * 100) as decimal(18, 1))) || '%' 执行百分比,
+ c.elapsed_seconds 已耗时_秒,
+ c.time_remaining 预计剩余_秒,
+ cast(c.elapsed_seconds / 60 as decimal(18, 2)) 已耗时_分,
+ cast(c.time_remaining / 60 as decimal(18, 2)) 预计剩余_分,
+ cast(c.elapsed_seconds / 3600 as decimal(18, 2)) 已耗时_时,
+ cast(c.time_remaining / 3600 as decimal(18, 2)) 预计剩余_时
+ from v$session a, v$sqlarea b, v$session_longops c, v$process d
+where a.sql_hash_value = b.HASH_VALUE
+ and a.sid = c.sid(+)
+ and a.SERIAL# = c.SERIAL#(+)
+ --and to_char(cast((c.sofar / totalwork * 100) as decimal(18, 1))) <> '100'
+ and a.PADDR = d.ADDR ORDER BY a.MODULE;
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
