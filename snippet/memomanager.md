@@ -17235,8 +17235,125 @@ where a.sql_hash_value = b.HASH_VALUE
 
 ```
 
+# 197 Build pgAudit on Windows
 
+more information 
+please visit url: https://github.com/njesp/build_pgaudit_on_windows
 
+pgAudit版本支持的PostgreSQL主要版本：
+
+```
+pgAudit v1.6.X is intended to support PostgreSQL 14.
+pgAudit v1.5.X is intended to support PostgreSQL 13.
+pgAudit v1.4.X is intended to support PostgreSQL 12.
+pgAudit v1.3.X is intended to support PostgreSQL 11.
+pgAudit v1.2.X is intended to support PostgreSQL 10.
+pgAudit v1.1.X is intended to support PostgreSQL 9.6.
+pgAudit v1.0.X is intended to support PostgreSQL 9.5.
+```
+
+## Build pgAudit against a binary installation of PostgreSQL
+The full PostgreSQL build has a lot of automatic generation of build options included. The build of pgaudit is no exception. The instructions below are based on what the full build process generates.
+
+Assumptions below are default locations of PostgreSQL.
+
+1. Create a build-folder somewhere.
+
+2. Copy pgaudit.c to this folder.
+
+3. Open a x64 Native Tools Command Prompt for VS 2017.
+
+4. Go to the folder with pgaudit.c.
+
+5. Create a pgaudit.def file. Put the text below in the file.
+```
+EXPORTS
+  Pg_magic_func
+  _PG_init
+  auditEventStack DATA
+  auditLog DATA
+  auditLogCatalog DATA
+  auditLogClient DATA
+  auditLogLevel DATA
+  auditLogLevelString DATA
+  auditLogParameter DATA
+  auditLogRelation DATA
+  auditLogStatementOnce DATA
+  auditRole DATA
+  pg_finfo_pgaudit_ddl_command_end
+  pg_finfo_pgaudit_sql_drop
+  pgaudit_ddl_command_end
+  pgaudit_sql_drop
+```
+6. Create a compile_response_file.txt file. Put the text below in the file.
+ ```
+ /I"C:\Program Files\PostgreSQL\11\include\server"
+ /I"C:\Program Files\PostgreSQL\11\include\server\port\win32"
+ /I"C:\Program Files\PostgreSQL\11\include\server\port\win32_msvc"
+ /I"C:\Program Files\PostgreSQL\11\include"
+ /Zi
+ /nologo
+ /W3
+ /WX-
+ /diagnostics:classic
+ /Ox
+ /D WIN32
+ /D _WINDOWS
+ /D __WINDOWS__
+ /D __WIN32__
+ /D EXEC_BACKEND
+ /D WIN32_STACK_RLIMIT=4194304
+ /D _CRT_SECURE_NO_DEPRECATE
+ /D _CRT_NONSTDC_NO_DEPRECATE
+ /D _WINDLL
+ /D _MBCS
+ /GF
+ /Gm-
+ /EHsc
+ /MD
+ /GS
+ /fp:precise
+ /Zc:wchar_t
+ /Zc:forScope
+ /Zc:inline
+ /Gd
+ /TC
+ /wd4018
+ /wd4244
+ /wd4273
+ /wd4102
+ /wd4090
+ /wd4267
+ /FC
+ /errorReport:queue
+ ```
+7.Create a link_response_file.txt file. Put the text below in the file.
+```
+/ERRORREPORT:QUEUE
+/INCREMENTAL:NO
+/NOLOGO
+"C:\Program Files\PostgreSQL\11\lib\postgres.lib"
+/NODEFAULTLIB:libc
+/DEF:".\pgaudit.def"
+/MANIFEST
+/MANIFESTUAC:"level='asInvoker' uiAccess='false'"
+/manifest:embed
+/DEBUG
+/SUBSYSTEM:CONSOLE
+/STACK:"4194304"
+/TLBID:1
+/DYNAMICBASE:NO
+/NXCOMPAT
+/IMPLIB:".\pgaudit.lib"
+/MACHINE:X64
+/ignore:4197
+/DLL
+```
+8. Build, using the compile and link commands below.
+```
+cl /c @.\compile_response_file.txt .\pgaudit.c
+link.exe @.\link_response_file.txt /OUT:".\pgaudit.dll" .\pgaudit.obj
+```
 
 
 
