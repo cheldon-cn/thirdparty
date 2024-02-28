@@ -17351,14 +17351,39 @@ EXPORTS
 ```
 8. Build, using the compile and link commands below.
 ```
-cl /c @.\compile_response_file.txt .\pgaudit.c
+cl /c @.\compile_response_file.txt .\pgaudit.c 
 link.exe @.\link_response_file.txt /OUT:".\pgaudit.dll" .\pgaudit.obj
 ```
 
 
+# 198 joint strings with  python function 
 
+```
+def strLoop( str_list ,tag):
+    pre = "E:/Qt/msvc2015_64/bin/moc.exe " ;
+    for x in range(len(str_list)):
+        file = str_list[x]
+        tail = "{0}/{1}.h  -o  {0}/moc_{1}.cpp".format(tag, file)
+        tar = pre + tail
+        print(tar)
+    return
 
+str_list = ["aqmmap","tileloader","wms","wmsmap","wmts","wmtsmap","worldfilemap"]
+strLoop(str_list,"map")
 
+```
+
+```
+E:/Qt/msvc2015_64/bin/moc.exe map/aqmmap.h  -o  map/moc_aqmmap.cpp
+E:/Qt/msvc2015_64/bin/moc.exe map/tileloader.h  -o  map/moc_tileloader.cpp
+E:/Qt/msvc2015_64/bin/moc.exe map/wms.h  -o  map/moc_wms.cpp
+E:/Qt/msvc2015_64/bin/moc.exe map/wmsmap.h  -o  map/moc_wmsmap.cpp
+E:/Qt/msvc2015_64/bin/moc.exe map/wmts.h  -o  map/moc_wmts.cpp
+E:/Qt/msvc2015_64/bin/moc.exe map/wmtsmap.h  -o  map/moc_wmtsmap.cpp
+E:/Qt/msvc2015_64/bin/moc.exe map/worldfilemap.h  -o  map/moc_worldfilemap.cpp
+```
+
+# 199
 
 
 
