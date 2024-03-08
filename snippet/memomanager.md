@@ -17383,16 +17383,119 @@ E:/Qt/msvc2015_64/bin/moc.exe map/wmtsmap.h  -o  map/moc_wmtsmap.cpp
 E:/Qt/msvc2015_64/bin/moc.exe map/worldfilemap.h  -o  map/moc_worldfilemap.cpp
 ```
 
-# 199
+# 199. guess image type by parsing image buffer header
 
+```
 
+std::string GuessImageType(char* pImageBuffer, int nBufferSize)
+{
+	if (nBufferSize < 10 || pImageBuffer == nullptr)
+		return "";
 
+	unsigned char* pBuffer = (unsigned char*)pImageBuffer;
 
+	if (pBuffer[0] == 0xFF && pBuffer[1] == 0xD8)
+		return ".jpg";
 
+	if (pBuffer[0] == 0x89 && pBuffer[1] == 0x50 && pBuffer[2] == 0x4E &&
+		pBuffer[3] == 0x47 && pBuffer[4] == 0x0D && pBuffer[5] == 0x0A &&
+		pBuffer[6] == 0x1A && pBuffer[7] == 0x0A)
+		return ".png";
 
+	if (pBuffer[0] == 'B' && pBuffer[1] == 'M')
+		return ".bmp";
 
+	if ((pBuffer[0] == 'I' && pBuffer[1] == 'I') ||
+		(pBuffer[0] == 'M' && pBuffer[1] == 'M'))
+		return ".tif";
 
+	if (pBuffer[0] == 'G' && pBuffer[1] == 'I' && pBuffer[2] == 'F')
+		return ".gif";
 
+	return "";
+}
+```
+
+# 200 . opentopomap url
+
+```
+<name>Open Topo Map</name>
+<url>https://a.tile.opentopomap.org/$z/$x/$y.png</url>
+<zoom max="17"/>
+<copyright>Map data: © OpenStreetMap contributors (ODbL), SRTM | Rendering: © OpenTopoMap (CC-BY-SA)</copyright>
+
+```
+```
+https://basemap.nationalmap.gov/ArcGIS/rest/services/USGSImageryOnly/MapServer/tile/2/1/2
+
+```
+
+# 201. ProcessBuilder  commandArgs
+
+```
+
+    public static boolean isLinuxOS() {
+        boolean var0 = false;
+        String var1 = "os.name";
+        String var2 = System.getProperty(var1);
+        var2 = var2.toLowerCase();
+        if (var2.contains("window")) {
+            var0 = false;
+        } else if (var2.contains("linux")) {
+            var0 = true;
+        }
+
+        return var0;
+    }
+
+    public static String getProgramPath() {
+        String var0 = null;
+        boolean var1 = isLinuxOS();
+        String var2;
+        if (var1) {
+            var2 = "libbase.so";
+            String var3 = System.getProperty("java.library.path");
+            String[] var4 = var3.split(File.pathSeparator);
+            String[] var5 = var4;
+            int var6 = var4.length;
+
+            for(int var7 = 0; var7 < var6; ++var7) {
+                String var8 = var5[var7];
+                File var9 = new File(Paths.get(var8, var2).toString());
+                if (var9.isFile() && var9.exists()) {
+                    try {
+                        var0 = (new File(var9.getCanonicalPath())).getParent();
+                    } catch (IOException var12) {
+                        var12.printStackTrace();
+                    }
+                    break;
+                }
+            }
+        } else {
+
+        }
+
+        return var0;
+    }
+
+    protected  static void process() throws IOException, InterruptedException {
+        String programPath = getProgramPath();
+        String toolName = isLinuxOS() ? "Licence" : "Licence.exe";
+        String authExePath = java.nio.file.Paths.get(programPath, toolName).toString();
+        List<String> commandArgs = new ArrayList<>();
+        commandArgs.add(authExePath);
+        commandArgs.add("-self");
+        commandArgs.add("-check");
+        ProcessBuilder processBuilder = new ProcessBuilder();
+        processBuilder.environment().put(isLinuxOS() ? "LD_LIBRARY_PATH" : "PATH", programPath + File.separator);
+        processBuilder.command(commandArgs);
+        //processBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+        System.out.println("开始授权验证......");
+        Process p = processBuilder.start();
+        p.waitFor();
+
+    }
+```
 
 
 
