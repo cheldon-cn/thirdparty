@@ -17498,10 +17498,129 @@ https://basemap.nationalmap.gov/ArcGIS/rest/services/USGSImageryOnly/MapServer/t
 ```
 
 
+# 202. check character set
+
+## windows
+```
+0. 查看windows操作系统的默认编码(字符集)_默认编码 
+在windows cmd 模式下，输入命令 ： chcp
+
+中文windows下，活动代码页为936，意思是"中国-简体中文(GB2312)"
+
+936   (ANSI/OEM - 简体中文 GBK)
+
+说明：代码页是“字符集编码”的别名，也有人称为“内码表”。
+
+1.临时修改系统编码：
+直接输入“chcp 65001”，回车键（Enter键）执行，这时候该窗口编码已经是UTF-8编码了
+
+```
+```
+下表列出了所有支持的代码页及其国家(地区)或者语言：
+代码页 国家(地区)或语言
+437 美国
+708 阿拉伯文(ASMO 708)
+720 阿拉伯文(DOS)
+850 多语言(拉丁文 I)
+852 中欧(DOS) - 斯拉夫语(拉丁文 II)
+855 西里尔文(俄语)
+857 土耳其语
+860 葡萄牙语
+861 冰岛语
+862 希伯来文(DOS)
+863 加拿大 - 法语
+865 日耳曼语
+866 俄语 - 西里尔文(DOS)
+869 现代希腊语
+874 泰文(Windows)
+932 日文(Shift-JIS)
+936 中国 - 简体中文(GB2312)
+949 韩文
+950 繁体中文(Big5)
+1200 Unicode
+1201 Unicode (Big-Endian)
+1250 中欧(Windows)
+1251 西里尔文(Windows)
+1252 西欧(Windows)
+1253 希腊文(Windows)
+1254 土耳其文(Windows)
+1255 希伯来文(Windows)
+1256 阿拉伯文(Windows)
+1257 波罗的海文(Windows)
+1258 越南文(Windows)
+20866 西里尔文(KOI8-R)
+21866 西里尔文(KOI8-U)
+28592 中欧(ISO)
+28593 拉丁文 3 (ISO)
+28594 波罗的海文(ISO)
+28595 西里尔文(ISO)
+28596 阿拉伯文(ISO)
+28597 希腊文(ISO)
+28598 希伯来文(ISO-Visual)
+38598 希伯来文(ISO-Logical)
+50000 用户定义的
+50001 自动选择
+50220 日文(JIS)
+50221 日文(JIS-允许一个字节的片假名)
+50222 日文(JIS-允许一个字节的片假名 - SO/SI)
+50225 韩文(ISO)
+50932 日文(自动选择)
+50949 韩文(自动选择)
+51932 日文(EUC)
+51949 韩文(EUC)
+52936 简体中文(HZ)
+65000 Unicode (UTF-7)
+65001 Unicode (UTF-8)
+```
+## for linux 
+```
+[Unauthorized System] root@Kylin:~# locale
+LANG=zh_CN.UTF-8
+LANGUAGE=zh_CN:zh
+LC_CTYPE="zh_CN.UTF-8"
+LC_NUMERIC="zh_CN.UTF-8"
+LC_TIME="zh_CN.UTF-8"
+LC_COLLATE="zh_CN.UTF-8"
+LC_MONETARY="zh_CN.UTF-8"
+LC_MESSAGES="zh_CN.UTF-8"
+LC_PAPER="zh_CN.UTF-8"
+LC_NAME="zh_CN.UTF-8"
+LC_ADDRESS="zh_CN.UTF-8"
+LC_TELEPHONE="zh_CN.UTF-8"
+LC_MEASUREMENT="zh_CN.UTF-8"
+LC_IDENTIFICATION="zh_CN.UTF-8"
+LC_ALL=
+
+[Unauthorized System] root@Kylin:~# echo $LANG
+zh_CN.UTF-8
 
 
+```
+
+## 查看系统是否安装中文字符集
+```
 
 
+locale -a |grep zh      
+
+如果出现了 zh 开头的，代表安装了中文字符集，直接进行第 4 步就行修改即可。
+
+如果未出现 zh 开头的，则需要安装：
+	yum -y groupinstall chinese-support      安装中文字符集
+安装完成之后，修改系统字符集即可
+
+```
+## 修改系统字符集
+```
+
+临时修改(当前终端生效)：
+	export LANG="zh_CN.UTF-8"
+
+永久修改：
+	echo 'export LANG="zh_CN.UTF-8"'  >> /etc/proflile       将单引号中的语句写入到 /etc/profile 文件
+	source /etc/profile      重新加载 profile 文件（使之立即生效）
+
+```
 
 
 
