@@ -17622,6 +17622,48 @@ locale -a |grep zh
 
 ```
 
+# 203  get character set
+
+```
+
+#ifdef _WIN32
+#include "windows.h"
+#include "stdio.h"
+#else
+#include <langinfo.h>
+#endif
+
+enum characterset
+{
+	def = 1,
+	ansi = 100,
+	gbk  = 936,
+	uft8 = 65001
+}  ;
+
+characterset get_characterset()
+{
+	characterset cs = characterset::def;
+
+#ifdef _WIN32
+	CPINFOEX cpInfoEx;
+	UINT codePage;
+	codePage = GetACP();
+	GetCPInfoEx(codePage, 0, &cpInfoEx);
+	printf("windows系统字符集: %s.\n", cpInfoEx.CodePageName);
+	if (codePage == 936)
+		cs = characterset::gbk;
+#else
+	char * pInfo = nl_langinfo(CODESET);
+	printf("linux系统字符集: %s.\n", pInfo);
+	if (pInfo && 0 == strcmpi("UTF-8", pInfo))
+		cs = characterset::utf8;;
+
+
+#endif
+	return cs;
+}
+```
 
 
 
