@@ -17752,8 +17752,34 @@ std::wstring String2Wstring(std::string wstr, UINT nCode) ///CP_ACP
 }
 ```
 
+# 206. MSB8027: Two or more files with the name of ***.cpp will produce outputs to the same location.
 
+## Question
 
+```
+有两个Texture.cpp（一个针对真实环境纹理，另一个针对虚拟目标纹理）分别位于不同的子目录中，然而VC++编译器却不太乐意接受这种情况：
+
+C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V120\Microsoft.CppBuild.targets(942,5): warning MSB8027: Two or more files with the name of Texture.cpp will produce outputs to the same location. This can lead to an incorrect build result.  The files involved are src\geometry\Texture.cpp, src\graphics\Texture.cpp.
+程序会继续编译，但最后将在包含错误文件或者访问错误类时发生错误！
+```
+```
+
+其实这个已经不是什么新Bug了，在下面这个Microsoft Connect给出的时间线中就有这个问题，并且原本计划是在Visual Studio 2013 Update 1就该得到解决（我现在在用Update 3然而并没有解决！）：https://connect.microsoft.com/VisualStudio/feedback/details/797460/incorrect-warning-msb8027-reported-for-files-excluded-from-build
+```
+## solution
+
+解决方法
+```
+
+VC++编译源文件时默认全部输出（对象文件）到同一个目录下，遇到同名源文件覆盖前面的同名对象文件。
+链接时会出现链接失败的现象 ‘error LNK2001: 无法解析的外部符号’
+
+为了解决这个问题，你可以设置输出路径与源文件路径类似。以下操作在Visual Studio 2013 (Update 3)下适用：
+
+右键项目->属性->配置属性->C/C++->输出文件->对象文件名，将$(IntDir)改为$(IntDir)/%(RelativeDir)/。
+
+设置完毕后，编译阶段输出路径将会把源文件路径考虑进去而不是只考虑源文件名
+```
 
 
 
