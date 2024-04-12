@@ -17781,8 +17781,111 @@ VC++编译源文件时默认全部输出（对象文件）到同一个目录下�
 设置完毕后，编译阶段输出路径将会把源文件路径考虑进去而不是只考虑源文件名
 ```
 
+```
+两个或多个源文件具有相同的名称，并且生成结果保存在同一个中间目录中。 首先生成的文件的输出会被下一个同名文件覆盖。 发生错误后通常会出现 LNK4042 警告。 合并在不同位置使用相同文件名的项目时，可能会发生此错误。
+```
+
+可以通过几种方法解决此问题：
+```
+如果项目有两个或多个同名的源文件，请为这些文件指定唯一名称。
+```
+```
+如果无法更改文件名，请将每个文件编译到唯一的中间目录。 要设置中间文件位置，请在“解决方案资源管理器”中选择源文件，然后右键单击以打开快捷菜单。 选择“属性”以打开源文件的“属性页”对话框 。 选择“配置属性”>“C/C++”>“输出文件”属性页 。 将“对象文件名”属性从 $(IntDir) 更改为 $(IntDir)%(RelativeDir)。 选择“确定”以保存更改 。
+```
+
+# 207. thread 
+
+```
+#ifdef HAVE_PTHREAD_H
+#include <pthread.h>
+#elif defined(_WIN32)
+#include <windows.h>
+#endif
+
+#define	MAX_ARGC	20
+#define TEST_REPEAT_COUNT 500
+#ifdef HAVE_PTHREAD_H
+static pthread_t tid[MAX_ARGC];
+#elif defined(_WIN32)
+static HANDLE tid[MAX_ARGC];
+#endif
+
+static const unsigned int num_threads = 4;
+
+static void *
+thread_specific_data(void *private_data)
+{
+    xmlThreadParams *params = (xmlThreadParams *) private_data;
+    const char *filename = params->filename;
+}
+#ifdef _WIN32
+static DWORD WINAPI
+win32_thread_specific_data(void *private_data)
+{
+    thread_specific_data(private_data);
+    return(0);
+}
+#endif
+#endif /* LIBXML_THREADS_ENABLED */
+
+void runThread()
+{
+#ifdef HAVE_PTHREAD_H
+        memset(tid, 0xff, sizeof(*tid)*num_threads);
+
+	for (i = 0; i < num_threads; i++) {
+	    ret = pthread_create(&tid[i], NULL, thread_specific_data,
+				 (void *) &threadParams[i]);
+	    if (ret != 0) {
+		perror("pthread_create");
+		exit(1);
+	    }
+	}
+	for (i = 0; i < num_threads; i++) {
+            void *result;
+	    ret = pthread_join(tid[i], &result);
+	    if (ret != 0) {
+		perror("pthread_join");
+		exit(1);
+	    }
+	}
+#elif defined(_WIN32)
+        for (i = 0; i < num_threads; i++)
+        {
+            tid[i] = (HANDLE) -1;
+        }
+
+        for (i = 0; i < num_threads; i++)
+        {
+            DWORD useless;
+            tid[i] = CreateThread(NULL, 0,
+                win32_thread_specific_data, &threadParams[i], 0, &useless);
+            if (tid[i] == NULL)
+            {
+                perror("CreateThread");
+                exit(1);
+            }
+        }
+
+        if (WaitForMultipleObjects (num_threads, tid, TRUE, INFINITE) == WAIT_FAILED)
+            perror ("WaitForMultipleObjects failed");
+
+        for (i = 0; i < num_threads; i++)
+        {
+            DWORD exitCode;
+            ret = GetExitCodeThread (tid[i], &exitCode);
+            if (ret == 0)
+            {
+                perror("GetExitCodeThread");
+                exit(1);
+            }
+            CloseHandle (tid[i]);
+        }
+#endif /* pthreads */
+}
 
 
+```
 
 
 
