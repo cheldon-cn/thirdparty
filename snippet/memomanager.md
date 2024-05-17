@@ -17888,6 +17888,108 @@ void runThread()
 ```
 
 
+# 208. set data dir for vscode 
+
+For case：the valid space in default dir maybe not enough;
+Traget: do not use the default dir;
+To do:
+
+```
+1. create a shortcut for vscode
+2. open the property of the shortcut;
+3. for target item,set the user data dir,
+   eg:
+   D:\Program\VSCode-win32-x64\Code.exe --user-data-dir "F:\Cache\vscode"
+```
+
+#209.  exportCsv and  exportExcel
+
+```
+   private void exportExcel() {
+        FileChooser fileChooser = new FileChooser();
+        // 设置对话框标题
+        fileChooser.setTitle("保存文件");
+        // 设置默认文件扩展名过滤器，这里以txt为例
+        FileChooser.ExtensionFilter txtFilter = new FileChooser.ExtensionFilter("Excel文件(*.xlsx)", "*.xlsx");
+        fileChooser.getExtensionFilters().add(txtFilter);
+        fileChooser.setSelectedExtensionFilter(txtFilter);
+
+        java.io.File selectedFile = fileChooser.showSaveDialog(this.tableView.getScene().getWindow());
+        if (selectedFile != null) {
+            //System.out.println("Selected file path: " + selectedFile.getAbsolutePath());
+            try {
+                String fileName = selectedFile.getName();
+                int extensionStartIndex = fileName.lastIndexOf('.');
+                if (extensionStartIndex != -1) {
+                    fileName = fileName.substring(0, extensionStartIndex);
+                }
+                EasyExcel.write(selectedFile.getAbsolutePath(), Scoring.class).registerWriteHandler(new LongestMatchColumnWidthStyleStrategy()).sheet(fileName).doWrite(this.data);
+                MessageBox.information(this.tableView.getScene().getWindow(), "保存成功，路径：\r\n" + selectedFile.getAbsolutePath());
+            } catch (Throwable e) {
+                MessageBox.error(this.tableView.getScene().getWindow(), e.getMessage());
+            }
+        }
+    }
+
+    private void exportCsv() {
+        FileChooser fileChooser = new FileChooser();
+        // 设置对话框标题
+        fileChooser.setTitle("保存文件");
+        // 设置默认文件扩展名过滤器，这里以txt为例
+        FileChooser.ExtensionFilter txtFilter = new FileChooser.ExtensionFilter("Csv(*.csv)", "*.csv");
+        fileChooser.getExtensionFilters().add(txtFilter);
+        fileChooser.setSelectedExtensionFilter(txtFilter);
+
+        java.io.File selectedFile = fileChooser.showSaveDialog(this.tableView.getScene().getWindow());
+        if (selectedFile != null) {
+            //System.out.println("Selected file path: " + selectedFile.getAbsolutePath());
+            try {
+                EasyExcel.write(selectedFile.getAbsolutePath(), Scoring.class).excelType(ExcelTypeEnum.CSV).sheet().doWrite(this.data);
+                addBOMtoFile(selectedFile.getAbsolutePath());
+                MessageBox.information(this.tableView.getScene().getWindow(), "保存成功，路径：\r\n" + selectedFile.getAbsolutePath());
+            } catch (Throwable e) {
+                MessageBox.error(this.tableView.getScene().getWindow(), e.getMessage());
+            }
+        }
+    }
+
+    private static boolean isWindows() {
+        String os = System.getProperty("os.name").toLowerCase();
+        return os.contains("windows");
+    }
+
+    private static void addBOMtoFile(String src) throws IOException {
+        if (!isWindows())
+            return;
+        File inputFile = new File(src);
+        File tempFile = File.createTempFile(java.util.UUID.randomUUID().toString(), ".csv");
+
+        RandomAccessFile raf = new RandomAccessFile(inputFile, "rw");
+        FileOutputStream tempfos = new FileOutputStream(tempFile);
+
+        byte[] newData = { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF};
+        // 将新字节写入文件头
+        raf.seek(0);
+        tempfos.write(newData);
+        // 读取并复制剩余的原文件内容到临时文件
+        byte[] buffer = new byte[1024];
+        int bytesRead;
+        while ((bytesRead = raf.read(buffer)) != -1) {
+            tempfos.write(buffer, 0, bytesRead);
+        }
+        tempfos.close();
+        raf.close();
+        // 删除原文件
+        inputFile.delete();
+
+        // 将临时文件改名为原文件
+        tempFile.renameTo(inputFile);
+    }
+
+
+```
+
+
 
 
 
