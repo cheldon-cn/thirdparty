@@ -17989,8 +17989,53 @@ To do:
 
 ```
 
+#210. Copy File by char one by one from source file to target file
 
 
+gisLONG CopyFile(const char * pszSrcFile, const char * pszDestFile)
+{
+	FILE*      in_file = NULL;
+	FILE*      out_file = NULL;
+	char       data[1024] = { 0 };
+	size_t     bytes_in = 0;
+	size_t     bytes_out = 0;
+	long len = 0;
+
+	if (!pszSrcFile || strlen(pszSrcFile) <= 0 || !pszDestFile || strlen(pszDestFile) <= 0)
+		return 0;
+
+	if ((in_file = fopen(pszSrcFile, "rb")) == NULL)
+	{
+		fclose(in_file);
+		perror(pszSrcFile);
+		return 0;
+	}
+	if ((out_file = fopen(pszDestFile, "wb")) == NULL)
+	{
+		fclose(in_file);
+		fclose(out_file);
+		perror(pszDestFile);
+		return 0;
+	}
+
+
+	while ((bytes_in = fread(data, 1, 1024, in_file)) > 0)
+	{
+		bytes_out = fwrite(data, 1, bytes_in, out_file);
+		if (bytes_in != bytes_out)
+		{
+			perror("Fatal write error.\n");
+			return 0;
+		}
+		len += bytes_out;
+		printf("copying file .... %d bytes copy\n", len);
+	}
+
+	fclose(in_file);
+	fclose(out_file);
+
+	return 1;
+}
 
 
 
