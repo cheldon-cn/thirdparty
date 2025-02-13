@@ -18038,10 +18038,58 @@ gisLONG CopyFile(const char * pszSrcFile, const char * pszDestFile)
 }
 
 
+#211. shell script 
+
+当window下创建的脚本文件需要用于linux环境时，需要将文件转为unix格式进行保存，而不能默认保存为windows格式；
+两者的区别在于 windows格式结束符为 CR LF ,unix格式结束符为LF ,mac格式为CR
+
+CRLF 是 carriage return line feed 的缩写；中文意思是 回车换行。
+LF 是 line feed 的缩写，中文意思是换行
+
+```
+#!/bin/bash
+# 校验第一个参数是否存在且非空
+if [ -z "$1" ]; then
+    echo "错误：必须提供第一个参数（URL）！" >&1
+    exit 1
+fi
+
+# 处理 URL 结尾斜杠问题
+db_source="${1%/}"  # 移除末尾可能存在的斜杠
+export db_source
+
+# 拼接路径（确保格式为 http://www.qq.com/acls）
+export AclsPathSrc="${db_source}/acls"
+
+# 打印结果
+echo "AclsPathSrc：${AclsPathSrc}"
+
+# 校验第二个参数是否存在且非空
+if [ -z "$2" ]; then
+    echo "错误：必须提供第二个参数（URL）！" >&2
+    exit 1
+fi
+
+# 处理 URL 结尾斜杠问题
+db_tar="${2%/}"  # 移除末尾可能存在的斜杠
+export db_tar
+
+# 拼接路径（确保格式为 http://www.qq.com/acls）
+export AclsPathtar="${db_tar}/acls"
+
+# 打印结果
+echo "AclsPathtar：${AclsPathtar}"
+
+#!/bin/bash
+```
+
+#212. 
+
+
 
 
 
 
 
 -----
-Copyright 2020 - 2024 @ [cheldon](https://github.com/cheldon-cn/).
+Copyright 2020 - 2025 @ [cheldon](https://github.com/cheldon-cn/).
