@@ -17902,7 +17902,7 @@ To do:
    D:\Program\VSCode-win32-x64\Code.exe --user-data-dir "F:\Cache\vscode"
 ```
 
-#209.  exportCsv and  exportExcel
+# 209.  exportCsv and  exportExcel
 
 ```
    private void exportExcel() {
@@ -17989,7 +17989,7 @@ To do:
 
 ```
 
-#210. Copy File by char one by one from source file to target file
+# 210. Copy File by char one by one from source file to target file
 
 
 gisLONG CopyFile(const char * pszSrcFile, const char * pszDestFile)
@@ -18038,7 +18038,7 @@ gisLONG CopyFile(const char * pszSrcFile, const char * pszDestFile)
 }
 
 
-#211. shell script 
+# 211. shell script 
 
 当window下创建的脚本文件需要用于linux环境时，需要将文件转为unix格式进行保存，而不能默认保存为windows格式；
 两者的区别在于 windows格式结束符为 CR LF ,unix格式结束符为LF ,mac格式为CR
@@ -18084,7 +18084,7 @@ echo "AclsPathtar：${AclsPathtar}"
 ```
 
 
-#212. gitclone.com 
+# 212. gitclone.com 
 
 ## HTTPS
 SSH 可能很慢且失败，使用https 对应url 
@@ -18111,6 +18111,466 @@ git clone https://gitclone.com/github.com/huggingface/transformers
 实测基本上能做到1M/s的下载速度。
 
 这种加速目前只支持git clone 和git pull 命令，所以适用于拉取别人代码进行本地查看的应用场景。
+
+# 213  name validator
+
+
+	#pragma region
+	#include <string>
+	#include <regex>
+	#include <unordered_set>
+	#include <algorithm>
+	#include <cctype>
+	#include <fstream>
+	// 命名规范检查类
+	class validator {
+
+	public:
+		Validator(size_t trancateLen);
+	protected:
+		std::unordered_set<std::string> m_reserved_keywords;
+		std::unordered_set<std::string> m existedNames;
+	bool m_bRenameInvalidFld:
+		size_t m_maxLen = FLD_MAME_LEN;
+	public:
+		/**
+		* @brief Loads keywords from the specified file.
+		* @param filename The path to the file containing keywords to load.
+		* @note This is a pure virtual function, must be implemented by derived classes.
+		*/
+		virtual void Loadkeywords(const std::string& filename) = 0;
+		//有效性检查核心逻辑
+		bool Validate(std::string& fieldName) {
+			return ValidateCore(fieldName, m existedNames);
+		}
+	//验证字段名的有效性
+		virtual bool ValidateCore(std::string& fieldName,
+								std::unordered_set<std::string>& existingNames) = 0;
+
+		///rename invalid field
+		bool IfRenameInvalidFld();
+		void setRenameInvalidFld(bool bRename);
+	};
+	//字段命名规范检查类
+	class Fieldvalidator : public Validator {
+	public:
+		Fieldvalidator(size_t trancatelen);
+		~Fieldvalidator();
+	public:
+		void Loadkeywords(const std::string& filename);
+	//验证字段名的有效性
+		virtual bool ValidateCore(std::string& fieldName,
+								std::unordered_set<std::string > & existingNames);
+	// 批是检查接口
+		void Batchcheck(const std::vector<std::string>& fields);
+	};
+
+	enum ValidationResult {
+		VALID,
+		EMPTY_NAME,
+		LENGTH_EXCEEDED,
+		INVALID_FIRST_CHAR,
+		INVALID_CHAR,
+		RESERVED_KEYWORD,
+		DUPLICATE_MAME
+	};
+
+	class Namevalidator : public validator {
+	public:
+		Namevalidator(size_t trancateLen);
+		~Namevalidator();
+	private:
+		ValidationResult i_validate(
+			std::string& name,
+			const std::unordered_set<std::string>& existingNames
+		);
+	public:
+		void Loadkeywords(const std::string& filename);
+	// 验证字段名的有效性
+		virtual bool ValidateCore(std::string& fieldName, std: : unordered_set<std::string>& existingNames);
+		static std::string getErrorMessage(validationResult result) {
+			switch(result) {
+
+			case EMPTY_NAME:
+				return "名称不能为空";
+			case LENGTH_EXCEEDED:
+				return "名称长度超限";
+			case INVALID_FIRST_CHAR:
+				return "首字符必须为字母、汉字或下划线";
+			case INVALID_CHAR:
+				return"包含非法字";
+			case RESERVED_KEYWORD:
+				return "名称与保留关键字冲突";
+			case DUPLICATE_NAME:
+				return "名称已存在";
+			default:
+				return "";
+			}
+		}
+	};
+
+	class MDBFieldvalidator : public Fieldvalidator {
+
+	public:
+		MDBFieldvalidator(size_t trancateLen);
+		~MDBFieldvalidator();
+		void Initkeywords();
+	public:
+	// Access 保留关键字集合
+		void Loadkeywords(std::unordered_set<std::string>& keywords);
+	//扩展检查:ArcGIs地理数据库字股特殊规则
+		bool ValidateForGeodatabase(std::string& fieldName);
+	};
+	#pragma endregion
+
+
+	#pragma region Fieldvalidator
+	Validator::validator(size_t trancateLen) :
+		m_maxLen(trancateLen),
+		m_bRenameInvalidFld(true) {
+
+	}
+	bool validator::IfRenameInvalidFld() {
+		return m_bRenameInvalidFld;
+	}
+	void validator::setRenameInvalidFld(bool bRename) {
+		m_bRenameInvalidFld = bRename;
+	}
+
+	void Fieldvalidator::Loadkeywords(const std::string& filename) {
+		std::ifstream file(filename.c str());
+		std::string keyword;
+		while(file >> keyword) {
+			m_reserved_keywords.insert(keyword);
+		}
+
+	}
+	const std::string INVALID_CHARS = ".[]!\\/\"'?*,;<>:{}-+=()";
+
+	Fieldvalidator::ValidateCore(std::string& fieldName, std: : unordered_set<std::string>& existingNames) {
+		const char* pszName = fieldName.c str();
+		// 检章 1:空值
+		if(fieldName.empty()) {
+			LogError("当前为空值", pszName);
+			return false;
+		}
+		// 检查 2:首尾不能有空掐
+		if(fieldName.front() == ' ' || fieldName.back() == ' ') {
+
+			LogError("字段:%s,字段名不能以空格开头或结尾", pszName);
+	return false:
+		}
+		//检查 3:首字符必须为字母或下划线
+
+		if(mdb::isvalidrirstchar(fieldName)) {
+
+			yogError("字段:%s,首字符必须为字母,汉字或下划线", pszName);
+			return false;
+		}
+
+		bool bExsitIllegalchar = false,
+			//检查 4:非法字符检测正则表达式
+		for(char c : fieldName) {
+			if(INVALID_CHARS.find(c) != std::string::npos) {
+				LogWanning("字段:%s,包含非法字符%s", pszName, c);
+				bExsitIllegalchar = true;
+				if(m_bRenameInvalidFld) {
+					mdb::sanitizeName(fieldName);
+					break;
+				} else
+					return false;
+
+			}
+		}
+		// 检查 5:字段长度
+		if(fieldName.size() > m_maxLen) {
+			LogWanning("字段名长度需在 1-%d 字符之间,字段:%s", m_maxLen, pszName);
+			if(m_bRenameInvalidFld) {
+				mdb::Trancate(fieldName, m_maxLen);
+				else
+					return false;
+			}
+		}
+	// 检章 6:是百为保留字(不区分大小写)
+		std::string upperName = fieldName;
+		std::transform(upperName.begin(), upperName.end(), upperName.begin(), ::toupper);
+		if(m_reserved_keywords.count(upperName)) {
+			LogWanning("字段:%s,字段名不能为保留关键字", pszName);
+			if(m_bRenameInvalidFld) {
+
+				mdb::Addsuffix(upperName);
+				LogWanning("字段:%s,已添加后缀重命名为:%s", pszName, upperName.c str());
+				fieldName = upperName;
+			} else
+				return false;
+		}
+	///检查 7:唯一性不区分大小写)
+		if(existingNames.count(upperName)) {
+
+			LogWanning("字段:%s,字段名已存在", pszName);
+			if(m_bRenameInvalidFld) {
+				mdb::Addsuffix(upperName)i
+				LogWanning("字段:%s,已添加后缀重命名为:%s", pszName, upperName.c_str());
+				fieldName = upperName;
+			} else
+				return false;
+
+		}
+		existingNames.insert(upperName);
+		return true;
+	}
+	void Fieldvalidator::Batchcheck(const std::vector<std::string>& fields) {
+
+		for(const auto& field : fields) {
+			std::string fld = field;
+			bool isvalid = validate(fld);
+			std::cout << "字段'" << field << "' :"
+					<< (isvalid ? "有效" : "无效") << std::endl;
+		}
+	}
+	Fieldvalidator::Fieldvalidator(size_t trancateLen):
+		Validator(trancateLen)
+
+	{
+
+	}
+	Fieldvalidator::~Fieldvalidator() {
+
+	}
+
+	#pragma endregion
+
+	namespace mdb {
+
+	//名称枚举,用于指定验证场景
+	enum validType {
+
+		validFieldName = 1,
+		validsFclsName,
+		validAclsName,
+		validoclsName,
+		validFdsName,
+		validAliasName
+	};
+	enum logLevel {
+
+		debug = 0,
+		info = 1,
+		warn = 2,
+		error = 4,
+		fatal = 8
+	};
+
+	//验证给定字符串是否符合指定类型的规则
+	bool Validate(std::string& str, validType type);
+	//替换非法字符为下划线,确保名称的合法性
+	int SanitizeName(std::string& name);
+	//合名称添加后缀,以避免命名冲突
+	int Addsuffix(std::string& name);
+	// 截断过长的名称,使其符合最大长度限制
+	void Trancate(std::string& sanName, size_t maxLen);
+	//判断字符串是否以GBK编码的汉字开头
+	bool startswithchinese(const std::string &s);
+	//验证字符串是否为有效的首字符,用于命名规范性检查
+	bool IsvalidFirstchar(const std::string &s);
+	}
+
+	#pragma region Namevalidator
+	Namevalidator::Namevalidator(size_t trancateLen):
+		Validator(trancateLen) {
+
+	}
+	Namevalidator::~Namevalidator()
+	{}
+	void NameValidator::Loadkeywords(const std::string& filename) {
+
+		std::unordered_set<std::string>keywords = {
+			"SELECT", "INSERT", "UPDATE", "DELETE", "TABLE", "OBJECTID", "SHAPE"
+		};
+		for(std::string keyword : keywords) {
+			m_reserved_keywords.insert(keyword);
+		}
+	}
+
+	bool Namevalidator::ValidateCore(std::string& fieldName, std::unordered_set<std::string>& existingNames) {
+		ValidationResult result = i_validate(fieldName, existingNames),
+		if(result != VALID) {
+			std::string strMsg = Namevalidator::geterrorMessage(result);
+			Lognrning("Msg:%s,名称:%s", strMsg.c str(), fieldName.c str());
+		}
+		if(result == VALID) return true;
+		else if(resuIt == LENGTH_EXCEEDED) {
+
+			if(m_bRenameInvalidFld)
+				mdb::Trancate(fieldName, m_maxLen);
+			return true;
+		} 
+		else if(result == INVALID_CHAR) {
+			if(m_bRenameInvalidFld) {
+				mdb::sanitizeName(fieldName);
+			}
+			return true;
+		} 
+		else if(result == RESERVED_KEYWORD || resuIt == DUPLICATE_NAME) {
+
+			if(m_bRenameInvalidFld) {
+				mdb::Addsuffix(fieldName);
+			}
+			return true;
+		} 
+		else return false;
+
+	}
+
+	ValidationResult Namevalidator::i_validate(std::string& name, const std: : unordered_set<std::string>& existingNames) {
+
+	// 检查空值
+		if(name.empty()) return EMPTY_NAME;
+	// 检查长度
+		size_t maxLength = m_maxLen;
+		if(name.length() > maxLength) return LENGTH_EXCEEDED;
+	//   检查首字符
+		if(mdb::IsvalidFirstchar(name))return INVALID_FIRST_CHAR;
+	// 检查非法字符
+		for(char c : name) {
+			if(INVALID_CHARs.find(c) != std::string::npos) {
+				return INVALID_CHAR;
+			}
+		}
+	//std::regex pattern(R"(^[A-za-28-9 +)");
+	//if(!std::regex match(name, pattern))return INVALID_CHAR;
+	// 检查保留字,(不区分大小写)
+		std::string upperName = name;
+		std::transform(upperName.begin(), upperName.end(), upperName.begin(), ::toupper);
+		if(m reserved KeyNords, count(upperName))return RESERVED_KEYWORD;
+	// 检查准一性(企业库不区分大小写)
+		std::string lookupName = upperName;
+		if(existingNames.count(lookupName))return DUPLICATE_NAME;
+		return VALID;
+	}
+
+	#pragma endregion
+
+	#pragma region MDBFieldValidator
+	MDBFieldValidator::MDBFieldValidator(size_t trancateLen):
+		FieldValidator(trancateLen) {
+
+		InitKeywords();
+	}
+	MDBFieldValidator::~MDBFieldValidator()
+	{}
+	void MDBFieldValidator::InitKeywords() {
+		std::unordered_set<std::string>keyWords = {
+			"ADD", "ALL", "ALTER",  "AND", "AS", "ASC",
+			"BETWEEN", "BY", "COLUMN", "GROUP", "CREATE", "DELETE", "DESC", "DROP", "EXISTS", "FROM",
+			"IN", "LIKE", "NOT", "NULL", "OR", "ORDER', "INSERT", 'INTO",
+			"JOIN", "KEY", "PRIMARY",
+			"SELECT", "TABLE", "UPDATE", "VALUES", "WHERE", "CLASS"
+		};
+		LoadKeywords(keywords);
+	}
+	}
+	void MDBFieldValidator::LoadKeywords(std::unordered_set<std::string>& keyWords) {
+		for(std::string keyword : keyWords) {
+			m reserved Keylords.insert(keyword);
+		}
+	}
+
+		bool MDBFieldValidator::ValidateForGeodatabase(std::string& fieldName) {
+			//基础语法检育
+			if(!FieldValidator::Validate(fieldName))return false;
+	//地理数据库字段禁用前缀(如shape、objectid)
+			if(fieldName.find("shape_") == 0 ||
+					fieldName.find("objectid") != std::string::npos) {
+				return false;
+			}
+			return true;
+		}
+
+	#Pragma endregion
+	bool mdb::Validate(std::string& str, validType type)
+		{
+		bool rtn = false;
+		switch(type) {
+		case validFieldName : {
+
+			MDBFieldValidator fldValidator(FLD_NAME_LEN);
+			rtn = fldValidator.Validate(str);
+			break;
+		}
+		case validsFclsName: {
+
+			NameValidator clsValidator(50);//52
+			rtn = clsValidator.Validate(str);
+			break;
+		}
+		case validAclsName:
+		case validOclsName:
+		case validFdsName: {
+
+			NameValidator clsValidator(60);//64
+			rtn = clsValidator.Validate(str);
+			break;
+		}
+		case validAliasName: {
+
+			NameValidator aliasValidator(MAX_ALIAS_LEN - 3);
+			rtn = aliasValidator.Validate(str);
+			break;
+		}
+		default:
+			break;
+			return rtn;
+		}
+
+	int mdb::SanitizeName(std::string& name) {
+		const char* pszName = name.c str();
+		std::replace_if(name.begin(), name.end()
+			[](char c) { return INVALID_CHARs.find(c) != std::string::npos; }, '_');
+		Logwanning("已重命名,%s-->%s", pszName, name.c_str());
+		return 1;
+
+	}
+	int mdb::Addsuffix(std::string& name) {
+
+	/// add suffix with gdb
+	//return 1;
+		std::string strName(name);
+		int index = 1;
+		name += "_";
+		name += std::to string(index);
+		yogwanning("已添加后缀重命名,%5-->%s", strName.c str(), name.c str());
+		return index;
+	}
+
+	void mdb::Trancate(std::string& sanName, size_t maxLen) {
+		const char* pszName = sanName.c str();
+		if(maxLen <= FLD_NAME_LEN)
+			sanName = sanName.substr(0, maxLen);
+		else {
+
+			size_t len = sanName.size();
+			size_t lhalf = maxLen / 2;
+			size_t lpos = len - lhalf;
+			if(lpos < 0) lpos = 0;
+			sanName = sanName.substr(0, lhalf) + sanName.substr(lpos, lhalf);
+		}
+		Logwarning("已截断重命名,%s-->%s", pszName, sanName.c str());
+	}
+
+	bool mdb::startsWithchinese(const std::string &s) {
+		if(s.size() < 2)return false;
+		unsigned char c1 = s0], c2 = s1];
+	//GBK汉字的首字节0x81-0xFE,次字节0x40-0xFE
+		return(c1 >= 0x81 && c1 <= 0xFE) && (c2 >= 0x40 && c2 <= BxFE);
+	}
+	bool mdb::IsValidFirstchar(const std::string &fieldName)
+	{
+		return !std::isalpha(fieldName[0l) && fieldName[0l != '_' && !mdb::startswithchinese(fieldName);
+	}
+
+
+
 
 
 
