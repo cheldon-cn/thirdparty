@@ -18083,7 +18083,34 @@ echo "AclsPathtar：${AclsPathtar}"
 #!/bin/bash
 ```
 
-#212. 
+
+#212. gitclone.com 
+
+## HTTPS
+SSH 可能很慢且失败，使用https 对应url 
+SSH 示例： git@github.com:kingsoft/thirdparty.git
+
+HTTPS 示例：https://github.com/kingsoft/thirdparty.git
+
+如果 https 依然很慢，可以加 gitclone.com
+
+## gitcone.com
+最近偶然发现一个比较好用的解决方案，是采用http://gitclone.com的加速，这里记录一下。
+
+具体来说，在仓库url中增加gitclone.com的前缀，别的地方不变，
+
+即https://github.com/修改为https://gitclone.com/github.com/，
+
+例如原始的clone命令是:
+git clone https://github.com/huggingface/transformers 
+
+替换成下面的命令即可：
+
+git clone https://gitclone.com/github.com/huggingface/transformers
+
+实测基本上能做到1M/s的下载速度。
+
+这种加速目前只支持git clone 和git pull 命令，所以适用于拉取别人代码进行本地查看的应用场景。
 
 
 
