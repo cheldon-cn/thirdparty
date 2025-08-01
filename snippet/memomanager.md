@@ -18570,10 +18570,325 @@ git clone https://gitclone.com/github.com/huggingface/transformers
 	}
 
 
+# 214 build libpqxx
+
+## install postgresql firstly
+## build libpqxx
+1.download libpqxx 
+2.
+  cmake -G"Visual Studio 17 2022" -A x64 -DPostgreSQL_ROOT="E:/PostgreSQL13" -DCMAKE_BUILD_TYPE="Release" -DCMAKE_CONFIGURATION_TYPES-"Release" -DBUILD_SHARED_LIBS=ON -S ../
+
+
+'''
+Administrator@WIN-55826SEKP4A MINGW64 /g/sql/libpqxx-7.10.1
+$ mkdir build
+
+Administrator@WIN-55826SEKP4A MINGW64 /g/sql/libpqxx-7.10.1
+$ cd build
+
+Administrator@WIN-55826SEKP4A MINGW64 /g/sql/libpqxx-7.10.1/build
+$ cmake -G"Visual Studio 17 2022" -A x64 -DPostgreSQL_ROOT="E:/PostgreSQL13" -DCMAKE_BUILD_TYPE="Release" -DCMAKE_CONFIGURATION_TYPES-"Release" -DBUILD_SHARED_LIBS=ON
+CMake Warning:
+  No source or binary directory provided.  Both will be assumed to be the
+  same as the current working directory, but note that this warning will
+  become a fatal error in future CMake releases.
+
+
+CMake Error: Parse error in command line argument: CMAKE_CONFIGURATION_TYPES-Release
+ Should be: VAR:type=value
+
+CMake Error: Run 'cmake --help' for all supported options.
+
+Administrator@WIN-55826SEKP4A MINGW64 /g/sql/libpqxx-7.10.1/build
+$ cmake --help
+Usage
+
+  cmake [options] <path-to-source>
+  cmake [options] <path-to-existing-build>
+  cmake [options] -S <path-to-source> -B <path-to-build>
+
+Specify a source directory to (re-)generate a build system for it in the
+current working directory.  Specify an existing build directory to
+re-generate its build system.
+
+Options
+  -S <path-to-source>          = Explicitly specify a source directory.
+  -B <path-to-build>           = Explicitly specify a build directory.
+  -C <initial-cache>           = Pre-load a script to populate the cache.
+  -D <var>[:<type>]=<value>    = Create or update a cmake cache entry.
+  -U <globbing_expr>           = Remove matching entries from CMake cache.
+  -G <generator-name>          = Specify a build system generator.
+  -T <toolset-name>            = Specify toolset name if supported by
+                                 generator.
+  -A <platform-name>           = Specify platform name if supported by
+                                 generator.
+  --toolchain <file>           = Specify toolchain file
+                                 [CMAKE_TOOLCHAIN_FILE].
+  --install-prefix <directory> = Specify install directory
+                                 [CMAKE_INSTALL_PREFIX].
+  -Wdev                        = Enable developer warnings.
+  -Wno-dev                     = Suppress developer warnings.
+  -Werror=dev                  = Make developer warnings errors.
+  -Wno-error=dev               = Make developer warnings not errors.
+  -Wdeprecated                 = Enable deprecation warnings.
+  -Wno-deprecated              = Suppress deprecation warnings.
+  -Werror=deprecated           = Make deprecated macro and function warnings
+                                 errors.
+  -Wno-error=deprecated        = Make deprecated macro and function warnings
+                                 not errors.
+  --preset <preset>,--preset=<preset>
+                               = Specify a configure preset.
+  --list-presets[=<type>]      = List available presets.
+  --workflow [<options>]       = Run a workflow preset.
+  -E                           = CMake command mode.  Run "cmake -E" for a
+                                 summary of commands.
+  -L[A][H]                     = List non-advanced cached variables.
+  -LR[A][H] <regex>            = Show cached variables that match the regex.
+  --fresh                      = Configure a fresh build tree, removing any
+                                 existing cache file.
+  --build <dir>                = Build a CMake-generated project binary tree.
+                                 Run "cmake --build" to see compatible
+                                 options and a quick help.
+  --install <dir>              = Install a CMake-generated project binary
+                                 tree.  Run "cmake --install" to see
+                                 compatible options and a quick help.
+  --open <dir>                 = Open generated project in the associated
+                                 application.
+  -N                           = View mode only.
+  -P <file>                    = Process script mode.
+  --find-package               = Legacy pkg-config like mode.  Do not use.
+  --graphviz=<file>            = Generate graphviz of dependencies, see
+                                 CMakeGraphVizOptions.cmake for more.
+  --system-information [file]  = Dump information about this system.
+  --print-config-dir           = Print CMake config directory for user-wide
+                                 FileAPI queries.
+  --log-level=<ERROR|WARNING|NOTICE|STATUS|VERBOSE|DEBUG|TRACE>
+                               = Set the verbosity of messages from CMake
+                                 files.  --loglevel is also accepted for
+                                 backward compatibility reasons.
+  --log-context                = Prepend log messages with context, if given
+  --debug-trycompile           = Do not delete the try_compile build tree.
+                                 Only useful on one try_compile at a time.
+  --debug-output               = Put cmake in a debug mode.
+  --debug-find                 = Put cmake find in a debug mode.
+  --debug-find-pkg=<pkg-name>[,...]
+                               = Limit cmake debug-find to the
+                                 comma-separated list of packages
+  --debug-find-var=<var-name>[,...]
+                               = Limit cmake debug-find to the
+                                 comma-separated list of result variables
+  --trace                      = Put cmake in trace mode.
+  --trace-expand               = Put cmake in trace mode with variable
+                                 expansion.
+  --trace-format=<human|json-v1>
+                               = Set the output format of the trace.
+  --trace-source=<file>        = Trace only this CMake file/module.  Multiple
+                                 options allowed.
+  --trace-redirect=<file>      = Redirect trace output to a file instead of
+                                 stderr.
+  --warn-uninitialized         = Warn about uninitialized values.
+  --no-warn-unused-cli         = Don't warn about command line options.
+  --check-system-vars          = Find problems with variable usage in system
+                                 files.
+  --compile-no-warning-as-error= Ignore COMPILE_WARNING_AS_ERROR property and
+                                 CMAKE_COMPILE_WARNING_AS_ERROR variable.
+  --profiling-format=<fmt>     = Output data for profiling CMake scripts.
+                                 Supported formats: google-trace
+  --profiling-output=<file>    = Select an output path for the profiling data
+                                 enabled through --profiling-format.
+  -h,-H,--help,-help,-usage,/? = Print usage information and exit.
+  --version,-version,/V [<file>]
+                               = Print version number and exit.
+  --help <keyword> [<file>]    = Print help for one keyword and exit.
+  --help-full [<file>]         = Print all help manuals and exit.
+  --help-manual <man> [<file>] = Print one help manual and exit.
+  --help-manual-list [<file>]  = List help manuals available and exit.
+  --help-command <cmd> [<file>]= Print help for one command and exit.
+  --help-command-list [<file>] = List commands with help available and exit.
+  --help-commands [<file>]     = Print cmake-commands manual and exit.
+  --help-module <mod> [<file>] = Print help for one module and exit.
+  --help-module-list [<file>]  = List modules with help available and exit.
+  --help-modules [<file>]      = Print cmake-modules manual and exit.
+  --help-policy <cmp> [<file>] = Print help for one policy and exit.
+  --help-policy-list [<file>]  = List policies with help available and exit.
+  --help-policies [<file>]     = Print cmake-policies manual and exit.
+  --help-property <prop> [<file>]
+                               = Print help for one property and exit.
+  --help-property-list [<file>]= List properties with help available and
+                                 exit.
+  --help-properties [<file>]   = Print cmake-properties manual and exit.
+  --help-variable var [<file>] = Print help for one variable and exit.
+  --help-variable-list [<file>]= List variables with help available and exit.
+  --help-variables [<file>]    = Print cmake-variables manual and exit.
+
+Generators
+
+The following generators are available on this platform (* marks default):
+* Visual Studio 17 2022        = Generates Visual Studio 2022 project files.
+                                 Use -A option to specify architecture.
+  Visual Studio 16 2019        = Generates Visual Studio 2019 project files.
+                                 Use -A option to specify architecture.
+  Visual Studio 15 2017 [arch] = Generates Visual Studio 2017 project files.
+                                 Optional [arch] can be "Win64" or "ARM".
+  Visual Studio 14 2015 [arch] = Generates Visual Studio 2015 project files.
+                                 Optional [arch] can be "Win64" or "ARM".
+  Borland Makefiles            = Generates Borland makefiles.
+  NMake Makefiles              = Generates NMake makefiles.
+  NMake Makefiles JOM          = Generates JOM makefiles.
+  MSYS Makefiles               = Generates MSYS makefiles.
+  MinGW Makefiles              = Generates a make file for use with
+                                 mingw32-make.
+
+
+Administrator@WIN-55826SEKP4A MINGW64 /g/sql/libpqxx-7.10.1/build
+$
+
+Administrator@WIN-55826SEKP4A MINGW64 /g/sql/libpqxx-7.10.1/build
+$ cmake -G"Visual Studio 17 2022" -A x64 -DPostgreSQL_ROOT="E:/PostgreSQL13" -DCMAKE_BUILD_TYPE="Release" -DCMAKE_CONFIGURATION_TYPES-"Release" -DBUILD_SHARED_LIBS=ON -S ../
+CMake Error: Parse error in command line argument: CMAKE_CONFIGURATION_TYPES-Release
+ Should be: VAR:type=value
+
+CMake Error: Run 'cmake --help' for all supported options.
+
+Administrator@WIN-55826SEKP4A MINGW64 /g/sql/libpqxx-7.10.1/build
+$ cmake -G"Visual Studio 17 2022" -A x64 -DPostgreSQL_ROOT="E:/PostgreSQL13" -DCMAKE_BUILD_TYPE="Release" -DCMAKE_CONFIGURATION_TYPES="Release" -DBUILD_SHARED_LIBS=ON
+CMake Warning:
+  No source or binary directory provided.  Both will be assumed to be the
+  same as the current working directory, but note that this warning will
+  become a fatal error in future CMake releases.
+
+
+CMake Error: The source directory "G:/sql/libpqxx-7.10.1/build" does not appear to contain CM
+akeLists.txt.
+Specify --help for usage, or press the help button on the CMake GUI.
+
+Administrator@WIN-55826SEKP4A MINGW64 /g/sql/libpqxx-7.10.1/build
+$ cmake -G"Visual Studio 17 2022" -A x64 -DPostgreSQL_ROOT="E:/PostgreSQL13" -DCMAKE_BUILD_TYPE="Release" -DCMAKE_CONFIGURATION_TYPES="Release" -DBUILD_SHARED_LIBS=ON -S ../
+-- Selecting Windows SDK version 10.0.20348.0 to target Windows 10.0.19045.
+-- The CXX compiler identification is MSVC 19.43.34810.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: E:/program/vs2022/Enterprise/VC/Tools/MSVC/14.43.34808/bin/Hostx6
+4/x64/cl.exe - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Found PostgreSQL: E:/PostgreSQL13/lib/libpq.lib (found version "13.21")
+-- Looking for poll
+-- Looking for poll - not found
+-- Generating config.h
+-- Generating config.h - done
+-- Configuring done (28.1s)
+-- Generating done (0.1s)
+-- Build files have been written to: G:/sql/libpqxx-7.10.1/build
+
+'''
+
+# 215 restful Spring Boot
+
+'''
+package com.example.zonex;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.concurrent.atomic.AtomicLong;
+
+// 假设外部JAR中的类
+class ExternalCalculator {
+    public int add(int a, int b) {
+        return a + b;
+    }
+}
+
+@RestController
+public class CalculatorService {
+    private final ExternalCalculator calculator = new ExternalCalculator();
+
+    /// http://localhost:8080/add?a=5&b=3
+    @GetMapping("/add")
+    public int add(@RequestParam int a, @RequestParam int b) {
+        return calculator.add(a, b);
+    }
+
+    private static final String template = "Hello, %s!";
+    private final AtomicLong counter = new AtomicLong();
+
+    @GetMapping("/greeting")
+    public Greeting greeting(@RequestParam(value = "name", defaultValue = "World") String name) {
+        return new Greeting(counter.incrementAndGet(), String.format(template, name));
+    }
+
+    ///  http://localhost:8080/hi
+    @RequestMapping("/hi")
+    public String hi(@RequestParam(value = "name", defaultValue = "World") String name) {
+        return String.format(template, name);
+    }
+
+    /// http://localhost:8080/hello
+    @RequestMapping("/hello")
+    public Greeting hello(@RequestParam(value = "name", defaultValue = "World") String name) {
+        return new Greeting(counter.incrementAndGet(), String.format(template, name));
+    }
+}
+'''
+
+
+
+'''
+
+PS C:\.jdks\openjdk-24.0.1\bin> .\java.exe -jar G:\restservice\target\restservice-0.0.1-SNAPSHOT.jar --server.port=8015
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.5.3)
+
+'''
+
+# 216 TopoJson
+
+https://geojson.cn/api/china/1.6.2/china.topo.json
+https://file.geojson.cn/china/1.6.2/350000.topo.json  福州
+https://geojson.cn/api/china/1.6.2/330000.topo.json   浙江
+https://geojson.cn/api/china/1.6.2/330000/330100.topo.json 杭州
+
+https://geojson.cn/api/china/1.6.2/420000.topo.json 湖北
+https://geojson.cn/api/china/1.6.2/420000/420100.topo.json 武汉
+https://geojson.cn/api/china/1.6.2/420000/420700.topo.json 鄂州
+https://geojson.cn/api/china/1.6.2/410000.topo.json 河南
+https://geojson.cn/api/china/1.6.2/410000/410100.topo.json 郑州
+https://geojson.cn/api/china/1.6.2/410000/411000.topo.json 许昌
+
+
+# 217  compile gdal and proj in linux  
+
+## 1 编译proj
+
+
+ ./configure --without-curl --prefix=/data/devops/proj --exec-prefix=/data/devops/proj/bin SQLITE3_CFLAGS="-I/data/sdk/3rd/sqlite3/include" SQLITE3_LIBS="-L/data/devops/desktop/program -lsqlite" --enable-tiff=no CFLAGS="-fstack-protector-all -fPIC" LDFLAGS="-Wl,-z,now  -Wl,-z,relro -Wl,-z,noexecstack -Wtrampolines -s"
 
 
 
 
+## 2 编译gdal
+
+arm机器上的cmake版本太低，导致无法找到gdal，将cmake3.25.0版本中的findGDAL.cmake文件更换到arm机器上后，使用下面命令编译
+
+
+
+ cmake -G "Unix Makefiles" -DCMAKE_CXX_FLAGS_RELEASE="-fPIC -fstack-protector-all -std=c++11" -DCMAKE_INSTALL_PREFIX=/data/devops/libLAS-1.8.1/ -DCMAKE_BUILD_TYPE=RELEASE -DWITH_GDAL=TRUE -DWITH_GEOTIFF=TRUE -DWITH_LASZIP=FALSE -DWITH_PKGCONFIG=TRUE -DWITH_STATIC_LASZIP=FALSE -DWITH_TESTS=FALSE -DWITH_UTILITIES=FALSE -DBUILD_OSGEO4W=FALSE -DFindGDAL_SKIP_GDAL_CONFIG=TRUE -DGDAL_INCLUDE_DIR=/data/devops/gdal3.0.1/bin/include -DGDAL_LIBRARY=/data/devops/desktop/program/libgdal.so -DBoost_NO_BOOST_CMAKE=ON -DBoost_INCLUDE_DIR=/data/sdk/3rd/boost/include -DBOOST_LIBRARYDIR=/data/devops/desktop/program -DGEOTIFF_INCLUDE_DIR=/data/sdk/3rd/geotiff/include -DGEOTIFF_LIBRARY=/data/devops/desktop/program/libgeotiff.so -DPROJ4_INCLUDE_DIR=/data/devops/PROJ-8.0.1/bin -DPROJ4_LIBRARY=/data/devops/desktop/program/libproj.so -DTIFF_INCLUDE_DIR=/data/sdk/3rd/tiff/include -DTIFF_LIBRARY=/data/devops/desktop/program/libtiff.so -DJPEG_INCLUDE_DIR=/data/sdk/3rd/jepg/include -DJPEG_LIBRARY=/data/devops/desktop/program/libjpeg.so
+
+
+可能执行的过程中报如下错误：
+gt_wkt_srs.cpp中有FixupOrdering()函数找不到：在提示的位置屏蔽掉FixupOrdering函数调用即可；
+
+gt_citation.cpp中GetPrimeMeridian(NULL)，GetAngularUnits(NULL)调用的接口不明确：在对应位置将NULL改为nullptr即可。
 
 
 
