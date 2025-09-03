@@ -18930,6 +18930,78 @@ export LD_LIBRARY_PATH=/home:$LD_LIBRARY_PATH  # 临时生效
 -rpath-link仅用于链接阶段，不嵌入可执行文件，仅用于链接器查找依赖库：
 
 
+# 220 scp linux  使用方法
+
+## scp 命令 
+
+scp 命令是 SSH 提供的一个客户端程序，用来远程拷贝文件。scp 命令可以在 Linux 主机之间复制文件和目录，也可以从本地系统复制文件到远程系统，或者从远程系统复制文件到本地系统，同时支持增量备份。
+
+scp 命令的基本语法如下所示：
+	
+	scp [OPTION] [file] [user@host:] [file]
+		
+scp 命令的常用选项如下所示：
+	
+	-r 递归复制整个目录。
+	-q 静默模式，不显示进度信息。
+	-C 启用压缩。
+	-l 限制带宽，单位是 Kbit/s。
+	-v 显示进度信息。
+	-S 指定加密传输时使用的程序。
+	-i 指定私钥文件。
+	-o 指定 SSH 选项。
+	-F 指定 SSH 配置文件。
+	-B 使用批处理模式。
+	-P 不是端口号，而是指定是否显示输出。	
+
+## 从本地系统复制文件到远程系统
+	
+	scp [OPTION] [file] [user@host:] [file]		
+	
+例如，将本地系统中的 /home/user1/file.txt 文件复制到远程系统中的 /home/user2 目录下，可以使用如下命令：
+	
+	scp /home/user1/file.txt user2@192.168.1.100:/home/user2/
+	
+## 从远程系统复制文件到本地系统
+
+	scp [OPTION] [user@host:] [file] [file]		
+	
+例如，将远程系统中的 /home/user2/file.txt 文件复制到本地系统中的 /home/user1 目录下，可以使用如下命令：
+	
+	scp user2@192.168.1.100:/home/user2/file.txt /home/user1/
+	
+## 从远程系统复制目录到本地系统
+	
+	scp -r [user@host:] [directory] [directory]		
+	
+例如，将远程系统中的 /home/user2 目录复制到本地系统中的 /home/user1 目录下，可以使用如下命令：
+	
+	scp -r user2@192.168.1.100:/home/user2 /home/user1/
+	
+## 从本地系统复制目录到远程系统
+	
+	scp -r [directory] [user@host:] [directory]		
+	
+例如，将本地系统中的 /home/user1 目录复制到远程系统中的 /home/user2 目录下，可以使用如下命令：
+	
+	scp -r /home/user1 user2@192.168.1.100:/home/user2/
+	
+## 从远程系统复制文件到另一个远程系统
+	
+	scp [user@host:] [file] [user@host:] [file]		
+	
+例如，将远程系统中的 /home/user2/file.txt 文件复制到另一个远程系统中的 /home/user3 目录下，可以使用如下命令：
+	
+	scp user2@192.168.1.100:/home/user2/file.txt user3@192.168.1.101:/home/user3/
+	
+## 从本地系统复制文件到另一个远程系统
+	
+	scp [file] [user@host:] [file]				
+	
+例如，将本地系统中的 /home/user1/file.txt 文件复制到另一个远程系统中的 /home/user3 目录下，可以使用如下命令：
+	
+	scp /home/user1/file.txt user3@192.168.1.101:/home/user3/
+
 
 
 
