@@ -19016,9 +19016,29 @@ scp 命令的常用选项如下所示：
 	-pie 选项作用于链接阶段，告诉链接器，该可执行文件需要和位置无关的代码（PIC）链接。
 
 
+# 222 system("pause") 在linux下执行不成功
 
+在 Windows 系统中，system("pause")用于在控制台程序结束时暂停，等待用户按键。然而，在 Linux 系统上，这个命令无法直接使用，因为 Linux 没有名为 pause的系统命令。因此，我们需要一个跨平台的解决方案来实现类似的功能
 
+​​##  使用 C++ 标准输入实现暂停​
 
+	#include <iostream>
+	#include <limits>
+
+	void pause() {
+		std::cout << "Press Enter to continue...";
+		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+	}
+
+	int main() {
+		// ... 程序逻辑 ...
+		pause(); // 暂停
+		return 0;
+	}
+
+​​原理​​：std::cin.ignore()清空输入缓冲区并等待回车键。
+•
+​​优点​​：跨平台（Windows/Linux/macOS 通用）。
 
 
 ```
