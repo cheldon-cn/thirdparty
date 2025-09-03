@@ -18863,7 +18863,7 @@ https://geojson.cn/api/china/1.6.2/420000/420100.topo.json 武汉
 https://geojson.cn/api/china/1.6.2/420000/420700.topo.json 鄂州
 https://geojson.cn/api/china/1.6.2/410000.topo.json 河南
 https://geojson.cn/api/china/1.6.2/410000/410100.topo.json 郑州
-https://geojson.cn/api/china/1.6.2/410000/411000.topo.json 许昌
+https://geojson.cn/api/china/1.6.2/410000/411000.topo.json 
 
 
 # 217  compile gdal and proj in linux  
@@ -18893,5 +18893,46 @@ gt_citation.cpp中GetPrimeMeridian(NULL)，GetAngularUnits(NULL)调用的接口�
 
 
 
+# 218  download data from osm
+
+https://download.geofabrik.de/asia/china/beijing-latest-free.shp.zip
+https://download.geofabrik.de/asia/china/guangdong-latest-free.shp.zip
+https://download.geofabrik.de/asia/china-latest.osm.pbf
+https://download.geofabrik.de/asia/taiwan-latest-free.shp.zip
+
+
+# 219 need by /home/lib.so, try using -rpath or rpath-link
+
+https://stackoverflow.com/questions/10188173/how-to-add-a-directory-to-the-library-path-in-gcc
+ ## 问题原因​​
+•
+​​链接器默认路径​​：仅搜索标准路径（如 /usr/lib、/lib），无法定位自定义路径 /home/lib.so。
+
+•
+​​动态库依赖​​：程序运行时需加载共享库（.so），但未指定其位置
+
+## 解决方案
+
+​1. 使用 -rpath（链接+运行阶段）​​
+-rpath将路径​​嵌入可执行文件​​，供运行时加载器使用：
+
+gcc -o myapp main.o -L/home -l:lib.so -Wl,-rpath=/home
+•
+​​效果​​：程序运行时自动在 /home查找 lib.so。
+
+✅ 2. 设置 LD_LIBRARY_PATH（临时运行时）​​
+export LD_LIBRARY_PATH=/home:$LD_LIBRARY_PATH  # 临时生效
+./myapp
+•
+​​限制​​：需每次运行前设置，不推荐长期使用。
+
+## 3. 使用 -rpath-link（链接阶段）​​
+-rpath-link仅用于链接阶段，不嵌入可执行文件，仅用于链接器查找依赖库：
+
+
+
+
+
+```
 -----
 Copyright 2020 - 2025 @ [cheldon](https://github.com/cheldon-cn/).
