@@ -18903,7 +18903,6 @@ https://download.geofabrik.de/asia/taiwan-latest-free.shp.zip
 
 # 219 need by /home/lib.so, try using -rpath or rpath-link
 
-https://stackoverflow.com/questions/10188173/how-to-add-a-directory-to-the-library-path-in-gcc
  ## 问题原因​​
 •
 ​​链接器默认路径​​：仅搜索标准路径（如 /usr/lib、/lib），无法定位自定义路径 /home/lib.so。
@@ -19041,6 +19040,76 @@ scp 命令的常用选项如下所示：
 ​​优点​​：跨平台（Windows/Linux/macOS 通用）。
 
 
-```
+# 223  configure: error: cannot guess build type解决方案 
+
+	问题
+	在华为鲲鹏arm服务器上源码编译安装indent工具提示出错
+
+	UNAME_MACHINE = aarch64
+	UNAME_RELEASE = 4.19.36-vhulk1905.1.0.h276.eulerosv2r8.aarch64
+	UNAME_SYSTEM  = Linux
+	UNAME_VERSION = #1 SMP Mon Apr 1 00:00:00 UTC 2019
+	configure: error: cannot guess build type; you must specify one
+
+	原因
+	无法判断当前的系统类型
+
+
+	解决方案一
+	./configure --build=arm-linux
+
+
+	解决方案二
+	前提是必须安装1.16版本的automake,1.14版本测试失败
+
+	cp /usr/share/automake-1.16/config.guess   ./build/ 
+	./configure
+
+
+# 224  XML::Parser perl module is required for intltool
+	在configure的时候提示XML::Parser perl module is required for intltool错误。 
+
+	具体解决的方法如下： 
+
+	#sudo perl -MCPAN -e shell 之后跟据提示一步步往下，
+
+	配置完后会出现一个 >的命令提示 
+
+	>install XML::Parser 
+
+	等待它完成安装，重新configure 就OK了 
+
+# 225  显式禁用 --without-png
+
+ 有时虽然没有配置--with-png, 但是却默认配置了png，这时就需要显式禁用png
+ 
+需要链接png时配置--with-png= ；如果不需要时，如何配置
+
+# 大多数软件支持 --without-png 选项
+./configure --without-png
+
+# 某些软件可能使用 --disable-png
+./configure --disable-png
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 -----
 Copyright 2020 - 2025 @ [cheldon](https://github.com/cheldon-cn/).
